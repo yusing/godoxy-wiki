@@ -8,9 +8,20 @@ export default defineConfig({
   lastUpdated: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
-    nav: [{ text: "Home", link: "/" }],
+    nav: [
+      { text: "Home", link: "/" },
+      { text: "Install", link: "/Setup.md" },
+      { text: "Gallery", link: "/Gallery.md" },
+    ],
 
     sidebar: [
+      {
+        text: "Install",
+        items: [
+          { text: "Automatic", link: "/Setup.md#automatic" },
+          { text: "Manual", link: "/Setup.md#manual-setup" },
+        ],
+      },
       {
         text: "Getting Started",
         items: [
