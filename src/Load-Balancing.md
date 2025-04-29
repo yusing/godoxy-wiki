@@ -8,7 +8,6 @@ Support HTTP routes only. Will plan for TCP/UDP load-balancing in the future if 
 
 | Property | Description                | Default       | Allowed Values / Syntax                                                |
 | -------- | -------------------------- | ------------- | ---------------------------------------------------------------------- |
-|          |
 | link     | Subdomain of load-balancer | N/A           | string                                                                 |
 | mode     | Load-balance mode          | `round_robin` | <ul><li>`round_robin`</li><li>`least_conn`</li><li>`ip_hash`</li></ul> |
 | options  | Mode specific options      | N/A           | N/A                                                                    |

@@ -1,6 +1,6 @@
 # Access Control
 
-## Connection Level Access Control
+## Connection Level
 
 Connection level access control handles IP addresses before the request is even processed. If an IP is blocked, the connection will be dropped (and logged if configured).
 
@@ -10,8 +10,6 @@ Connection level access control handles IP addresses before the request is even 
 | CIDR             | `cidr:1.2.3.4/32`  |
 | ISO country code | `country:US`       |
 | Timezone         | `tz:Asia/Shanghai` |
-
-### Configurations
 
 > [!NOTE]
 >
@@ -45,11 +43,9 @@ acl:
     log_allowed: true # (default: false)
 ```
 
-### Request Level Access Control
+## Request Level
 
 Request level access control handles IP addresses after the request is processed. If an IP is blocked, GoDoxy will response a HTTP error code with an error message (and logged if configured).
-
-### Configurations
 
 > [!NOTE]
 > HTTP Access loggers can be configured
@@ -58,6 +54,7 @@ Request level access control handles IP addresses after the request is processed
 > - per route in docker labels or route files
 
 ```yaml
+# config.yml
 entrypoint:
   middlewares: # allow only local (private) ips
     - use: CIDRWhiteList
@@ -86,6 +83,14 @@ entrypoint:
           X-Real-Ip: keep
           CF-Connecting-Ip: keep
           X-Forwarded-For: keep
+
+# docker labels
+proxy.#1.middlewares.cidr_whitelist: |
+  allow:
+    - 10.0.0.0/8
+    - 192.168.0.0/16
+  status_code: 403
+  message: "IP not allowed"
 ```
 
 ## Access Logging
@@ -195,7 +200,7 @@ entrypoint:
           foo: keep
 
 # route file
-# same as above, but under your app config, i.e.
+# same as above, but under your app config, e.g.
 app1:
   access_log:
     format: json

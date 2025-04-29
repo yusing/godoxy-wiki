@@ -195,11 +195,15 @@ location / {
 
 > [!NOTE]
 >
-> This middleware is used for setting `$remote_addr`, `$remote_host` from `real_ip.header` (i.e.) `X-Real-IP`.
+> This middleware is used for resolving the correct client IP from `real_ip.header` (e.g. `X-Real-IP`)
 >
-> This allows logging the correct IP address in access log.
+> This affects:
+>
+> - `$remote_addr` and `$remote_host`
+> - IP in the access log
+> - [CIDRWhitelist](#cidr-whitelist) Middleware
 
-`recursive: true` - recursively resolve `header` to get the IP that does not match the `from` list
+`recursive: true` - choose the first IP that does not match the `from` list
 `recursive: false` - choose the last IP that does not match the `from` list
 
 #### Example
@@ -253,9 +257,9 @@ location / {
 #### Preset Values
 
 - header: `CF-Connecting-IP`
-- from: CIDR List of Cloudflare IPs from (updated every hour)
-  - https://www.cloudflare.com/ips-v4
-  - https://www.cloudflare.com/ips-v6
+- from: CIDR List of Cloudflare IPs from (updated hourly)
+  - <https://www.cloudflare.com/ips-v4>
+  - <https://www.cloudflare.com/ips-v6>
   - all local IPs
 - recursive: true
 
@@ -271,25 +275,7 @@ myapp:
 
 ### CIDR Whitelist
 
-```yaml
-# docker labels
-proxy.#1.middlewares.cidr_whitelist: |
-  allow:
-    - 10.0.0.0/8
-    - 192.168.0.0/16
-  status_code: 403
-  message: "IP not allowed"
-
-# route file
-myapp:
-  middlewares:
-    cidr_whitelist:
-      allow:
-        - 10.0.0.0/8
-        - 192.168.0.0/16
-      status_code: 403 # default
-      message: "IP not allowed" # default
-```
+[See Request Level Access Control](Access-Control#request-level)
 
 ### Rate Limiter
 

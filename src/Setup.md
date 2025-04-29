@@ -16,7 +16,7 @@ Configure Wildcard DNS Record(s) to point to machine running `GoDoxy`, e.g.
 
 1. Prepare a new directory for docker compose and config files.
 
-2. Run setup script inside the directory, or [set up manually](#manual-setup)
+2. Run setup script inside the directory
 
    ```shell
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/yusing/godoxy/main/scripts/setup.sh)"

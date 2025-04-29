@@ -39,7 +39,7 @@ Supported escape sequences:
 - `\\` - backslash
 - `\"` - double quote
 - `\'` - single quote
-- `\ ` - space
+- `\ ` <span style="white-space:pre"> - </span>space
 
 ### On
 

@@ -40,9 +40,9 @@
 
 > [!DANGER]
 >
-> **If you are in a trusted network, you can disable authentication by setting `GODOXY_API_JWT_SECRET` to empty string.**
+> If you desire to use authentication without HTTPS, set `GODOXY_API_JWT_SECURE` to `false`
 >
-> **If you desire to use authentication without HTTPS, set `GODOXY_JWT_SECURE` to `false`.**
+> **Not recommended**
 
 #### Common
 
@@ -52,7 +52,7 @@
 | `GODOXY_API_JWT_SECRET`    | Base64 JWT secret for api server | random **(you will have to login again after restarting GoDoxy)** | string                                            |
 | `GODOXY_API_JWT_TOKEN_TTL` | JWT Time-to-live                 | `24h`                                                             | [duration](https://pkg.go.dev/time#ParseDuration) |
 
-#### User Password
+#### User Password Auth
 
 | Environment Variable  | Description          | Default    | Values |
 | --------------------- | -------------------- | ---------- | ------ |
@@ -143,11 +143,11 @@ Add these to `.env`:
 >
 > - label `proxy.exclude` is set to **true**
 > - GoDoxy **IS NOT** explicit enabled for container, but it is either
->   - from a provider in **explicit mode** (with an exclamation mark **`!`** at the end of provider name)
+>   - from a provider in **explicit only mode** (provider name with exclamation mark **`!`** suffix)
 >   - **or** detected as a backend service (e.g. headless browsers, databases, etc.)
 > - container doesn't have any exposed port
 > - container name has prefix `buildx_`
-> - alias with prefix `x-` or suffix `-old`
+> - `alias` with prefix `x-` or suffix `-old`
 
 To explicitly enable **GoDoxy** for a container:
 

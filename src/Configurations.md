@@ -28,56 +28,21 @@ The `config.yml` file is divided into several sections:
 - **match_domains**: List of domains to match
 - **homepage**: Configures homepage settings
 
-### SSL Certificate (autocert)
+### Auto SSL and Domain matching
 
-For SSL certificates, you can either use an existing one or set up automatic certificates.
-
-#### Using an Existing SSL Certificate
-
-```yaml
-autocert:
-  provider: local
-  # path relative to /app
-  cert_path: certs/cert.crt
-  key_path: certs/priv.key
-```
-
-#### Auto SSL with Cloudflare
+Specify which domains your application should respond to.
 
 ```yaml
 autocert:
   provider: cloudflare
   email: your-email@example.com
   domains:
-    - "*.yourdomain.com"
-  options:
-    auth_token: your-zone-api-token
+    - *.yourdomain.com
+match_domains:
+  - yourdomain.com
 ```
 
-![Cloudflare autocert](images/config/cf-autocert.png)
-
-#### Auto SSL with other DNS providers
-
-Check [DNS-01 Providers](DNS-01-Providers.md)
-
-#### Troubleshooting SSL Issues
-
-If you encounter issues, try these steps:
-
-- Set `LEGO_DISABLE_CNAME_SUPPORT=1` if your domain has a CNAME record.
-- Use a different DNS server.
-
-  ```yaml
-  services:
-    app:
-      container_name: godoxy
-      ...
-      environment:
-        - LEGO_DISABLE_CNAME_SUPPORT=1
-      dns:
-        - 1.1.1.1
-        - 1.1.1.2
-  ```
+See [Certificates and domain matching](Certificates-and-domain-matching)
 
 ### Entrypoint Configuration
 
@@ -133,17 +98,6 @@ providers:
 
 ![Providers](images/config/providers.png)
 
-### Domain Matching
-
-Specify which domains your application should respond to.
-
-```yaml
-match_domains:
-  - yourdomain.com
-```
-
-See also: [Certificates and domain matching](Certificates-and-domain-matching)
-
 ### Homepage Settings
 
 Configure how GoDoxy handles the WebUI App dashboard.
@@ -152,6 +106,8 @@ Configure how GoDoxy handles the WebUI App dashboard.
 homepage:
   use_default_categories: true
 ```
+
+See [Homepage Configurations](Homepage-Configurations)
 
 ### Multi Docker Nodes Setup
 
@@ -170,6 +126,12 @@ homepage:
 
 #### Method 2: Using `docker-socket-proxy`
 
+> [!WARNING]
+>
+> **Not recommended**
+>
+> This exposes docker socket and maintain unencrypted connection
+
 run the following docker compose file on the other node:
 
 ```yaml
@@ -182,6 +144,7 @@ docker-proxy:
     - ALLOW_RESTARTS=1
     - CONTAINERS=1
     - EVENTS=1
+    - INFO=1
     - PING=1
     - POST=1
     - VERSION=1
@@ -192,9 +155,6 @@ docker-proxy:
     - /run
   ports:
     - <ip>:2375:2375
-
-    # or less secure way
-    # - 2375:2375
 ```
 
 Add this to your `config.yml` under `providers.docker`:

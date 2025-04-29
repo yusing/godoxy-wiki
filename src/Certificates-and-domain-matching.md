@@ -4,12 +4,62 @@
 
 - GoDoxy **DOES NOT** register certificate for **each route**. Instead, it registers for all `autocert.domains` in your `config.yml` then combine into one certificate. All HTTP(s) requests to **GoDoxy** will be handled by the same certificate.
 
-- GoDoxy uses https://github.com/go-acme/lego, similar to other reverse proxies powered by [Golang](https://golang.org). Powered by [ACME](<https://en.wikipedia.org/wiki/ACME_(protocol)>) and [Let's Encrypt](https://letsencrypt.org) via [DNS-01](https://en.wikipedia.org/wiki/DNS-01) challenge.
+- GoDoxy uses <https://github.com/go-acme/lego>, similar to other reverse proxies powered by [Golang](https://golang.org). Powered by [ACME](<https://en.wikipedia.org/wiki/ACME_(protocol)>) and [Let's Encrypt](https://letsencrypt.org) via [DNS-01](https://en.wikipedia.org/wiki/DNS-01) challenge.
 
 - GoDoxy obtain / renew certificates automatically, with 1 hour cooldown for every failed requests. It only renew when these conditions are met:
+
   - `autocert` is enabled but no certs are found under `certs/`
   - `autocert.domains` does not match current certs
   - Certificates are about to expire in a month
+
+- You can either also use existing (self-signed) certificate.
+
+### Using Existing SSL Certificate
+
+```yaml
+autocert:
+  provider: local
+  # path relative to /app
+  cert_path: certs/cert.crt
+  key_path: certs/priv.key
+```
+
+### Auto SSL with Cloudflare
+
+```yaml
+autocert:
+  provider: cloudflare
+  email: your-email@example.com
+  domains:
+    - "*.yourdomain.com"
+  options:
+    auth_token: your-zone-api-token
+```
+
+![Cloudflare autocert](images/config/cf-autocert.png)
+
+### Auto SSL with other DNS providers
+
+Check [DNS-01 Providers](DNS-01-Providers.md)
+
+### Troubleshooting
+
+If you encounter issues, try these steps:
+
+- Set `LEGO_DISABLE_CNAME_SUPPORT=1` if your domain has a CNAME record.
+- Use a different DNS server.
+
+  ```yaml
+  services:
+    app:
+      container_name: godoxy
+      ...
+      environment:
+        - LEGO_DISABLE_CNAME_SUPPORT=1
+      dns:
+        - 1.1.1.1
+        - 1.1.1.2
+  ```
 
 ## Domain matching
 
