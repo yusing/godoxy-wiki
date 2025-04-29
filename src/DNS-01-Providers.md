@@ -1,14 +1,4 @@
-# Supported DNS-01 Providers
-
-- [Supported DNS-01 Providers](#supported-dns-01-providers)
-  - [Cloudflare](#cloudflare)
-  - [CloudDNS](#clouddns)
-  - [DuckDNS](#duckdns)
-  - [OVHCloud](#ovhcloud)
-  - [Porkbun](#porkbun)
-  - [Others](#others)
-    - [Option 1](#option-1)
-    - [Option 2](#option-2)
+# DNS-01 Providers
 
 ## Cloudflare
 

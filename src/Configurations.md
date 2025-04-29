@@ -58,7 +58,7 @@ autocert:
 
 #### Auto SSL with other DNS providers
 
-Check [DNS 01 Providers](DNS‐01-Providers)
+Check [DNS-01 Providers](DNS-01-Providers.md)
 
 #### Troubleshooting SSL Issues
 
