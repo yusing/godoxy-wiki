@@ -3,6 +3,7 @@
 To enable custom error pages, place page files (`html`, `js`, `css`) in `error_pages` directory.
 
 > [!NOTE]
+>
 > Subfolders are not considered
 
 ## Setup

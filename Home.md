@@ -158,11 +158,4 @@ To explicitly enable **GoDoxy** for a container:
 
 **If you are unsure about what it is, ignore this**
 
-Using JSON schema allows static checking in IDEs. For VSCode, copy [`.vscode/settings.example.json`](https://github.com/yusing/go-proxy/blob/v0.9/.vscode/settings.example.json) to `.vscode/settings.json` (under root directory of GoDoxy) and modify it to fit your needs
-
-See also:
-
-- [Config file](Configurations)
-- [Docker Labels and Route Files](Docker-labels-and-Route-Files)
-- [Custom Error Page](Custom-Error-Pages)
-- [Health monitoring](Health-monitoring)
+Using JSON schema allows static checking in IDEs. For VSCode, copy [`.vscode/settings.example.json`](https://github.com/yusing/go-proxy/blob/main/.vscode/settings.example.json) to `.vscode/settings.json` (under root directory of GoDoxy) and modify it to fit your needs
