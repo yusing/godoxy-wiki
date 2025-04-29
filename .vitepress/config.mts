@@ -4,7 +4,7 @@ import { defineConfig } from "vitepress";
 export default defineConfig({
   title: "GoDoxy",
   description: "Documentations",
-  srcDir: "../",
+  srcDir: "src",
   lastUpdated: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
