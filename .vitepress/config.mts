@@ -8,13 +8,15 @@ export default defineConfig({
   lastUpdated: true,
   cleanUrls: true,
   themeConfig: {
+    search: {
+      provider: "local",
+    },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "Home", link: "/" },
       { text: "Install", link: "/Setup.md" },
       { text: "Gallery", link: "/Gallery.md" },
     ],
-
     sidebar: [
       {
         text: "Install",
@@ -177,7 +179,6 @@ export default defineConfig({
         ],
       },
     ],
-
     socialLinks: [
       { icon: "github", link: "https://github.com/yusing/godoxy" },
       { icon: "discord", link: "https://discord.gg/invite/umReR62nRd" },
