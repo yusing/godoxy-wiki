@@ -99,10 +99,10 @@ proxy.#1.middlewares.cidr_whitelist: |
 
 | Key                   | Type      | Description                                       | Allowed Values        | Default      |
 | --------------------- | --------- | ------------------------------------------------- | --------------------- | ------------ |
-| `buffer_size`         | int       | access log buffer size **(in bytes)**             | positive integer      | 64KB         |
-| `path`                | string    | access log path                                   | `/var/log/access.log` | **required** |
-| `stdout`              | bool      | enable stdout logging **(can be used with path)** | `true` or `false`     | `false`      |
-| `keep` or `retention` | retention | retention policy                                  |                       | `30 days`    |
+| `path`                | string    | Access log path                                   | `/var/log/access.log` | **required** |
+| `stdout`              | bool      | Enable stdout logging **(can be used with path)** | `true` or `false`     | `false`      |
+| `keep` or `retention` | retention | Retention policy                                  |                       | `30 days`    |
+| `rotate_interval`     | duration  | Log rotation interval                             | Duration              | `1h`         |
 
 ### Log rotation
 
@@ -164,7 +164,6 @@ Format:
 entrypoint:
   access_log:
     format: json
-    buffer_size: 4096
     path: /var/log/example.log
     filters:
       status_codes:
@@ -209,12 +208,10 @@ app1:
 # docker labels - string as inline mapping
 proxy.app1.access_log: |
   format: json
-  buffer_size: 4096
   ...
 
 # docker labels - full label
 proxy.app1.access_log.format: json
-proxy.app1.access_log.buffer_size: 4096
 proxy.app1.access_log.filters.status_codes.values: 200-299,300
 proxy.app1.access_log.fields.headers.config.foo: redact
 ```

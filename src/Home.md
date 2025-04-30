@@ -11,7 +11,9 @@
 - Proxy `ghcr.io/yusing/godoxy:<tag>`
 - Frontend `ghcr.io/yusing/godoxy-frontend:<tag>`
 
-**Current version: v0.11.7**
+**Current version**
+
+![GitHub Release](https://img.shields.io/github/v/release/yusing/godoxy?style=flat-square)
 
 ## Known issues
 
