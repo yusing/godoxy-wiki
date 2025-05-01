@@ -97,9 +97,9 @@
 
 ##### Example
 
-![Image](https://github.com/user-attachments/assets/665985f6-9954-4069-81b5-3635e276d510)
+![Image](images/oidc/pocket-id-1.png)
 
-![Image](https://github.com/user-attachments/assets/743b521d-c331-4f04-8492-d9272043a671)
+![Image](images/oidc/pocket-id-2.png)
 
 Add these to `.env`:
 

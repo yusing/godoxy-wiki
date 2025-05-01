@@ -2,7 +2,7 @@
 
 ## App Dashboard
 
-![App Dashboard](https://github.com/yusing/godoxy/blob/main/screenshots/webui.jpg?raw=true)
+![App Dashboard](images/gallery/dashboard.jpg)
 
 ## Metrics and System Info
 
@@ -31,20 +31,20 @@
 
 ### Uptime Monitor
 
-![Uptime Monitor](https://github.com/yusing/godoxy/blob/main/screenshots/uptime.png?raw=true)
+![Uptime Monitor](images/gallery/uptime.png)
 
 ### Docker Logs
 
-![Docker Logs](https://github.com/yusing/godoxy/blob/main/screenshots/docker-logs.jpg?raw=true)
+![Docker Logs](images/gallery/docker-logs.jpg)
 
 ### Server Overview
 
-![Server Overview](https://github.com/yusing/godoxy/blob/main/screenshots/docker.jpg?raw=true)
+![Server Overview](images/gallery/server-overview.jpg)
 
 ### System Monitor
 
-![System Monitor](https://github.com/yusing/godoxy/blob/main/screenshots/system-monitor.jpg?raw=true)
+![System Monitor](images/gallery/system-monitor.jpg)
 
 ### Graphs
 
-![Graphs](https://github.com/yusing/godoxy/blob/main/screenshots/system-info-graphs.jpg?raw=true)
+![Graphs](images/gallery/system-info-graphs.jpg)
