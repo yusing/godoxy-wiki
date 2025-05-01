@@ -79,15 +79,22 @@ To enable notifications, you need to configure it on WebUI or in your `config.ym
 <img src="/images/config/gotify-notification.png" height="250" alt="Gotify Notification" title="Gotify Notification"/>
 <img src="/images/config/discord-notification.png" height="250" alt="Discord Notification" title="Discord Notification"/>
 
-### Full Webhook documentation
+## Full documentation
 
-#### Webhook fields
+### Common Field
+
+| Field    | Description          | Required | Allowed values            |
+| -------- | -------------------- | -------- | ------------------------- |
+| name     | Name of the provider | Yes      |                           |
+| provider |                      | Yes      | `gotify` `ntfy` `webhook` |
+| url      | Provider URL         | Yes      | Full URL                  |
+| format   | Message Format       | No       | `markdown` `plain`        |
+
+### Webhook
 
 | Field      | Description            | Required                       | Allowed values   |
 | ---------- | ---------------------- | ------------------------------ | ---------------- |
-| name       | Name of the provider   | Yes                            |                  |
 | provider   |                        | Yes                            | `webhook`        |
-| url        | Webhook URL            | Yes                            | Full URL         |
 | template   | Webhook template       | No                             | empty, `discord` |
 | token      | Webhook token          | No                             |                  |
 | payload    | Webhook payload        | No **(if `template` is used)** | valid json       |
@@ -95,11 +102,23 @@ To enable notifications, you need to configure it on WebUI or in your `config.ym
 | mime_type  | MIME type              | No                             |                  |
 | color_mode | Color mode             | No                             | `hex` `dec`      |
 
-#### Available Payload Variables
+### Available Payload Variables
 
-When using a webhook payload, you can include the following variables:
-
-- **$title:** Title of the message.
-- **$message:** Message in Markdown format.
-- **$fields:** Additional fields in JSON format.
+- **$title:** Title of the message **(JSON escaped)**.
+- **$message:** Message in Markdown format **(JSON escaped)**.
+- **$fields:** Message in JSON format **(JSON escaped)**.
 - **$color:** Color of the message in `hex` (e.g., `#ff0000`) or `dec` (e.g., `16711680`).
+
+Example
+
+```json
+{
+    "embeds": [
+        {
+            "title": $title,
+            "fields": $fields,
+            "color": "$color"
+        }
+    ]
+}
+```
