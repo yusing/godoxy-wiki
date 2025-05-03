@@ -4,16 +4,26 @@
 
 Connection level access control handles IP addresses before the request is even processed. If an IP is blocked, the connection will be dropped (and logged if configured).
 
-| Type             | Example            |
-| ---------------- | ------------------ |
-| IP address       | `ip:1.2.3.4`       |
-| CIDR             | `cidr:1.2.3.4/32`  |
-| ISO country code | `country:US`       |
-| Timezone         | `tz:Asia/Shanghai` |
+### Supported Filters
 
-> [!NOTE]
->
-> MaxMind credentials required if you want geo-blocking.
+| Type             | Example            | MaxMind Credentials Required |
+| ---------------- | ------------------ | ---------------------------- |
+| IP address       | `ip:1.2.3.4`       | No                           |
+| CIDR             | `cidr:1.2.3.4/32`  | No                           |
+| ISO country code | `country:US`       | **Yes**                      |
+| Timezone         | `tz:Asia/Shanghai` | **Yes**                      |
+
+### ACL Configuration
+
+| Key           | Type        | Description                          | Required | Default |
+| ------------- | ----------- | ------------------------------------ | -------- | ------- |
+| `default`     | string      | Default action                       | **Yes**  | `allow` |
+| `allow_local` | bool        | Allow local addresses                | No       | `true`  |
+| `allow`       | Filter List | Allow list                           | No       | `[]`    |
+| `deny`        | Filter List | Deny list                            | No       | `[]`    |
+| `log`         | object      | [Log configuration](#access-logging) | No       | `{}`    |
+
+### ACL Example
 
 ```yaml
 # config.yml
@@ -52,6 +62,16 @@ Request level access control handles IP addresses after the request is processed
 >
 > - in `config.yml` under entrypoint section
 > - per route in docker labels or route files
+
+### Request Whitelist Configuration
+
+| Key           | Type         | Description   | Required | Default          |
+| ------------- | ------------ | ------------- | -------- | ---------------- |
+| `allow`       | IP/CIDR list | Allow list    | No       | `[]`             |
+| `status_code` | int          | Status code   | No       | `403`            |
+| `message`     | string       | Error message | No       | `IP not allowed` |
+
+### Request Whitelist Example
 
 ```yaml
 # config.yml
