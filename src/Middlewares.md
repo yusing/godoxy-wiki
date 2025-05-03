@@ -53,11 +53,6 @@ myWhitelist:
     allow:
       - 127.0.0.1
       - 223.0.0.0/8
-
-# config.yml
-entrypoint:
-  middlewares:
-    - use: myWhitelist@file
 ```
 
 ### Reusing Middleware Compose Objects
@@ -74,10 +69,10 @@ myapp:
   middlewares:
     myWhitelist@file:
 
-# entrypoint
+# entrypoint in config.yml
 entrypoint:
   middlewares:
-    myWhitelist@file:
+    - use: myWhitelist@file
 ```
 
 ## Examples
