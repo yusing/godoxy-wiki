@@ -25,6 +25,7 @@ The `config.yml` file is divided into several sections:
   - **agents**: GoDoxy agents
   - **proxmox**: Proxmox credentials
   - **notification**: Configures notifications for health monitoring
+  - **maxmind**: MaxMind credentials
 - **match_domains**: List of domains to match
 - **homepage**: Configures homepage settings
 
@@ -94,6 +95,11 @@ providers:
       token_id: root@pam!abcdef
       secret: aaaa-bbbb-cccc-dddd
       no_tls_verify: true
+
+  maxmind:
+    account_id: 123456
+    license_key: your-license-key
+    database: geolite # or geoip2 if you have subscription
 ```
 
 ![Providers](images/config/providers.png)

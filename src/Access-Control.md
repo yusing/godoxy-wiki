@@ -15,9 +15,8 @@ Connection level access control handles IP addresses before the request is even 
 >
 > MaxMind credentials required if you want geo-blocking.
 
-- in `config.yml` under `acl` section
-
 ```yaml
+# config.yml
 acl:
   default: allow # or deny (default: allow)
   allow_local: true # or false (default: true)
@@ -31,16 +30,17 @@ acl:
     - cidr:1.2.3.4/32
     - country:US
     - tz:Asia/Shanghai
-  maxmind:
-    account_id: 123456
-    license_key: your-license-key
-    database: geolite # or geoip2 if you have subscription
   log:
     buffer_size: 65536 # (default: 64KB)
     path: /app/logs/acl.log # (default: none)
     stdout: false # (default: false)
     keep: last 10 # (default: none)
     log_allowed: true # (default: false)
+providers:
+  maxmind:
+    account_id: 123456
+    license_key: your-license-key
+    database: geolite # or geoip2 if you have subscription
 ```
 
 ## Request Level
@@ -97,12 +97,12 @@ proxy.#1.middlewares.cidr_whitelist: |
 
 ### Common Fields
 
-| Key                   | Type      | Description                                       | Allowed Values        | Default      |
-| --------------------- | --------- | ------------------------------------------------- | --------------------- | ------------ |
-| `path`                | string    | Access log path                                   | `/var/log/access.log` | **required** |
-| `stdout`              | bool      | Enable stdout logging **(can be used with path)** | `true` or `false`     | `false`      |
-| `keep` or `retention` | retention | Retention policy                                  |                       | `30 days`    |
-| `rotate_interval`     | duration  | Log rotation interval                             | Duration              | `1h`         |
+| Key                   | Type                       | Description                                       | Allowed Values        | Default      |
+| --------------------- | -------------------------- | ------------------------------------------------- | --------------------- | ------------ |
+| `path`                | string                     | Access log path                                   | `/var/log/access.log` | **required** |
+| `stdout`              | bool                       | Enable stdout logging **(can be used with path)** | `true` or `false`     | `false`      |
+| `keep` or `retention` | [See below](#log-rotation) | Retention policy                                  |                       | `30 days`    |
+| `rotate_interval`     | duration                   | Log rotation interval                             | Duration              | `1h`         |
 
 ### Log rotation
 
