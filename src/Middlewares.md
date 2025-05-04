@@ -36,7 +36,7 @@ services:
 >
 > See below for docker labels and route files
 
-### Middleware Compose
+### Middleware Compose and Entrypoint Middleware
 
 ```yaml
 # middleware compose / entrypoint middleware syntax
@@ -53,6 +53,26 @@ myWhitelist:
     allow:
       - 127.0.0.1
       - 223.0.0.0/8
+```
+
+### Docker Labels and Route Files
+
+```yaml
+# docker labels
+proxy.#1.middlewares.{middlewareName}.{optionName}: { value }
+proxy.#1.middlewares.{middlewareName}.{optionName2}: { value2 }
+
+# docker labels (yaml style)
+proxy.#1.middlewares.{middlewareName}: |
+  {optionName}: {value}
+  {optionName2}: {value2}
+
+# route file
+myapp:
+  middlewares:
+    { middlewareName }:
+      { optionName }: { value }
+      { optionName2 }: { value2 }
 ```
 
 ### Reusing Middleware Compose Objects
@@ -113,7 +133,9 @@ openai:
 
 ### OIDC
 
-OIDC uses the settings from `.env` file, with configurable `allowed_groups` and `allowed_users` overrides.
+Name: `oidc`
+
+OIDC uses the settings from `.env` file, with configurable overrides.
 
 > [!NOTE]
 >
@@ -121,72 +143,42 @@ OIDC uses the settings from `.env` file, with configurable `allowed_groups` and 
 >
 > ```yaml
 > # config.yml
+> # DO NOT use this
 > entrypoint:
 >   middlewares:
 >     - use: oidc
 > ```
 
-```yaml
-# docker labels
-proxy.#1.middlewares.oidc:
+| Option           | Description             | Default                      | Required |
+| ---------------- | ----------------------- | ---------------------------- | -------- |
+| `allowed_users`  | Override allowed users  | `GODOXY_OIDC_ALLOWED_USERS`  | No       |
+| `allowed_groups` | Override allowed groups | `GODOXY_OIDC_ALLOWED_GROUPS` | No       |
 
-# additional docker labels (optional)
-proxy.#1.middlewares.oidc.allowed_groups: admin
-proxy.#1.middlewares.oidc.allowed_users: user1, user2
+### hCaptcha
 
-# route file
-myapp:
-  middlewares:
-    oidc:
-```
+Name: `hcaptcha`
+
+Protects against bots by solving a [hCaptcha](https://hcaptcha.com/) challenge.
+
+| Option           | Description         | Default | Required |
+| ---------------- | ------------------- | ------- | -------- |
+| `site_key`       | hCaptcha site key   |         | Yes      |
+| `secret_key`     | hCaptcha secret key |         | Yes      |
+| `session_expiry` | Session expiry time | `24h`   | No       |
 
 ### Redirect http
 
+Name: `redirect_http`
+
 Redirect http requests to https
-
-```yaml
-# docker labels
-proxy.#1.middlewares.redirect_http:
-
-# route file
-myapp:
-  middlewares:
-    redirect_http:
-```
-
-nginx equivalent:
-
-```nginx
-server {
-  listen 80;
-  server_name domain.tld;
-  return 301 https://$host$request_uri;
-}
-```
 
 ### Custom error pages
 
 See [Custom Error Pages](Custom-Error-Pages)
 
-```yaml
-# docker labels
-proxy.#1.middlewares.custom_error_page:
-
-# route file
-myapp:
-  middlewares:
-    custom_error_page:
-```
-
-nginx equivalent:
-
-```nginx
-location / {
-  try_files $uri $uri/ /error_pages/404.html =404;
-}
-```
-
 ### Real IP
+
+Name: `real_ip`
 
 > [!NOTE]
 >
@@ -197,29 +189,35 @@ location / {
 > - `$remote_addr` and `$remote_host`
 > - IP in the access log
 > - [CIDRWhitelist](#cidr-whitelist) Middleware
+>
+> **Recommended to use on entrypoint**
 
-`recursive: true` - choose the first IP that does not match the `from` list
-`recursive: false` - choose the last IP that does not match the `from` list
+| Option      | Description           | Default     | Required |
+| ----------- | --------------------- | ----------- | -------- |
+| `header`    | Real IP header        | `X-Real-IP` | No       |
+| `from`      | List of trusted CIDRs |             | Yes      |
+| `recursive` | Recursive mode        | `true`      | No       |
 
-#### Example
+| Recursive mode | Description                                             |
+| -------------- | ------------------------------------------------------- |
+| `true`         | Choose the first IP that does not match the `from` list |
+| `false`        | Choose the last IP that does not match the `from` list  |
 
-`X-Forwarded-For: 1.2.3.4, 192.168.0.123, 10.0.0.123` with `from: 192.168.0.0/16`
+Example:
 
-- `recursive: true` - `1.2.3.4`
-- `recursive: false` - `10.0.0.123`
+- `X-Forwarded-For: 1.2.3.4, 192.168.0.123, 10.0.0.123`
+- `from: 192.168.0.0/16`
+
+| Recursive mode | Result       |
+| -------------- | ------------ |
+| `true`         | `1.2.3.4`    |
+| `false`        | `10.0.0.123` |
 
 ```yaml
-# docker labels
-proxy.#1.middlewares.real_ip.header: X-Real-IP
-proxy.#1.middlewares.real_ip.from: |
-  - 127.0.0.1
-  - 192.168.0.0/16
-  - 10.0.0.0/8
-proxy.#1.middlewares.real_ip.recursive: true
-# route file
-myapp:
+# entrypoint
+entrypoint:
   middlewares:
-    real_ip:
+    - use: real_ip
       header: X-Real-IP
       from:
         - 127.0.0.1
@@ -243,6 +241,8 @@ location / {
 
 ### Cloudflare Real IP
 
+Name: `cloudflare_real_ip`
+
 > [!NOTE]
 >
 > This middleware requires no additional configuration.
@@ -251,81 +251,84 @@ location / {
 
 #### Preset Values
 
-- header: `CF-Connecting-IP`
-- from: CIDR List of Cloudflare IPs from (updated hourly)
-  - <https://www.cloudflare.com/ips-v4>
-  - <https://www.cloudflare.com/ips-v6>
-  - all local IPs
-- recursive: true
+| Option      | Description                                  |
+| ----------- | -------------------------------------------- |
+| `header`    | `CF-Connecting-IP`                           |
+| `from`      | List of Cloudflare IPs from (updated hourly) |
+| `recursive` | `true`                                       |
 
-```yaml
-# docker labels
-proxy.#1.middlewares.cloudflare_real_ip:
+Trusted IPs:
 
-# route file
-myapp:
-  middlewares:
-    cloudflare_real_ip:
-```
+- <https://www.cloudflare.com/ips-v4>
+- <https://www.cloudflare.com/ips-v6>
+- all local IPs
 
 ### CIDR Whitelist
+
+Name: `cidr_whitelist`
 
 [See Request Level Access Control](Access-Control#request-level)
 
 ### Rate Limiter
 
-- `average` - average number of requests per period
-- `burst` - maximum number of requests allowed in a period
-- `periods` - time period in format `number[unit]`
+Name: `rate_limit`
 
-```yaml
-# docker labels
-proxy.#1.middlewares.ratelimit: |
-  average: 100
-  burst: 100
-  periods: 1s
-
-# route file
-myapp:
-  middlewares:
-    ratelimit:
-      average: 100
-      burst: 100
-      periods: 1s
-```
+| Option    | Description                                    | Default | Required |
+| --------- | ---------------------------------------------- | ------- | -------- |
+| `average` | Average requests per period                    |         | Yes      |
+| `burst`   | Maximum number of requests allowed in a period |         | Yes      |
+| `periods` | Time period in format `number[unit]`           | `1s`    | No       |
 
 ### Modify request or response
 
-**In docker compose, you need double dollar signs `$$` like `$$req_method` since single `$` is treated as environment variables.**
+Names:
+
+- `modify_request` or `request`
+- `modify_response` or `response`
+
+| Option         | Description        | Default | Required |
+| -------------- | ------------------ | ------- | -------- |
+| `set_headers`  | Set headers        |         | No       |
+| `add_headers`  | Add headers        |         | No       |
+| `hide_headers` | Hide headers       |         | No       |
+| `add_prefix`   | Add prefix to path |         | No       |
 
 #### Supported variables
 
-- `$req_method` - request http method
-- `$req_scheme` - request URL scheme (http/https)
-- `$req_host` - request host without port
-- `$req_port` - request port
-- `$req_addr` - request host with port (if present)
-- `$req_path` - request URL path
-- `$req_query` - raw query string
-- `$req_url` - full request URL
-- `$req_uri` - request URI (encoded path?query)
-- `$req_content_type` - request Content-Type header
-- `$req_content_length` - length of request body (if present)
-- `$remote_addr` - client's remote address (may changed by middlewares like `RealIP` and `CloudflareRealIP`)
-- `$remote_host` - client's remote ip parse from `$remote_addr`
-- `$remote_port` - client's remote port parse from `$remote_addr` (may be empty)
-- `$resp_content_type` - response Content-Type header
-- `$resp_content_length` - length response body
-- `$status_code` - response status code
-- `$upstream_name` - upstream server name (alias)
-- `$upstream_scheme` - upstream server scheme
-- `$upstream_host` - upstream server host
-- `$upstream_port` - upstream server port
-- `$upstream_addr` - upstream server address with port (if present)
-- `$upstream_url` - full upstream server URL
-- `$header(name)` - get request header by name
-- `$resp_header(name)` - get response header by name
-- `$arg(name)` - get URL query parameter by name
+> [!NOTE]
+>
+> To use variables, add `$` **(`$$` for docker compose)** before the variable name.
+>
+> Single `$` in docker compose is treated as environment variables.
+
+| Variable              | Description                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------------- |
+| `req_method`          | request http method                                                                       |
+| `req_scheme`          | request URL scheme (http/https)                                                           |
+| `req_host`            | request host without port                                                                 |
+| `req_port`            | request port                                                                              |
+| `req_addr`            | request host with port (if present)                                                       |
+| `req_path`            | request URL path                                                                          |
+| `req_query`           | raw query string                                                                          |
+| `req_url`             | full request URL                                                                          |
+| `req_uri`             | request URI (encoded path?query)                                                          |
+| `req_content_type`    | request Content Type header                                                               |
+| `req_content_length`  | length of request body (if present)                                                       |
+| `remote_addr`         | client's remote address (may changed by middlewares like `RealIP` and `CloudflareRealIP`) |
+| `remote_host`         | client's remote ip parse from `remote_addr`                                               |
+| `remote_port`         | client's remote port parse from `remote_addr` (may be empty)                              |
+| `resp_content_type`   | response Content Type header                                                              |
+| `resp_content_length` | length response body                                                                      |
+| `status_code`         | response status code                                                                      |
+| `upstream_name`       | upstream server name (alias)                                                              |
+| `upstream_scheme`     | upstream server scheme                                                                    |
+| `upstream_host`       | upstream server host                                                                      |
+| `upstream_port`       | upstream server port                                                                      |
+| `upstream_addr`       | upstream server address with port (if present)                                            |
+| `upstream_url`        | full upstream server URL                                                                  |
+| `header(name)`        | get request header by name                                                                |
+| `resp_header(name)`   | get response header by name                                                               |
+| `arg(name)`           | get URL query parameter by name                                                           |
 
 #### Set headers
 
@@ -341,7 +344,7 @@ myapp:
     request:
       set_headers:
         X-Custom-Header1: value1, value2
-        X-Real-IP: $$remote_host
+        X-Real-IP: $remote_host
 ```
 
 #### Add headers
@@ -394,6 +397,8 @@ location / {
 
 #### Hide X-Forwarded Headers
 
+Name: `hide_x_forwarded`
+
 Remove `Forwarded` and `X-Forwarded-*` headers before request
 
 ```yaml
@@ -407,6 +412,8 @@ myapp:
 ```
 
 #### Set X-Forwarded Headers
+
+Name: `set_x_forwarded`
 
 Replace existing `X-Forwarded-*` headers with GoDoxy provided headers
 

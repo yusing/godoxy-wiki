@@ -103,8 +103,16 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
+                text: "Middleware Compose",
+                link: "/Middlewares.md#middleware-compose",
+              },
+              {
                 text: "OpenID Connect",
                 link: "/Middlewares.md#oidc",
+              },
+              {
+                text: "hCaptcha",
+                link: "/Middlewares.md#hcaptcha",
               },
               {
                 text: "Redirect to HTTPS",
