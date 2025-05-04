@@ -10,8 +10,7 @@ Currently used for notifying service health status changes only.
 
 To enable notifications, you need to configure it on WebUI or in your `config.yml` file. Follow these steps:
 
-1. **Open `config/config.yml`:**
-   Open it with WebUI config editor or a text editor.
+1. **Open `config/config.yml`** with WebUI config editor or a text editor.
 
 2. **Add Gotify Notification Configuration:**
 
