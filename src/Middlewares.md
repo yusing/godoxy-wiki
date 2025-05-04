@@ -9,8 +9,7 @@ Middlewares can be used in several ways:
 - Docker labels (unordered)
 - Route files (unordered)
 
-> [!NOTE]
-> For unordered middlewares, you have to set `priority` manually when order matters
+For **unordered** middlewares, you have to set `priority` manually when order matters
 
 ```yaml
 services:
@@ -23,18 +22,11 @@ services:
       proxy.myapp.middlewares.cidrWhiteList.allow: 127.0.0.1, 10.0.0.0/16
 ```
 
-> [!NOTE]
-> Middleware name and properties are case-insensitive and accept snake_case, PascalCase or camelCase
->
-> `redirectHTTP`, `redirect_http` and `RedirectHttp` are equivalent.
+Middleware name and properties are case-insensitive and accept snake_case, PascalCase or camelCase
+
+`redirectHTTP`, `redirect_http` and `RedirectHttp` are equivalent.
 
 ## Syntax
-
-> [!NOTE]
->
-> Entrypoint middlewares share the same syntax as middleware compose
->
-> See below for docker labels and route files
 
 ### Middleware Compose and Entrypoint Middleware
 
@@ -46,6 +38,7 @@ services:
     {option2}: {value2}
     ...
 
+# middleware compose
 # config/middlewares/whitelist.yml
 myWhitelist:
   - use: CloudflareRealIP
@@ -53,6 +46,15 @@ myWhitelist:
     allow:
       - 127.0.0.1
       - 223.0.0.0/8
+
+# config/config.yml
+entrypoint:
+  middlewares:
+    - use: CloudflareRealIP
+    - use: CIDRWhitelist
+      allow:
+        - 127.0.0.1
+        - 223.0.0.0/8
 ```
 
 ### Docker Labels and Route Files
