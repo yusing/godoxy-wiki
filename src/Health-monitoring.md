@@ -12,9 +12,9 @@
 
 GoDoxy uses `HEAD` or `GET` to send a request to the specified `path` (default to `/`).
 
-**Healthy**: When server reply any HTTP response (even if status code is not 200)
+**Healthy**: When server reply any HTTP response, except 503 SERVICE UNAVAILABLE
 
-**Unhealthy**: Otherwise
+**Unhealthy**: Connection failure / Error, 503 SERVICE UNAVAILABLE
 
 ### TCP/UDP healthcheck
 
