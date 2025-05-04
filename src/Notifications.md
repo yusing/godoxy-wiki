@@ -83,12 +83,12 @@ To enable notifications, you need to configure it on WebUI or in your `config.ym
 
 ### Common Field
 
-| Field    | Description          | Required | Allowed values            |
-| -------- | -------------------- | -------- | ------------------------- |
-| name     | Name of the provider | Yes      |                           |
-| provider |                      | Yes      | `gotify` `ntfy` `webhook` |
-| url      | Provider URL         | Yes      | Full URL                  |
-| format   | Message Format       | No       | `markdown` `plain`        |
+| Field    | Description          | Required                 | Allowed values            |
+| -------- | -------------------- | ------------------------ | ------------------------- |
+| name     | Name of the provider | Yes                      |                           |
+| provider |                      | Yes                      | `gotify` `ntfy` `webhook` |
+| url      | Provider URL         | Yes                      | Full URL                  |
+| format   | Message Format       | No (default: `markdown`) | `markdown` `plain`        |
 
 ### Webhook
 
