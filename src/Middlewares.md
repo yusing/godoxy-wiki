@@ -176,18 +176,6 @@ Name: `oidc`
 
 OIDC uses the settings from `.env` file, with configurable overrides.
 
-> [!NOTE]
->
-> **DO NOT** use this middleware on entrypoint
->
-> ```yaml
-> # config.yml
-> # DO NOT use this
-> entrypoint:
->   middlewares:
->     - use: oidc
-> ```
-
 | Option           | Description             | Default                      | Required |
 | ---------------- | ----------------------- | ---------------------------- | -------- |
 | `allowed_users`  | Override allowed users  | `GODOXY_OIDC_ALLOWED_USERS`  | No       |
