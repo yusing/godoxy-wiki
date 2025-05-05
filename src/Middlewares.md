@@ -109,7 +109,6 @@ entrypoint:
     - use: oidc
       bypass:
         - route immich # bypass for immich route
-        - path /api/v1/* # bypass for /api/v1/* path
         - route public_service & path / # bypass for route "public_service" and root path "/"
         - remote 127.0.0.1 # bypass for localhost
         - remote 192.168.0.0/16 # bypass for 192.168.0.0/16 ip range
