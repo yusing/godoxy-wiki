@@ -193,6 +193,17 @@ Protects against bots by solving a [hCaptcha](https://hcaptcha.com/) challenge.
 | `secret_key`     | hCaptcha secret key |         | Yes      |
 | `session_expiry` | Session expiry time | `24h`   | No       |
 
+#### Explanation
+
+- User will see a captcha landing page before accessing the protected route.
+- Once the captcha is solved, the user will be redirected to the real page.
+- Every period of `session_expiry`, the user will need to solve the captcha again.
+
+#### Screenshots
+
+![captcha page light](images/captcha-page-light.png)
+![captcha page dark](images/captcha-page-dark.png)
+
 ### Redirect http
 
 Name: `redirect_http`
