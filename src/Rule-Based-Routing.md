@@ -46,10 +46,10 @@ Supported escape sequences:
 Conditions seperated by:
 
 - `|` will be considered as **OR**
-- lines will be considered as **AND**
+- `&` or `\n` will be considered as **AND**
 
 ```plain
-<condition> <args> [ | <condition> <args>...]
+<condition> <args> [[ | <condition> <args> ] [ & <condition> <args> ]]...
 ```
 
 Conditions:
@@ -69,6 +69,7 @@ Conditions:
 | method     | `<method>`                     | match when request method equals `<method>`                                                                                                    |
 | path       | `<path>`                       | match when request path matches glob `<path>`                                                                                                  |
 | remote     | `<ip \| cidr>`                 | match when client IP matches `<ip>` or `<cidr>`                                                                                                |
+| route      | `<name>`                       | match when request route name equals `<name>`                                                                                                  |
 | basic_auth | `<username> <hashed_password>` | match when request basic auth username equals `<username>` and password equals `<hashed_password>`, `<hashed_password>` is bcrypt hashed value |
 
 ### `postform` vs `form`
@@ -137,6 +138,7 @@ The pattern syntax is:
 
 - Actions are executed in order
 - Actions that returns afterwards must be the last action, e.g.:
+
   ```yaml
   # invalid
   on: method GET
