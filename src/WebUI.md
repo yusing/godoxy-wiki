@@ -1,4 +1,4 @@
-# Homepage Configurations
+# WebUI
 
 > [!NOTE]
 >
@@ -8,7 +8,21 @@
 
 Please contribute to the [category preset](https://github.com/yusing/godoxy/blob/main/internal/homepage/categories.go) if you have the time.
 
-## Properties
+## Guide
+
+### Editing / Hiding apps
+
+Right click on the app you want to edit, and select `Edit App` or `Hide App`.
+
+### Changing category name
+
+Double click on the category name, edit it and hit `Enter`.
+
+### Reordering apps
+
+Drag and drop the app to the desired position. Drag to another category to also change the category.
+
+## Configurations
 
 | Property      | Description                                                                                                                                                                                 | Default                                                                                                                                                                                                                                    | Allowed Values / Syntax                                                                                                                                |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |

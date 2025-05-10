@@ -113,7 +113,7 @@ homepage:
   use_default_categories: true
 ```
 
-See [Homepage Configurations](Homepage-Configurations)
+See [WebUI Configurations](WebUI.md)
 
 ### Multi Docker Nodes Setup
 

@@ -45,8 +45,8 @@ export default defineConfig({
         text: "Customization",
         items: [
           {
-            text: "Homepage Configurations",
-            link: "/Homepage-Configurations.md",
+            text: "WebUI",
+            link: "/WebUI.md",
           },
           {
             text: "Custom Error Pages",
