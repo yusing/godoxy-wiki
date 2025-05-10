@@ -20,6 +20,27 @@
 - Idlewatcher does not work with TCP / UDP routes _(wip)_
 - UDP forwarding does not work properly
 
+## Secure your containers
+
+> [!NOTE]
+> GoDoxy will work without mapping ports to the host.
+
+Replace every `ports` section with `expose` section in your docker-compose.yml file.
+
+Doing this will make your host has only **one** exposed service, which is GoDoxy.
+
+```yaml
+# Before
+ports:
+  - 8080:80
+  - 4433:443
+
+# After
+expose:
+  - 80
+  - 443
+```
+
 ## Environment variables
 
 ### Core
