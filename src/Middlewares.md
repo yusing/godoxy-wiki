@@ -156,15 +156,39 @@ openai:
     show: false
 ```
 
-### Global OIDC with Bypass Rules
+### Middleware with Bypass Rules
+
+> [!WARNING]
+>
+> **Global OIDC is hard to configure correctly.**
 
 ```yaml
+# config.yml (global middlewares)
 entrypoint:
   middlewares:
     - use: oidc
       bypass:
-        - route immich # this allows immich route to bypass oidc (to use with its own oidc implementation)
+        - route pocket-id # bypass the IdP route
+        - route immich & path /api/* # this allows immich route to bypass oidc (to use with its own oidc implementation)
         - route karakeep & path /api/v1/* # this allows karakeep mobile app (or any api requests) to bypass oidc
+        # bypass local network
+        - remote 127.0.0.1
+        - remote 192.168.0.0/16
+        - remote 10.0.0.0/8
+        - remote 172.16.0.0/12
+        - remote 100.64.0.0/10
+
+# docker labels (route specific middlewares) (e.g. vaultwarden)
+services:
+  vw:
+    ...
+    labels:
+      # this allows bitwarden apps (api requests) to bypass oidc
+      proxy.#1.middlewares.oidc.bypass: path /identity/* | path /api/* | path /icons/*
+  karakeep:
+    ...
+    labels:
+      proxy.#1.middlewares.oidc.bypass: path /api/v1/*
 ```
 
 ## Available middlewares
