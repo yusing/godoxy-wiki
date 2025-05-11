@@ -130,6 +130,14 @@ See [WebUI Configurations](WebUI.md)
 - `godoxy-agent` is a light-weight agent that handles docker, metrics and health checks
 - Secure by default, with HTTPS and mTLS
 
+##### Updating system mode agent
+
+Run the following command on the agent server, or make it a cron job:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/yusing/godoxy/refs/heads/main/scripts/install-agent.sh)" -- update
+```
+
 #### Method 2: Using `docker-socket-proxy`
 
 > [!WARNING]
