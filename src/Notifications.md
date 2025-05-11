@@ -4,7 +4,11 @@
 
 Notifications are sent to users to inform them about an event, update, or action.
 
-Currently used for notifying service health status changes only.
+Currently used for:
+
+- Notifying service health status changes
+- Notifying when certificate renewal is successful or failed
+- Notifying when errors occur on config file reload
 
 ## Enabling Notifications
 
