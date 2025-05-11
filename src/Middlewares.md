@@ -5,7 +5,7 @@
 Middlewares can be used in several ways:
 
 - Entrypoint (ordered)
-- Middleware Compose (ordered) - reusable middlewares YAML files under `config/middlewares`
+- Middleware Compose (ordered) - reusable middleware configuration YAML files under `config/middlewares`
 - Docker labels (unordered)
 - Route files (unordered)
 
@@ -160,7 +160,7 @@ openai:
 
 > [!WARNING]
 >
-> **Global OIDC is hard to configure correctly.**
+> **Global OIDC is hard to be configured correctly.**
 
 ```yaml
 # config.yml (global middlewares)
@@ -220,7 +220,7 @@ Protects against bots by solving a [hCaptcha](https://hcaptcha.com/) challenge.
 
 - User will see a captcha landing page before accessing the protected route.
 - Once the captcha is solved, the user will be redirected to the real page.
-- Every period of `session_expiry`, the user will need to solve the captcha again.
+- Users will need to solve the captcha again after each `session_expiry` period.
 
 #### Screenshots
 
@@ -312,11 +312,11 @@ Name: `cloudflare_real_ip`
 
 #### Preset Values
 
-| Option      | Description                                  |
-| ----------- | -------------------------------------------- |
-| `header`    | `CF-Connecting-IP`                           |
-| `from`      | List of Cloudflare IPs from (updated hourly) |
-| `recursive` | `true`                                       |
+| Option      | Description                                                   |
+| ----------- | ------------------------------------------------------------- |
+| `header`    | `CF-Connecting-IP`                                            |
+| `from`      | List of Cloudflare IPs (updated hourly from official sources) |
+| `recursive` | `true`                                                        |
 
 Trusted IPs:
 
@@ -376,10 +376,10 @@ Names:
 | `req_content_type`    | request Content Type header                                                               |
 | `req_content_length`  | length of request body (if present)                                                       |
 | `remote_addr`         | client's remote address (may changed by middlewares like `RealIP` and `CloudflareRealIP`) |
-| `remote_host`         | client's remote ip parse from `remote_addr`                                               |
-| `remote_port`         | client's remote port parse from `remote_addr` (may be empty)                              |
+| `remote_host`         | client's remote IP, parsed from `remote_addr`                                             |
+| `remote_port`         | client's remote port, parsed from `remote_addr` (may be empty)                            |
 | `resp_content_type`   | response Content Type header                                                              |
-| `resp_content_length` | length response body                                                                      |
+| `resp_content_length` | length of the response body                                                               |
 | `status_code`         | response status code                                                                      |
 | `upstream_name`       | upstream server name (alias)                                                              |
 | `upstream_scheme`     | upstream server scheme                                                                    |
@@ -460,7 +460,7 @@ location / {
 
 Name: `hide_x_forwarded`
 
-Remove `Forwarded` and `X-Forwarded-*` headers before request
+Remove `Forwarded` and `X-Forwarded-*` headers before the request is sent to the upstream service.
 
 ```yaml
 # docker labels
@@ -476,7 +476,7 @@ myapp:
 
 Name: `set_x_forwarded`
 
-Replace existing `X-Forwarded-*` headers with GoDoxy provided headers
+Replace existing `X-Forwarded-*` headers with headers provided by GoProxy.
 
 ```yaml
 # docker labels

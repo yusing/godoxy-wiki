@@ -55,7 +55,7 @@ providers:
 
 ## Request Level
 
-Request level access control handles IP addresses after the request is processed. If an IP is blocked, GoDoxy will response a HTTP error code with an error message (and logged if configured).
+Request level access control handles IP addresses after the request is processed. If an IP is blocked, GoProxy will respond with an HTTP error code with an error message (and logged if configured).
 
 > [!NOTE]
 > HTTP Access loggers can be configured
@@ -119,7 +119,7 @@ proxy.#1.middlewares.cidr_whitelist: |
 
 | Key                   | Type                       | Description                                       | Allowed Values        | Default      |
 | --------------------- | -------------------------- | ------------------------------------------------- | --------------------- | ------------ |
-| `path`                | string                     | Access log path                                   | `/var/log/access.log` | **required** |
+| `path`                | string                     | Path to the access log file                       | `/var/log/access.log` | **required** |
 | `stdout`              | bool                       | Enable stdout logging **(can be used with path)** | `true` or `false`     | `false`      |
 | `keep` or `retention` | [See below](#log-rotation) | Retention policy                                  |                       | `30 days`    |
 | `rotate_interval`     | duration                   | Log rotation interval                             | Duration              | `1h`         |
@@ -160,11 +160,11 @@ Format:
 #### Explanation
 
 - Multiple access loggers can share the same log file
-- When `filters.*.negative` is set to `true`, request that matches any of the negative filters will not be logged
+- When `filters.*.negative` is set to `true`, requests that match any of the negative filters will not be logged
 - When `fields.*.default` is set to `keep`, that field will be logged
 - When `fields.*.default` is set to `redact`, that field will be redacted as `REDACTED`
-  - `fields.query.default` = `redact` will replace query string into like `?key=REDACTED`
-  - other field config has effect only when `access_log.format` is set to `json`
+  - `fields.query.default` = `redact` will replace the query string with a format like `?key=REDACTED`
+  - This redaction configuration for other fields (besides query) only takes effect when `access_log.format` is set to `json`
 - When `fields.*.default` is set to `drop`, that field will be dropped
 - Default field config:
   - `query.default` = `keep`
@@ -200,7 +200,7 @@ entrypoint:
         negative: true
         values:
           - foo=bar # when key "foo" is present and value is `bar`
-          - baz # when key "bar" is present
+          - baz # when key "baz" is present
       cidr:
         values:
           - 192.168.10.0/24
