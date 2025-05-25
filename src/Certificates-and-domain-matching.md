@@ -38,6 +38,30 @@ autocert:
 
 ![Cloudflare autocert](images/config/cf-autocert.png)
 
+### Auto SSL with Custom Internal CA
+
+You may use internal CA like [step-ca](https://github.com/smallstep/certificates) for issuing certificates.
+
+Use `step-ca` as an example:
+
+```bash
+export ACME_URL=https://acme.internal
+# get root certs and save to `certs/roots.pem`
+# assume that `certs/` is mounted to `/app/certs` (by default)
+curl -k https://${ACME_URL}/roots.pem > certs/roots.pem
+```
+
+```yaml
+autocert:
+  provider: custom
+  email: your-email@example.com
+  domains:
+    - "*.yourdomain.com"
+  ca_dir_url: https://acme.internal/acme/acme/directory
+  ca_certs:
+    - certs/roots.pem
+```
+
 ### Auto SSL with other DNS providers
 
 Check [DNS-01 Providers](DNS-01-Providers.md)
