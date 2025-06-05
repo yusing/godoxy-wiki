@@ -2,9 +2,20 @@
 
 ## Behaviors
 
-- Health monitoring is enabled by default for all proxied services
-- If docker healthcheck is enabled, it will be used first. In this case, `use_get` and `path` will be ignored.
+- Health monitoring is enabled by default for all services, including the excluded ones.
+- If docker healthcheck<sup>1</sup> is enabled, it will be used first. In this case, `use_get` and `path` will be ignored.
 - In case docker healthcheck is not available (not enabled / failed to fetch), **GoDoxy** healthcheck will be used.
+
+1. Health check in [Docker compose](https://docs.docker.com/reference/compose-file/services/#healthcheck) and [Dockerfile](https://docs.docker.com/engine/reference/builder/#healthcheck), e.g.
+   ```yaml
+   healthcheck:
+     test: ["CMD", "curl", "-f", "http://localhost"]
+     interval: 1m30s
+     timeout: 10s
+     retries: 3
+     start_period: 40s
+     start_interval: 5s
+   ```
 
 ## Implementations
 
