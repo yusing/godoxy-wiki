@@ -6,11 +6,13 @@ Docker containers / Proxmox LXCs consume resources even when they are idle. This
 
 ## How?
 
-GoDoxy will put containers to sleep when there is no traffic for a specified period of time. When any traffic is received, the container will be woken up.
+GoDoxy will put containers to sleep when there is **no traffic** for a specified period of time. When any **traffic is received**, the container will be woken up.
 
 When `depends_on` is set in docker compose file, GoDoxy will also put those dependencies to sleep, and wake together on traffic.
 
-On idle timeout, GoDoxy will stop the container first, and then stop the dependencies. On wake, GoDoxy will start the dependencies first, and then start the container.
+On idle timeout, GoDoxy will stop the container first, and then stop the dependencies.
+
+On wake, GoDoxy will start the dependencies first, and then start the container.
 
 ## Configuration
 
@@ -26,8 +28,8 @@ On idle timeout, GoDoxy will stop the container first, and then stop the depende
 
 ### Notes
 
-- <sup>1</sup> It reads from `com.docker.compose.depends_on` (which will be set by docker compose automatically) label from the container.
-- <sup>2</sup> `condition` is optional and can be one of:
+- <sup style="font-weight: bold;">1</sup> It reads from `com.docker.compose.depends_on` (which will be set by docker compose automatically) label from the container.
+- <sup style="font-weight: bold;">2</sup> `condition` is optional and can be one of:
 
   - `service_started` (default)
   - `service_healthy`
@@ -93,43 +95,43 @@ To setup GoDoxy to manage proxmox LXCs. You need to do the following:
 
 1. Add proxmox credentials to `config.yml`
 
-```yaml
-# config.yml
-providers:
-  proxmox:
-    - url: https://pve.domain.com:8006/api2/json
-      token_id: root@pam!abcdef
-      secret: aaaa-bbbb-cccc-dddd
-      no_tls_verify: true
-```
+    ```yaml
+    # config.yml
+    providers:
+      proxmox:
+        - url: https://pve.domain.com:8006/api2/json
+          token_id: root@pam!abcdef
+          secret: aaaa-bbbb-cccc-dddd
+          no_tls_verify: true
+    ```
 
 2. Create API Token on Proxmox
 
-![Proxmox API Token](images/proxmox-api-token.png)
+    ![Proxmox API Token](images/proxmox-api-token.png)
 
 3. Allow required permissions
 
-![Proxmox Permissions](images/proxmox-permissions.png)
+    ![Proxmox Permissions](images/proxmox-permissions.png)
 
 4. Add LXCs to route files
 
-Node Name:
+    Node Name:
 
-![Proxmox Node Name](images/proxmox-node.png)
+    ![Proxmox Node Name](images/proxmox-node.png)
 
-VMID:
+    VMID:
 
-![Proxmox LXC VMID](images/proxmox-lxc-vmid.png)
+    ![Proxmox LXC VMID](images/proxmox-lxc-vmid.png)
 
-```yaml
-lxc-test:
-  port: 3000
-  idlewatcher:
-    idle_timeout: 15s
-    proxmox:
-      node: pve
-      vmid: 119
-    depends_on:
-      - lxc-db
-lxc-db: ...
-```
+    ```yaml
+    lxc-test:
+      port: 3000
+      idlewatcher:
+        idle_timeout: 15s
+        proxmox:
+          node: pve
+          vmid: 119
+        depends_on:
+          - lxc-db
+    lxc-db: ...
+    ```
