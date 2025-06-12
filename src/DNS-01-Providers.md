@@ -77,6 +77,18 @@ autocert:
     secret_api_key:
 ```
 
+## AWS Route 53
+
+```yaml
+autocert:
+  provider: route53
+  options:
+    accesskeyid: your_key_id # AWS User Access key id on a user with Route53 permissions
+    secretaccesskey: your_secret_access_key # AWS User Access key secret on a user with Route53 permissions
+    region: us-east-1 # us-east-1 for most of the world
+    hostedzoneid: your_hosted_zone_id # The Hosted Zone ID of your domain in AWS Route53
+```
+
 ## Others
 
 > [!NOTE]
