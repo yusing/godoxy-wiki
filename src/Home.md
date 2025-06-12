@@ -63,7 +63,7 @@ expose:
 
 > [!DANGER]
 >
-> If you desire to use authentication without HTTPS, set `GODOXY_API_JWT_SECURE` to `false`
+> If you desire to use WebUI HTTP Only, set `GODOXY_API_JWT_SECURE` to `false`
 >
 > **Not recommended**
 
