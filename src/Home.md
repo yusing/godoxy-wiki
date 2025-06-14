@@ -15,11 +15,6 @@
 
 ![GitHub Release](https://img.shields.io/github/v/release/yusing/godoxy?style=flat-square)
 
-## Known issues
-
-- Idlewatcher does not work with TCP / UDP routes _(wip)_
-- UDP forwarding does not work properly
-
 ## Secure your containers
 
 > [!NOTE]
