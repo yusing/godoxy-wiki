@@ -180,7 +180,11 @@ app-backend.domain.com:
    - **HTTP/HTTPS**: e.g., `80`, `443`
    - **TCP/UDP**: The port for GoDoxy to listen on, mapped to the target container's port. (e.g. `8080:80`)
 
-4. **no_tls_verify** (optional): Whether skips TLS verification when scheme is `https`.
+4. **agent**: Tells the proxy server which agent to route from **(for route files)**
+
+   - **Values**: agent name (e.g. `Oracle`) or agent address `https://10.0.1.2:8890`
+
+5. **no_tls_verify** (optional): Whether skips TLS verification when scheme is `https`.
 
    - **Default**: `false`
    - **Values**: `true`, `false`
@@ -223,6 +227,7 @@ app-backend.domain.com:
 | `host`                                  | Proxy host                                                                                                                        | <ul><li>Docker: docker client IP / hostname </li><li>File: `localhost`</li></ul>                                                                                                                        | IP address, hostname                                                                                                                            |
 | `port`                                  | Proxy port **(http/s)**                                                                                                           | lowest port returned from docker (e.g. [443,80,8080] => 80)                                                                                                                                             | number in range of `1 - 65535`                                                                                                                  |
 | `port`                                  | Proxy port **(tcp/udp)**                                                                                                          | `0:lowest_port`                                                                                                                                                                                         | `x:y` <br/><ul><li>**x**: port for GoDoxy to listen on.<br>listen on a random port when `x` is zero</li><li>**y**: port to proxy from</li></ul> |
+| `agent`                                 | Agent to use                                                                                                 |                                             | agent name or agent address                                                                                          |
 | `no_tls_verify`                         | Whether skip TLS verification when scheme is `https`                                                                              | `false`                                                                                                                                                                                                 | boolean                                                                                                                                         |
 | `response_header_timeout`               | Response header timeout<br/>**❌TCP/UDP/File Server**                                                                             | `60s`                                                                                                                                                                                                   | duration                                                                                                                                        |
 | `disable_compression`                   | Disable compression for this route<br/>**❌TCP/UDP/File Server**                                                                  | `false`                                                                                                                                                                                                 | boolean                                                                                                                                         |
