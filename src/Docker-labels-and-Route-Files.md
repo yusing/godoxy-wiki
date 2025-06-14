@@ -47,6 +47,7 @@ There are two types of label syntax:
    ```
 
 3. **Mixing both (balance between convenience and readability)**
+
    ```yaml
    services:
      app:
@@ -89,6 +90,22 @@ service:
         category: app
       # hide backend from homepage
       proxy.app-backend.homepage.show: false
+```
+
+#### Specifying docker network
+
+```yaml
+services:
+  app:
+    ...
+    labels:
+      proxy.network: app-network
+    networks:
+      - app-network
+      - app-network-2
+networks:
+  app-network:
+  app-network-2:
 ```
 
 ### Example Route File
@@ -138,6 +155,7 @@ app-backend.domain.com:
 ### Docker Troubleshooting
 
 - If containers are not showing in the proxy list, make sure to map their ports:
+
   ```yaml
   services:
     nginx-1:
@@ -189,6 +207,7 @@ app-backend.domain.com:
 | `proxy.*.{property}`        | set field for all aliases                                     | `proxy.*.set_headers`              |                       |                                                                           |
 | `proxy.aliases`             | subdomains or FQDN for url matching (comma separated)         | `app`, `app.domain.com`, `app-tcp` | `container_name`      | any                                                                       |
 | `proxy.exclude`             | should GoDoxy ignore this container                           |                                    | false                 | boolean                                                                   |
+| `proxy.network`             | network to use for this container                              |                                    | first available network              | valid network name or empty                                                  |
 | `proxy.idle_timeout`        | inactivity timeout before put it into sleep<br/>**❌TCP/UDP** | `1h30s`                            | empty **(disabled)**  | `number[unit]...`                                                         |
 | `proxy.wake_timeout`        | time to wait for target site to be ready                      |                                    | `30s`                 | `number[unit]...`                                                         |
 | `proxy.stop_method`         | method to stop after `idle_timeout`                           |                                    | `stop`                | `stop`, `pause`, `kill`                                                   |
