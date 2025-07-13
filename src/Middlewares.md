@@ -487,3 +487,139 @@ myapp:
   middlewares:
     set_x_forwarded:
 ```
+
+### Modify HTML
+
+Name: `modify_html`
+
+Inject or replace HTML content in HTTP responses using CSS selectors.
+
+| Option    | Description                                                | Default | Required |
+| --------- | ---------------------------------------------------------- | ------- | -------- |
+| `target`  | CSS selector for target element                            |         | Yes      |
+| `html`    | HTML content to inject                                     |         | Yes      |
+| `replace` | Replace target element instead of appending to it          | `false` | No       |
+
+#### Behavior
+
+- **Content-Type filtering**: Only processes HTML responses (`text/html`, `application/xhtml+xml`)
+- **Append mode** (default): Appends HTML content to the **first** matching target element
+- **Replace mode**: Replaces **all** matching target elements with the specified HTML content
+- **Error handling**: Gracefully handles malformed HTML and missing targets
+- **Content-Length**: Automatically updates the `Content-Length` header
+
+#### CSS Selectors
+
+Supports standard CSS selectors, e.g.:
+
+| Selector Type | Example                | Description                    |
+| ------------- | ---------------------- | ------------------------------ |
+| Element       | `body`, `head`, `div`  | Select by element name         |
+| ID            | `#main`                | Select by ID attribute         |
+| Class         | `.container`           | Select by class attribute      |
+| Attribute     | `[data-test='target']` | Select by attribute value      |
+
+#### Modify HTML Examples
+
+##### Inject CSS into head
+
+```yaml
+# docker labels
+proxy.myapp.middlewares.modify_html: |
+  target: head
+  html: '<style>body { background-color: red; }</style>'
+
+# route file
+myapp:
+  middlewares:
+    modify_html:
+      target: head
+      html: '<style>body { background-color: red; }</style>'
+```
+
+##### Add footer to body
+
+```yaml
+# docker labels
+proxy.myapp.middlewares.modify_html: |
+  target: body
+  html: <footer>Footer content</footer>
+
+# route file
+myapp:
+  middlewares:
+    modify_html:
+      target: body
+      html: <footer>Footer content</footer>
+```
+
+##### Replace main content
+
+```yaml
+# docker labels
+proxy.myapp.middlewares.modify_html: |
+  target: main
+  html: <section><h2>New Content</h2></section>
+  replace: true
+
+# route file
+myapp:
+  middlewares:
+    modify_html:
+      target: main
+      html: <section><h2>New Content</h2></section>
+      replace: true
+```
+
+##### Complex injection with scripts and styles
+
+```yaml
+# route file
+myapp:
+  middlewares:
+    modify_html:
+      target: body
+      html: |
+        <script src="/static/app.js"></script>
+        <link rel="stylesheet" href="/static/style.css"/>
+```
+
+#### Multiple Targets
+
+When multiple elements match the CSS selector:
+
+- **Append mode**: Only the **first** matching element is modified
+- **Replace mode**: **All** matching elements are replaced
+
+Example with multiple `.container` elements:
+
+```html
+<!-- Original -->
+<div class="container">First container</div>
+<div class="container">Second container</div>
+
+<!-- Append mode: target=".container", html="<p>Added</p>" -->
+<div class="container">First container<p>Added</p></div>
+<div class="container">Second container</div>
+
+<!-- Replace mode: target=".container", html="<p>Replaced</p>", replace=true -->
+<p>Replaced</p>
+<p>Replaced</p>
+```
+
+#### Supported Content Types
+
+The middleware only processes HTML content types:
+
+- `text/html`
+- `text/html; charset=utf-8`
+- `application/xhtml+xml`
+
+#### Error Handling
+
+The middleware handles errors gracefully:
+
+- **Invalid HTML**: Restores original content and logs warning
+- **Target not found**: Returns original content unchanged
+- **Malformed selectors**: No modification occurs
+- **Empty HTML injection**: No visible change but processes normally

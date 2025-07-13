@@ -52,6 +52,10 @@ export default defineConfig({
             text: "Custom Error Pages",
             link: "/Custom-Error-Pages.md",
           },
+          {
+            text: "CSS Injection",
+            link: "/CSS-Injection.md",
+          },
         ],
       },
       {
@@ -169,6 +173,10 @@ export default defineConfig({
                     link: "/Middlewares.md#set-x-forwarded-headers",
                   },
                 ],
+              },
+              {
+                text: "Modify HTML",
+                link: "/Middlewares.md#modify-html",
               },
             ],
           },
