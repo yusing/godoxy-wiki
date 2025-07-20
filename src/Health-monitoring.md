@@ -68,13 +68,14 @@ GoDoxy checks if the root directory exists and is accessible by GoDoxy with `os.
 
 ## Properties
 
-| Property | Description                                    | Default | Allowed Values / Syntax     |
-| -------- | ---------------------------------------------- | ------- | --------------------------- |
-| disable  | Disable health monitoring                      | false   | boolean                     |
-| path     | Relative path **(HTTP only)**                  | empty   | empty or URI like `/health` |
-| use_get  | Use GET method instead of HEAD **(HTTP only)** | false   | boolean                     |
-| interval | Health check interval                          | 5s      | duration                    |
-| timeout  | Health check timeout                           | 5s      | duration                    |
+| Property | Description                                     | Default                   | Allowed Values / Syntax     |
+| -------- | ----------------------------------------------- | ------------------------- | --------------------------- |
+| disable  | Disable health monitoring                       | false                     | boolean                     |
+| path     | Relative path **(HTTP only)**                   | empty                     | empty or URI like `/health` |
+| use_get  | Use GET method instead of HEAD **(HTTP only)**  | false                     | boolean                     |
+| interval | Health check interval                           | 5s                        | duration                    |
+| timeout  | Health check timeout                            | 5s                        | duration                    |
+| retries  | Health check retries before notifying unhealthy | 15s divided by `interval` | integer                     |
 
 ## Examples
 
