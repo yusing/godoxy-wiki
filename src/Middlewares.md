@@ -494,11 +494,11 @@ Name: `modify_html`
 
 Inject or replace HTML content in HTTP responses using CSS selectors.
 
-| Option    | Description                                                | Default | Required |
-| --------- | ---------------------------------------------------------- | ------- | -------- |
-| `target`  | CSS selector for target element                            |         | Yes      |
-| `html`    | HTML content to inject                                     |         | Yes      |
-| `replace` | Replace target element instead of appending to it          | `false` | No       |
+| Option    | Description                                       | Default | Required |
+| --------- | ------------------------------------------------- | ------- | -------- |
+| `target`  | CSS selector for target element                   |         | Yes      |
+| `html`    | HTML content to inject                            |         | Yes      |
+| `replace` | Replace target element instead of appending to it | `false` | No       |
 
 #### Behavior
 
@@ -512,12 +512,12 @@ Inject or replace HTML content in HTTP responses using CSS selectors.
 
 Supports standard CSS selectors, e.g.:
 
-| Selector Type | Example                | Description                    |
-| ------------- | ---------------------- | ------------------------------ |
-| Element       | `body`, `head`, `div`  | Select by element name         |
-| ID            | `#main`                | Select by ID attribute         |
-| Class         | `.container`           | Select by class attribute      |
-| Attribute     | `[data-test='target']` | Select by attribute value      |
+| Selector Type | Example                | Description               |
+| ------------- | ---------------------- | ------------------------- |
+| Element       | `body`, `head`, `div`  | Select by element name    |
+| ID            | `#main`                | Select by ID attribute    |
+| Class         | `.container`           | Select by class attribute |
+| Attribute     | `[data-test='target']` | Select by attribute value |
 
 #### Modify HTML Examples
 
@@ -582,6 +582,38 @@ myapp:
       html: |
         <script src="/static/app.js"></script>
         <link rel="stylesheet" href="/static/style.css"/>
+```
+
+### Themed
+
+Name: `themed`
+
+Easily injects a theme CSS into the HTML response.
+
+| Option        | Description                    | Allowed Values                            |
+| ------------- | ------------------------------ | ----------------------------------------- |
+| `theme`       | Predefined theme name          | `dark`, `dark-grey`, `solarized-dark`     |
+| `font_url`    | Custom Font URL                | Full URL                                  |
+| `font_family` | Font family name of above font | string                                    |
+| `css`         | Custom CSS                     | URL, File with `file://` prefix, Full CSS |
+
+#### Example
+
+```yaml
+app:
+  middlewares:
+    themed:
+      theme: dark
+      font_url: https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap
+      font_family: Inter
+      css: |
+        body {
+          color: red !important;
+        }
+      # or
+      css: file://path/to/custom.css
+      # or
+      css: https://example.com/custom.css
 ```
 
 #### Multiple Targets
