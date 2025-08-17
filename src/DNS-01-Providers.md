@@ -89,12 +89,16 @@ autocert:
     hostedzoneid: your_hosted_zone_id # The Hosted Zone ID of your domain in AWS Route53
 ```
 
+## Custom ACME CA
+
+See [Certificates and domain matching](Certificates-and-domain-matching.md#auto-ssl-with-custom-internal-ca) for more details.
+
 ## Others
 
 > [!NOTE]
-> A full list of provider names can be found [here](https://github.com/yusing/godoxy/blob/4410637f8b543e0042ee92efe63319fad35778a3/internal/autocert/providers.go#L153)
+> A full list of provider names can be found in [autocert/providers.go](https://github.com/yusing/godoxy/blob/4410637f8b543e0042ee92efe63319fad35778a3/internal/autocert/providers.go#L153)
 >
-> Full documentation of [LEGO](https://go-acme.github.io/lego/index.html) supported providers can be found here [here](https://go-acme.github.io/lego/dns).
+> Full documentation of [LEGO](https://go-acme.github.io/lego/index.html) supported providers can be found in [LEGO DNS documentation](https://go-acme.github.io/lego/dns).
 
 > [!WARNING]
 > Anything not listed above are untested, please submit an issue if any of them doesn't work.

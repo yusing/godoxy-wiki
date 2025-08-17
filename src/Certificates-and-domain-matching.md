@@ -62,6 +62,21 @@ autocert:
     - certs/roots.pem
 ```
 
+#### EAB
+
+If you are using EAB (External Account Binding), you can set `eab_kid` and `eab_hmac` in `autocert.options`. It can also be used with custom ACME CA.
+
+```yaml
+autocert:
+  provider: custom
+  email: your-email@example.com
+  domains:
+    - "*.yourdomain.com"
+  options:
+    eab_kid: your-eab-kid
+    eab_hmac: base64-encoded-hmac
+```
+
 ### Auto SSL with other DNS providers
 
 Check [DNS-01 Providers](DNS-01-Providers.md)
@@ -136,6 +151,7 @@ A route with FQDN alias `app.example.com` can be accessed at:
 Given your main domain is `my.app`
 
 - Add `my.app` to `autocert.domains` and `match_domains` in `config.yml`
+
   ```yaml
   autocert:
     domains:
@@ -143,7 +159,9 @@ Given your main domain is `my.app`
   match_domains:
     - my.app
   ```
+
 - Use short aliases like `adguard` and `sonarr` when you want them to be accessible at your main domain
+
   ```yaml
   services:
     adguard: # adguard.my.app
@@ -155,6 +173,7 @@ Given your main domain is `my.app`
       labels:
         proxy.aliases: sonarr
   ```
+
 - Use FQDN aliases like `adguard.other.app` and `sonarr.other.app` when you want them to be accessible at other domains
 
   ```yaml
