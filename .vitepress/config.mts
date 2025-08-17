@@ -15,6 +15,7 @@ export default defineConfig({
     nav: [
       { text: "Home", link: "/" },
       { text: "Install", link: "/Setup.md" },
+      { text: "API Docs", link: "/api.md" },
       { text: "Gallery", link: "/Gallery.md" },
     ],
     sidebar: [
