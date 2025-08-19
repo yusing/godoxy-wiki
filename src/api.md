@@ -58,8 +58,8 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 
 | Method  | URI     | Name   | Summary |
 |---------|---------|--------|---------|
+| GET | /api/v1/auth/callback | [get auth callback](#get-auth-callback) | Auth Callback |
 | HEAD | /api/v1/auth/check | [head auth check](#head-auth-check) | Check authentication status |
-| POST | /api/v1/auth/callback | [post auth callback](#post-auth-callback) | Post Auth Callback |
 | POST | /api/v1/auth/login | [post auth login](#post-auth-login) | Login |
 | POST | /api/v1/auth/logout | [post auth logout](#post-auth-logout) | Logout |
   
@@ -193,6 +193,70 @@ Status: Internal Server Error
   
 
 [ErrorResponse](#error-response)
+
+### <span id="get-auth-callback"></span> Auth Callback (*GetAuthCallback*)
+
+```
+GET /api/v1/auth/callback
+```
+
+Handles the callback from the provider after successful authentication
+
+#### Produces
+  * text/plain
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| body | `body` | [AuthUserPassAuthCallbackRequest](#auth-user-pass-auth-callback-request) | `models.AuthUserPassAuthCallbackRequest` | | ✓ | | Userpass only |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-auth-callback-200) | OK | Userpass: OK |  | [schema](#get-auth-callback-200-schema) |
+| [302](#get-auth-callback-302) | Found | OIDC: Redirects to home page |  | [schema](#get-auth-callback-302-schema) |
+| [400](#get-auth-callback-400) | Bad Request | Userpass: invalid request / credentials |  | [schema](#get-auth-callback-400-schema) |
+| [500](#get-auth-callback-500) | Internal Server Error | Internal server error |  | [schema](#get-auth-callback-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-auth-callback-200"></span> 200 - Userpass: OK
+Status: OK
+
+###### <span id="get-auth-callback-200-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="get-auth-callback-302"></span> 302 - OIDC: Redirects to home page
+Status: Found
+
+###### <span id="get-auth-callback-302-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="get-auth-callback-400"></span> 400 - Userpass: invalid request / credentials
+Status: Bad Request
+
+###### <span id="get-auth-callback-400-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="get-auth-callback-500"></span> 500 - Internal server error
+Status: Internal Server Error
+
+###### <span id="get-auth-callback-500-schema"></span> Schema
+   
+  
+
+
 
 ### <span id="get-cert-info"></span> Get cert info (*GetCertInfo*)
 
@@ -1518,70 +1582,6 @@ Status: Internal Server Error
 
 [ErrorResponse](#error-response)
 
-### <span id="post-auth-callback"></span> Post Auth Callback (*PostAuthCallback*)
-
-```
-POST /api/v1/auth/callback
-```
-
-Handles the callback from the provider after successful authentication
-
-#### Produces
-  * text/plain
-
-#### Parameters
-
-| Name | Source | Type | Go type | Separator | Required | Default | Description |
-|------|--------|------|---------|-----------| :------: |---------|-------------|
-| body | `body` | [AuthUserPassAuthCallbackRequest](#auth-user-pass-auth-callback-request) | `models.AuthUserPassAuthCallbackRequest` | | ✓ | | Userpass only |
-
-#### All responses
-| Code | Status | Description | Has headers | Schema |
-|------|--------|-------------|:-----------:|--------|
-| [200](#post-auth-callback-200) | OK | Userpass: OK |  | [schema](#post-auth-callback-200-schema) |
-| [302](#post-auth-callback-302) | Found | OIDC: Redirects to home page |  | [schema](#post-auth-callback-302-schema) |
-| [400](#post-auth-callback-400) | Bad Request | Userpass: invalid request / credentials |  | [schema](#post-auth-callback-400-schema) |
-| [500](#post-auth-callback-500) | Internal Server Error | Internal server error |  | [schema](#post-auth-callback-500-schema) |
-
-#### Responses
-
-
-##### <span id="post-auth-callback-200"></span> 200 - Userpass: OK
-Status: OK
-
-###### <span id="post-auth-callback-200-schema"></span> Schema
-   
-  
-
-
-
-##### <span id="post-auth-callback-302"></span> 302 - OIDC: Redirects to home page
-Status: Found
-
-###### <span id="post-auth-callback-302-schema"></span> Schema
-   
-  
-
-
-
-##### <span id="post-auth-callback-400"></span> 400 - Userpass: invalid request / credentials
-Status: Bad Request
-
-###### <span id="post-auth-callback-400-schema"></span> Schema
-   
-  
-
-
-
-##### <span id="post-auth-callback-500"></span> 500 - Internal server error
-Status: Internal Server Error
-
-###### <span id="post-auth-callback-500-schema"></span> Schema
-   
-  
-
-
-
 ### <span id="post-auth-login"></span> Login (*PostAuthLogin*)
 
 ```
@@ -2098,6 +2098,7 @@ Status: Internal Server Error
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
 | addr | string| `string` |  | |  |  |
+| is_nerdctl | boolean| `bool` |  | |  |  |
 | name | string| `string` |  | |  |  |
 | version | string| `string` |  | |  |  |
 
@@ -2639,6 +2640,7 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
+| container_runtime | [NewAgentRequest](#new-agent-request)| `NewAgentRequest` |  | |  |  |
 | host | string| `string` | ✓ | |  |  |
 | name | string| `string` | ✓ | |  |  |
 | nightly | boolean| `bool` |  | |  |  |
@@ -3037,6 +3039,7 @@ Status: Internal Server Error
 |------|------|---------|:--------:| ------- |-------------|---------|
 | ca | [PEMPairResponse](#p-e-m-pair-response)| `PEMPairResponse` |  | |  |  |
 | client | [PEMPairResponse](#p-e-m-pair-response)| `PEMPairResponse` |  | |  |  |
+| container_runtime | [AgentContainerRuntime](#agent-container-runtime)| `AgentContainerRuntime` |  | |  |  |
 | host | string| `string` |  | |  |  |
 
 
@@ -3101,6 +3104,17 @@ Status: Internal Server Error
 | host | [LogFilterHost](#log-filter-host)| `LogFilterHost` |  | |  |  |
 | method | [LogFilterHTTPMethod](#log-filter-http-method)| `LogFilterHTTPMethod` |  | |  |  |
 | status_codes | [LogFilterStatusCodeRange](#log-filter-status-code-range)| `LogFilterStatusCodeRange` |  | |  |  |
+
+
+
+### <span id="agent-container-runtime"></span> agent.ContainerRuntime
+
+
+  
+
+| Name | Type | Go type | Default | Description | Example |
+|------|------|---------| ------- |-------------|---------|
+| agent.ContainerRuntime | string| string | |  |  |
 
 
 
