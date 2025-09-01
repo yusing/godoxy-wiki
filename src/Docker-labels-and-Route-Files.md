@@ -77,18 +77,21 @@ service:
       - 80 # e.g. frontend
       - 8080 # e.g. backend
     labels:
+      # put container to sleep after 1 hour of inactivity
+      proxy.idle_timeout: 1h
+      # specify port for each route
       proxy.app.port: 80
       proxy.app-backend.port: 8080
-      # wildcard * means all services
-      # put container to sleep after 1 hour of inactivity
-      proxy.*.idle_timeout: 1h
-      # homepage config
+      # wildcard * means all routes under the same service
+      proxy.*.healthcheck.path: /ping
+      proxy.*.healthcheck.interval: 10s
+      # homepage config for `app` route
       proxy.app.homepage: |
         name: App
         icon: "@selfhst/app.svg"
         description: An app
         category: app
-      # hide backend from homepage
+      # hide backend from homepage for `app-backend` route
       proxy.app-backend.homepage.show: false
 ```
 
