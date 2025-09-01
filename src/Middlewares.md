@@ -103,23 +103,6 @@ Bypass middlewares with a list of rules. Matching any of them will bypass the mi
 
 See [Rules syntax](Rule-Based-Routing#syntax)
 
-```yaml
-entrypoint:
-  middlewares:
-    - use: oidc
-      bypass:
-        - route immich # bypass for immich route
-        - route public_service & path / # bypass for route "public_service" and root path "/"
-        - remote 127.0.0.1 # bypass for localhost
-        - remote 192.168.0.0/16 # bypass for 192.168.0.0/16 ip range
-        - remote 10.0.0.0/8 # bypass for 10.0.0.0/8 ip range
-        - remote 172.16.0.0/12 # bypass for 172.16.0.0/12 ip range
-        - method HEAD # bypass for HEAD method
-        - header Authorization "Bearer 1234567890" # bypass for auth header with specific token
-        - query access_code "1234567890" # bypass for access_code query with specific value
-        - cookie session "1234567890" # bypass for session cookie with specific value
-```
-
 ## Examples
 
 ### Syntax Examples
