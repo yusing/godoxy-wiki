@@ -120,6 +120,10 @@ export default defineConfig({
                 link: "/Middlewares.md#hcaptcha",
               },
               {
+                text: "Forward Auth",
+                link: "/Middlewares.md#forward-auth",
+              },
+              {
                 text: "Redirect to HTTPS",
                 link: "/Middlewares.md#redirect-http",
               },

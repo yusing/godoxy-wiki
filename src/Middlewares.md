@@ -210,6 +210,42 @@ Protects against bots by solving a [hCaptcha](https://hcaptcha.com/) challenge.
 ![captcha page light](images/captcha-page-light.png)
 ![captcha page dark](images/captcha-page-dark.png)
 
+### Forward auth
+
+Name: `forward_auth`
+
+Authenticate requests by delegating to an external auth service. The middleware sends the request metadata to the configured auth endpoint and, based on its response, either forwards the request upstream (optionally enriching headers) or returns the auth response to the client (including redirects).
+
+| Option           | Description                                                                                   | Default                                           | Required |
+| ---------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------- | -------- |
+| `route`          | Forward-auth route name (alias) that points to the auth server                                 | `tinyauth`                                        | Yes      |
+| `auth_endpoint`  | Auth server endpoint path                                                                      | `/api/auth/traefik`                               | Yes      |
+| `headers`        | Additional response headers to forward from auth server to upstream (request headers to set)   | `["Remote-User", "Remote-Name", "Remote-Email", "Remote-Groups"]` | No       |
+
+#### Forward Auth Behaviors
+
+- Sends a GET request to the auth service at route's origin URL + `auth_endpoint` with request headers cloned
+- Populates and/or replaces `X-Forwarded-For`, `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Uri`
+- If auth response is non-2xx/3xx: propagates headers (except hop-by-hop), status, body, and `Location` (if present) back to client
+- If auth response is 2xx: copies configured `headers` from auth response into the original request headers before proxying upstream
+
+#### Forward Auth Examples
+
+```yaml
+# docker labels
+proxy.myapp.middlewares.forward_auth.route: tinyauth
+proxy.myapp.middlewares.forward_auth.auth_endpoint: /api/auth/traefik
+proxy.myapp.middlewares.forward_auth.headers: Remote-User, Remote-Name, Remote-Email, Remote-Groups
+
+# route file
+myapp:
+  middlewares:
+    forward_auth:
+      route: tinyauth
+      auth_endpoint: /api/auth/traefik
+      headers: Remote-User, Remote-Name, Remote-Email, Remote-Groups
+```
+
 ### Redirect http
 
 Name: `redirect_http`
