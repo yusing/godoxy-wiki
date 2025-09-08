@@ -186,6 +186,9 @@ OIDC uses the settings from `.env` file, with configurable overrides.
 | ---------------- | ----------------------- | ---------------------------- | -------- |
 | `allowed_users`  | Override allowed users  | `GODOXY_OIDC_ALLOWED_USERS`  | No       |
 | `allowed_groups` | Override allowed groups | `GODOXY_OIDC_ALLOWED_GROUPS` | No       |
+| `client_id`      | Override client id      | `GODOXY_OIDC_CLIENT_ID`      | No       |
+| `client_secret`  | Override client secret  | `GODOXY_OIDC_CLIENT_SECRET`  | No       |
+| `scope`          | Override scope          | `GODOXY_OIDC_SCOPE`          | No       |
 
 ### hCaptcha
 
