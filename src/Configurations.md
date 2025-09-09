@@ -29,6 +29,17 @@ The `config.yml` file is divided into several sections:
 - **match_domains**: List of domains to match
 - **homepage**: Configures homepage settings
 
+### Environment Variables substitution
+
+Environment variables can be substituted in the config file (`config.yml`) using the `${VAR_NAME}` syntax.
+
+```yaml
+autocert:
+  ...
+  options:
+    auth_token: ${AUTH_TOKEN}
+```
+
 ### Auto SSL and Domain matching
 
 Specify which domains your application should respond to.
@@ -76,7 +87,7 @@ providers:
     - file2.yml
 
   docker:
-    local: $DOCKER_HOST
+    local: ${DOCKER_HOST}
     remote-1: tcp://10.0.2.1:2375
     remote-2: ssh://root:1234@10.0.2.2
 
@@ -176,6 +187,6 @@ Add this to your `config.yml` under `providers.docker`:
 ```yaml
 providers:
   docker:
-    local: $DOCKER_HOST
+    local: ${DOCKER_HOST}
     server-1: tcp://<ip>:2375 # add it here
 ```
