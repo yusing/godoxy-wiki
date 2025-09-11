@@ -108,80 +108,108 @@ export default defineConfig({
             collapsed: true,
             items: [
               {
-                text: "Middleware Compose",
-                link: "/Middlewares.md#middleware-compose",
+                text: "Quick Start",
+                link: "/Middlewares.md#quick-start",
               },
               {
-                text: "OpenID Connect",
-                link: "/Middlewares.md#oidc",
+                text: "Configuration Syntax",
+                link: "/Middlewares.md#configuration-syntax",
               },
               {
-                text: "hCaptcha",
-                link: "/Middlewares.md#hcaptcha",
+                text: "Common Examples",
+                link: "/Middlewares.md#common-examples",
               },
               {
-                text: "Forward Auth",
-                link: "/Middlewares.md#forward-auth",
-              },
-              {
-                text: "Redirect to HTTPS",
-                link: "/Middlewares.md#redirect-http",
-              },
-              {
-                text: "Custom Error Pages",
-                link: "/Middlewares.md#custom-error-pages",
-              },
-              {
-                text: "Real IP",
-                link: "/Middlewares.md#real-ip",
-              },
-              {
-                text: "Cloudflare Real IP",
-                link: "/Middlewares.md#cloudflare-real-ip",
-              },
-              {
-                text: "CIDR Whitelist",
-                link: "/Middlewares.md#cidr-whitelist",
-              },
-              {
-                text: "Rate Limiter",
-                link: "/Middlewares.md#rate-limiter",
-              },
-              {
-                text: "Modify Request or Response",
-                link: "/Middlewares.md#modify-request-or-response",
+                text: "Authentication & Security",
+                link: "/Middlewares.md#authentication-and-security",
                 items: [
                   {
-                    text: "Set Headers",
-                    link: "/Middlewares.md#set-headers",
+                    text: "OIDC (OpenID Connect)",
+                    link: "/Middlewares.md#oidc-openid-connect",
                   },
                   {
-                    text: "Add Headers",
-                    link: "/Middlewares.md#add-headers",
+                    text: "hCaptcha",
+                    link: "/Middlewares.md#hcaptcha",
                   },
                   {
-                    text: "Hide Headers",
-                    link: "/Middlewares.md#hide-headers",
+                    text: "Forward Auth",
+                    link: "/Middlewares.md#forward-auth",
                   },
                 ],
               },
               {
-                text: "X-Forwarded Headers",
-                link: "/Middlewares.md#x-forwarded-headers",
+                text: "Traffic Control",
+                link: "/Middlewares.md#traffic-control",
                 items: [
                   {
-                    text: "Hide X-Forwarded Headers",
-                    link: "/Middlewares.md#hide-x-forwarded-headers",
+                    text: "Redirect HTTP",
+                    link: "/Middlewares.md#redirect-http",
                   },
                   {
-                    text: "Set X-Forwarded Headers",
-                    link: "/Middlewares.md#set-x-forwarded-headers",
+                    text: "Custom Error Pages",
+                    link: "/Middlewares.md#custom-error-pages",
                   },
                 ],
               },
               {
-                text: "Modify HTML",
-                link: "/Middlewares.md#modify-html",
+                text: "IP Resolution",
+                link: "/Middlewares.md#ip-resolution",
+                items: [
+                  {
+                    text: "Real IP",
+                    link: "/Middlewares.md#real-ip",
+                  },
+                  {
+                    text: "Cloudflare Real IP",
+                    link: "/Middlewares.md#cloudflare-real-ip",
+                  },
+                ],
+              },
+              {
+                text: "Access Control",
+                link: "/Middlewares.md#access-control",
+                items: [
+                  {
+                    text: "CIDR Whitelist",
+                    link: "/Middlewares.md#cidr-whitelist",
+                  },
+                  {
+                    text: "Rate Limiter",
+                    link: "/Middlewares.md#rate-limiter",
+                  },
+                ],
+              },
+              {
+                text: "Request & Response Modification",
+                link: "/Middlewares.md#request-and-response-modification",
+                items: [
+                  {
+                    text: "Modify Request/Response",
+                    link: "/Middlewares.md#modify-request-or-response",
+                  },
+                  {
+                    text: "Header Modification Examples",
+                    link: "/Middlewares.md#header-modification-examples",
+                  },
+                  {
+                    text: "X-Forwarded Headers",
+                    link: "/Middlewares.md#x-forwarded-headers",
+                  },
+                ],
+              },
+              {
+                text: "Content Modification",
+                link: "/Middlewares.md#content-modification",
+                items: [
+                  {
+                    text: "Modify HTML",
+                    link: "/Middlewares.md#modify-html",
+                  },
+                  {
+                    text: "Themed",
+                    link: "/Middlewares.md#themed",
+                  },
+                ],
               },
             ],
           },
