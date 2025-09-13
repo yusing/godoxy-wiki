@@ -58,8 +58,8 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 
 | Method  | URI     | Name   | Summary |
 |---------|---------|--------|---------|
-| GET | /api/v1/auth/callback | [get auth callback](#get-auth-callback) | Auth Callback |
 | HEAD | /api/v1/auth/check | [head auth check](#head-auth-check) | Check authentication status |
+| POST | /api/v1/auth/callback | [post auth callback](#post-auth-callback) | Auth Callback |
 | POST | /api/v1/auth/login | [post auth login](#post-auth-login) | Login |
 | POST | /api/v1/auth/logout | [post auth logout](#post-auth-logout) | Logout |
   
@@ -78,9 +78,13 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 
 | Method  | URI     | Name   | Summary |
 |---------|---------|--------|---------|
+| GET | /api/v1/docker/container/{id} | [get docker container ID](#get-docker-container-id) | Get container |
 | GET | /api/v1/docker/containers | [get docker containers](#get-docker-containers) | Get containers |
 | GET | /api/v1/docker/info | [get docker info](#get-docker-info) | Get docker info |
-| GET | /api/v1/docker/logs/{server}/{container} | [get docker logs server container](#get-docker-logs-server-container) | Get docker container logs |
+| GET | /api/v1/docker/logs/{id} | [get docker logs ID](#get-docker-logs-id) | Get docker container logs |
+| POST | /api/v1/docker/restart | [post docker restart](#post-docker-restart) | Restart container |
+| POST | /api/v1/docker/start | [post docker start](#post-docker-start) | Start container |
+| POST | /api/v1/docker/stop | [post docker stop](#post-docker-stop) | Stop container |
   
 
 
@@ -101,8 +105,13 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 |---------|---------|--------|---------|
 | GET | /api/v1/homepage/categories | [get homepage categories](#get-homepage-categories) | List homepage categories |
 | GET | /api/v1/homepage/items | [get homepage items](#get-homepage-items) | Homepage items |
+| POST | /api/v1/homepage/item_click | [post homepage item click](#post-homepage-item-click) | Increment item click |
 | POST | /api/v1/homepage/set/category_order | [post homepage set category order](#post-homepage-set-category-order) | Set homepage category order |
 | POST | /api/v1/homepage/set/item | [post homepage set item](#post-homepage-set-item) | Override single homepage item |
+| POST | /api/v1/homepage/set/item_all_sort_order | [post homepage set item all sort order](#post-homepage-set-item-all-sort-order) | Set homepage item all sort order |
+| POST | /api/v1/homepage/set/item_fav_sort_order | [post homepage set item fav sort order](#post-homepage-set-item-fav-sort-order) | Set homepage item fav sort order |
+| POST | /api/v1/homepage/set/item_favorite | [post homepage set item favorite](#post-homepage-set-item-favorite) | Set homepage item favorite |
+| POST | /api/v1/homepage/set/item_sort_order | [post homepage set item sort order](#post-homepage-set-item-sort-order) | Set homepage item sort order |
 | POST | /api/v1/homepage/set/item_visible | [post homepage set item visible](#post-homepage-set-item-visible) | Set homepage item visibility |
 | POST | /api/v1/homepage/set/items_batch | [post homepage set items batch](#post-homepage-set-items-batch) | Override multiple homepage items |
   
@@ -112,6 +121,7 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 
 | Method  | URI     | Name   | Summary |
 |---------|---------|--------|---------|
+| GET | /api/v1/metrics/all_system_info | [get metrics all system info](#get-metrics-all-system-info) | Get system info |
 | GET | /api/v1/metrics/system_info | [get metrics system info](#get-metrics-system-info) | Get system info |
 | GET | /api/v1/metrics/uptime | [get metrics uptime](#get-metrics-uptime) | Get uptime |
   
@@ -193,70 +203,6 @@ Status: Internal Server Error
   
 
 [ErrorResponse](#error-response)
-
-### <span id="get-auth-callback"></span> Auth Callback (*GetAuthCallback*)
-
-```
-GET /api/v1/auth/callback
-```
-
-Handles the callback from the provider after successful authentication
-
-#### Produces
-  * text/plain
-
-#### Parameters
-
-| Name | Source | Type | Go type | Separator | Required | Default | Description |
-|------|--------|------|---------|-----------| :------: |---------|-------------|
-| body | `body` | [AuthUserPassAuthCallbackRequest](#auth-user-pass-auth-callback-request) | `models.AuthUserPassAuthCallbackRequest` | | ✓ | | Userpass only |
-
-#### All responses
-| Code | Status | Description | Has headers | Schema |
-|------|--------|-------------|:-----------:|--------|
-| [200](#get-auth-callback-200) | OK | Userpass: OK |  | [schema](#get-auth-callback-200-schema) |
-| [302](#get-auth-callback-302) | Found | OIDC: Redirects to home page |  | [schema](#get-auth-callback-302-schema) |
-| [400](#get-auth-callback-400) | Bad Request | Userpass: invalid request / credentials |  | [schema](#get-auth-callback-400-schema) |
-| [500](#get-auth-callback-500) | Internal Server Error | Internal server error |  | [schema](#get-auth-callback-500-schema) |
-
-#### Responses
-
-
-##### <span id="get-auth-callback-200"></span> 200 - Userpass: OK
-Status: OK
-
-###### <span id="get-auth-callback-200-schema"></span> Schema
-   
-  
-
-
-
-##### <span id="get-auth-callback-302"></span> 302 - OIDC: Redirects to home page
-Status: Found
-
-###### <span id="get-auth-callback-302-schema"></span> Schema
-   
-  
-
-
-
-##### <span id="get-auth-callback-400"></span> 400 - Userpass: invalid request / credentials
-Status: Bad Request
-
-###### <span id="get-auth-callback-400-schema"></span> Schema
-   
-  
-
-
-
-##### <span id="get-auth-callback-500"></span> 500 - Internal server error
-Status: Internal Server Error
-
-###### <span id="get-auth-callback-500-schema"></span> Schema
-   
-  
-
-
 
 ### <span id="get-cert-info"></span> Get cert info (*GetCertInfo*)
 
@@ -364,6 +310,80 @@ Status: Internal Server Error
 
 [ErrorResponse](#error-response)
 
+### <span id="get-docker-container-id"></span> Get container (*GetDockerContainerID*)
+
+```
+GET /api/v1/docker/container/{id}
+```
+
+Get container by container id
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| id | `path` | string | `string` |  | ✓ |  | Container ID |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-docker-container-id-200) | OK | OK |  | [schema](#get-docker-container-id-200-schema) |
+| [400](#get-docker-container-id-400) | Bad Request | ID is required |  | [schema](#get-docker-container-id-400-schema) |
+| [403](#get-docker-container-id-403) | Forbidden | Forbidden |  | [schema](#get-docker-container-id-403-schema) |
+| [404](#get-docker-container-id-404) | Not Found | Container not found |  | [schema](#get-docker-container-id-404-schema) |
+| [500](#get-docker-container-id-500) | Internal Server Error | Internal Server Error |  | [schema](#get-docker-container-id-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-docker-container-id-200"></span> 200 - OK
+Status: OK
+
+###### <span id="get-docker-container-id-200-schema"></span> Schema
+   
+  
+
+[ContainerResponse](#container-response)
+
+##### <span id="get-docker-container-id-400"></span> 400 - ID is required
+Status: Bad Request
+
+###### <span id="get-docker-container-id-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-docker-container-id-403"></span> 403 - Forbidden
+Status: Forbidden
+
+###### <span id="get-docker-container-id-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-docker-container-id-404"></span> 404 - Container not found
+Status: Not Found
+
+###### <span id="get-docker-container-id-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-docker-container-id-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="get-docker-container-id-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
 ### <span id="get-docker-containers"></span> Get containers (*GetDockerContainers*)
 
 ```
@@ -460,13 +480,13 @@ Status: Internal Server Error
 
 [ErrorResponse](#error-response)
 
-### <span id="get-docker-logs-server-container"></span> Get docker container logs (*GetDockerLogsServerContainer*)
+### <span id="get-docker-logs-id"></span> Get docker container logs (*GetDockerLogsID*)
 
 ```
-GET /api/v1/docker/logs/{server}/{container}
+GET /api/v1/docker/logs/{id}
 ```
 
-Get docker container logs
+Get docker container logs by container id
 
 #### Consumes
   * application/json
@@ -478,8 +498,7 @@ Get docker container logs
 
 | Name | Source | Type | Go type | Separator | Required | Default | Description |
 |------|--------|------|---------|-----------| :------: |---------|-------------|
-| container | `path` | string | `string` |  | ✓ |  | container id |
-| server | `path` | string | `string` |  | ✓ |  | server name |
+| id | `path` | string | `string` |  | ✓ |  | container id |
 | from | `query` | string | `string` |  |  |  | from timestamp |
 | levels | `query` | string | `string` |  |  |  | levels |
 | stderr | `query` | boolean | `bool` |  |  |  | show stderr |
@@ -489,51 +508,51 @@ Get docker container logs
 #### All responses
 | Code | Status | Description | Has headers | Schema |
 |------|--------|-------------|:-----------:|--------|
-| [200](#get-docker-logs-server-container-200) | OK | OK |  | [schema](#get-docker-logs-server-container-200-schema) |
-| [400](#get-docker-logs-server-container-400) | Bad Request | Bad Request |  | [schema](#get-docker-logs-server-container-400-schema) |
-| [403](#get-docker-logs-server-container-403) | Forbidden | Forbidden |  | [schema](#get-docker-logs-server-container-403-schema) |
-| [404](#get-docker-logs-server-container-404) | Not Found | Not Found |  | [schema](#get-docker-logs-server-container-404-schema) |
-| [500](#get-docker-logs-server-container-500) | Internal Server Error | Internal Server Error |  | [schema](#get-docker-logs-server-container-500-schema) |
+| [200](#get-docker-logs-id-200) | OK | OK |  | [schema](#get-docker-logs-id-200-schema) |
+| [400](#get-docker-logs-id-400) | Bad Request | Bad Request |  | [schema](#get-docker-logs-id-400-schema) |
+| [403](#get-docker-logs-id-403) | Forbidden | Forbidden |  | [schema](#get-docker-logs-id-403-schema) |
+| [404](#get-docker-logs-id-404) | Not Found | server not found or container not found |  | [schema](#get-docker-logs-id-404-schema) |
+| [500](#get-docker-logs-id-500) | Internal Server Error | Internal Server Error |  | [schema](#get-docker-logs-id-500-schema) |
 
 #### Responses
 
 
-##### <span id="get-docker-logs-server-container-200"></span> 200 - OK
+##### <span id="get-docker-logs-id-200"></span> 200 - OK
 Status: OK
 
-###### <span id="get-docker-logs-server-container-200-schema"></span> Schema
+###### <span id="get-docker-logs-id-200-schema"></span> Schema
 
-##### <span id="get-docker-logs-server-container-400"></span> 400 - Bad Request
+##### <span id="get-docker-logs-id-400"></span> 400 - Bad Request
 Status: Bad Request
 
-###### <span id="get-docker-logs-server-container-400-schema"></span> Schema
+###### <span id="get-docker-logs-id-400-schema"></span> Schema
    
   
 
 [ErrorResponse](#error-response)
 
-##### <span id="get-docker-logs-server-container-403"></span> 403 - Forbidden
+##### <span id="get-docker-logs-id-403"></span> 403 - Forbidden
 Status: Forbidden
 
-###### <span id="get-docker-logs-server-container-403-schema"></span> Schema
+###### <span id="get-docker-logs-id-403-schema"></span> Schema
    
   
 
 [ErrorResponse](#error-response)
 
-##### <span id="get-docker-logs-server-container-404"></span> 404 - Not Found
+##### <span id="get-docker-logs-id-404"></span> 404 - server not found or container not found
 Status: Not Found
 
-###### <span id="get-docker-logs-server-container-404-schema"></span> Schema
+###### <span id="get-docker-logs-id-404-schema"></span> Schema
    
   
 
 [ErrorResponse](#error-response)
 
-##### <span id="get-docker-logs-server-container-500"></span> 500 - Internal Server Error
+##### <span id="get-docker-logs-id-500"></span> 500 - Internal Server Error
 Status: Internal Server Error
 
-###### <span id="get-docker-logs-server-container-500-schema"></span> Schema
+###### <span id="get-docker-logs-id-500-schema"></span> Schema
    
   
 
@@ -852,6 +871,8 @@ Homepage items
 |------|--------|------|---------|-----------| :------: |---------|-------------|
 | category | `query` | string | `string` |  |  |  | Category filter |
 | provider | `query` | string | `string` |  |  |  | Provider filter |
+| search | `query` | string | `string` |  |  |  | Search query |
+| sort_method | `query` | string | `string` |  |  | `"alphabetical"` | Sort method |
 
 #### All responses
 | Code | Status | Description | Has headers | Schema |
@@ -870,7 +891,7 @@ Status: OK
    
   
 
-[HomepageItems](#homepage-items)
+[][HomepageCategory](#homepage-category)
 
 ##### <span id="get-homepage-items-400"></span> 400 - Bad Request
 Status: Bad Request
@@ -948,6 +969,72 @@ Status: Forbidden
 
 [ErrorResponse](#error-response)
 
+### <span id="get-metrics-all-system-info"></span> Get system info (*GetMetricsAllSystemInfo*)
+
+```
+GET /api/v1/metrics/all_system_info
+```
+
+Get system info
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| aggregate | `query` | string | `string` |  |  |  |  |
+| interval | `query` | duration (formatted string) | `strfmt.Duration` |  |  |  |  |
+| period | `query` | string | `string` |  |  |  |  |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-metrics-all-system-info-200) | OK | period specified, aggregated system info by agent name |  | [schema](#get-metrics-all-system-info-200-schema) |
+| [400](#get-metrics-all-system-info-400) | Bad Request | Bad Request |  | [schema](#get-metrics-all-system-info-400-schema) |
+| [403](#get-metrics-all-system-info-403) | Forbidden | Forbidden |  | [schema](#get-metrics-all-system-info-403-schema) |
+| [500](#get-metrics-all-system-info-500) | Internal Server Error | Internal Server Error |  | [schema](#get-metrics-all-system-info-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-metrics-all-system-info-200"></span> 200 - period specified, aggregated system info by agent name
+Status: OK
+
+###### <span id="get-metrics-all-system-info-200-schema"></span> Schema
+   
+  
+
+map of [SystemInfoAggregate](#system-info-aggregate)
+
+##### <span id="get-metrics-all-system-info-400"></span> 400 - Bad Request
+Status: Bad Request
+
+###### <span id="get-metrics-all-system-info-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-metrics-all-system-info-403"></span> 403 - Forbidden
+Status: Forbidden
+
+###### <span id="get-metrics-all-system-info-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-metrics-all-system-info-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="get-metrics-all-system-info-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
 ### <span id="get-metrics-system-info"></span> Get system info (*GetMetricsSystemInfo*)
 
 ```
@@ -964,6 +1051,7 @@ Get system info
 | Name | Source | Type | Go type | Separator | Required | Default | Description |
 |------|--------|------|---------|-----------| :------: |---------|-------------|
 | agentAddr | `query` | string | `string` |  |  |  |  |
+| agentName | `query` | string | `string` |  |  |  |  |
 | aggregate | `query` | string | `string` |  |  |  |  |
 | period | `query` | string | `string` |  |  |  |  |
 
@@ -1582,6 +1670,70 @@ Status: Internal Server Error
 
 [ErrorResponse](#error-response)
 
+### <span id="post-auth-callback"></span> Auth Callback (*PostAuthCallback*)
+
+```
+POST /api/v1/auth/callback
+```
+
+Handles the callback from the provider after successful authentication
+
+#### Produces
+  * text/plain
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| body | `body` | [AuthUserPassAuthCallbackRequest](#auth-user-pass-auth-callback-request) | `models.AuthUserPassAuthCallbackRequest` | | ✓ | | Userpass only |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-auth-callback-200) | OK | Userpass: OK |  | [schema](#post-auth-callback-200-schema) |
+| [302](#post-auth-callback-302) | Found | OIDC: Redirects to home page |  | [schema](#post-auth-callback-302-schema) |
+| [400](#post-auth-callback-400) | Bad Request | Userpass: invalid request / credentials |  | [schema](#post-auth-callback-400-schema) |
+| [500](#post-auth-callback-500) | Internal Server Error | Internal server error |  | [schema](#post-auth-callback-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-auth-callback-200"></span> 200 - Userpass: OK
+Status: OK
+
+###### <span id="post-auth-callback-200-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="post-auth-callback-302"></span> 302 - OIDC: Redirects to home page
+Status: Found
+
+###### <span id="post-auth-callback-302-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="post-auth-callback-400"></span> 400 - Userpass: invalid request / credentials
+Status: Bad Request
+
+###### <span id="post-auth-callback-400-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="post-auth-callback-500"></span> 500 - Internal server error
+Status: Internal Server Error
+
+###### <span id="post-auth-callback-500-schema"></span> Schema
+   
+  
+
+
+
 ### <span id="post-auth-login"></span> Login (*PostAuthLogin*)
 
 ```
@@ -1658,6 +1810,228 @@ Status: Found
 
 
 
+### <span id="post-docker-restart"></span> Restart container (*PostDockerRestart*)
+
+```
+POST /api/v1/docker/restart
+```
+
+Restart container by container id
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| request | `body` | [DockerapiStopRequest](#dockerapi-stop-request) | `models.DockerapiStopRequest` | | ✓ | | Request |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-docker-restart-200) | OK | OK |  | [schema](#post-docker-restart-200-schema) |
+| [400](#post-docker-restart-400) | Bad Request | Invalid request |  | [schema](#post-docker-restart-400-schema) |
+| [403](#post-docker-restart-403) | Forbidden | Forbidden |  | [schema](#post-docker-restart-403-schema) |
+| [404](#post-docker-restart-404) | Not Found | Container not found |  | [schema](#post-docker-restart-404-schema) |
+| [500](#post-docker-restart-500) | Internal Server Error | Internal Server Error |  | [schema](#post-docker-restart-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-docker-restart-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-docker-restart-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-docker-restart-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="post-docker-restart-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-docker-restart-403"></span> 403 - Forbidden
+Status: Forbidden
+
+###### <span id="post-docker-restart-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-docker-restart-404"></span> 404 - Container not found
+Status: Not Found
+
+###### <span id="post-docker-restart-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-docker-restart-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-docker-restart-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-docker-start"></span> Start container (*PostDockerStart*)
+
+```
+POST /api/v1/docker/start
+```
+
+Start container by container id
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| request | `body` | [DockerapiStartRequest](#dockerapi-start-request) | `models.DockerapiStartRequest` | | ✓ | | Request |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-docker-start-200) | OK | OK |  | [schema](#post-docker-start-200-schema) |
+| [400](#post-docker-start-400) | Bad Request | Invalid request |  | [schema](#post-docker-start-400-schema) |
+| [403](#post-docker-start-403) | Forbidden | Forbidden |  | [schema](#post-docker-start-403-schema) |
+| [404](#post-docker-start-404) | Not Found | Container not found |  | [schema](#post-docker-start-404-schema) |
+| [500](#post-docker-start-500) | Internal Server Error | Internal Server Error |  | [schema](#post-docker-start-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-docker-start-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-docker-start-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-docker-start-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="post-docker-start-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-docker-start-403"></span> 403 - Forbidden
+Status: Forbidden
+
+###### <span id="post-docker-start-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-docker-start-404"></span> 404 - Container not found
+Status: Not Found
+
+###### <span id="post-docker-start-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-docker-start-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-docker-start-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-docker-stop"></span> Stop container (*PostDockerStop*)
+
+```
+POST /api/v1/docker/stop
+```
+
+Stop container by container id
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| request | `body` | [DockerapiStopRequest](#dockerapi-stop-request) | `models.DockerapiStopRequest` | | ✓ | | Request |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-docker-stop-200) | OK | OK |  | [schema](#post-docker-stop-200-schema) |
+| [400](#post-docker-stop-400) | Bad Request | Invalid request |  | [schema](#post-docker-stop-400-schema) |
+| [403](#post-docker-stop-403) | Forbidden | Forbidden |  | [schema](#post-docker-stop-403-schema) |
+| [404](#post-docker-stop-404) | Not Found | Container not found |  | [schema](#post-docker-stop-404-schema) |
+| [500](#post-docker-stop-500) | Internal Server Error | Internal Server Error |  | [schema](#post-docker-stop-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-docker-stop-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-docker-stop-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-docker-stop-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="post-docker-stop-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-docker-stop-403"></span> 403 - Forbidden
+Status: Forbidden
+
+###### <span id="post-docker-stop-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-docker-stop-404"></span> 404 - Container not found
+Status: Not Found
+
+###### <span id="post-docker-stop-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-docker-stop-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-docker-stop-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
 ### <span id="post-file-validate"></span> Validate file (*PostFileValidate*)
 
 ```
@@ -1731,6 +2105,63 @@ any
 Status: Internal Server Error
 
 ###### <span id="post-file-validate-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-homepage-item-click"></span> Increment item click (*PostHomepageItemClick*)
+
+```
+POST /api/v1/homepage/item_click
+```
+
+Increment item click.
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| which | `query` | string | `string` |  | ✓ |  |  |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-homepage-item-click-200) | OK | OK |  | [schema](#post-homepage-item-click-200-schema) |
+| [400](#post-homepage-item-click-400) | Bad Request | Bad Request |  | [schema](#post-homepage-item-click-400-schema) |
+| [500](#post-homepage-item-click-500) | Internal Server Error | Internal Server Error |  | [schema](#post-homepage-item-click-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-homepage-item-click-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-homepage-item-click-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-homepage-item-click-400"></span> 400 - Bad Request
+Status: Bad Request
+
+###### <span id="post-homepage-item-click-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-homepage-item-click-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-homepage-item-click-500-schema"></span> Schema
    
   
 
@@ -1845,6 +2276,234 @@ Status: Bad Request
 Status: Internal Server Error
 
 ###### <span id="post-homepage-set-item-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-homepage-set-item-all-sort-order"></span> Set homepage item all sort order (*PostHomepageSetItemAllSortOrder*)
+
+```
+POST /api/v1/homepage/set/item_all_sort_order
+```
+
+Set homepage item all sort order.
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| request | `body` | [HomepageOverrideItemAllSortOrderParams](#homepage-override-item-all-sort-order-params) | `models.HomepageOverrideItemAllSortOrderParams` | | ✓ | | Set item all sort order |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-homepage-set-item-all-sort-order-200) | OK | OK |  | [schema](#post-homepage-set-item-all-sort-order-200-schema) |
+| [400](#post-homepage-set-item-all-sort-order-400) | Bad Request | Bad Request |  | [schema](#post-homepage-set-item-all-sort-order-400-schema) |
+| [500](#post-homepage-set-item-all-sort-order-500) | Internal Server Error | Internal Server Error |  | [schema](#post-homepage-set-item-all-sort-order-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-homepage-set-item-all-sort-order-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-homepage-set-item-all-sort-order-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-homepage-set-item-all-sort-order-400"></span> 400 - Bad Request
+Status: Bad Request
+
+###### <span id="post-homepage-set-item-all-sort-order-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-homepage-set-item-all-sort-order-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-homepage-set-item-all-sort-order-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-homepage-set-item-fav-sort-order"></span> Set homepage item fav sort order (*PostHomepageSetItemFavSortOrder*)
+
+```
+POST /api/v1/homepage/set/item_fav_sort_order
+```
+
+Set homepage item fav sort order.
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| request | `body` | [HomepageOverrideItemFavSortOrderParams](#homepage-override-item-fav-sort-order-params) | `models.HomepageOverrideItemFavSortOrderParams` | | ✓ | | Set item fav sort order |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-homepage-set-item-fav-sort-order-200) | OK | OK |  | [schema](#post-homepage-set-item-fav-sort-order-200-schema) |
+| [400](#post-homepage-set-item-fav-sort-order-400) | Bad Request | Bad Request |  | [schema](#post-homepage-set-item-fav-sort-order-400-schema) |
+| [500](#post-homepage-set-item-fav-sort-order-500) | Internal Server Error | Internal Server Error |  | [schema](#post-homepage-set-item-fav-sort-order-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-homepage-set-item-fav-sort-order-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-homepage-set-item-fav-sort-order-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-homepage-set-item-fav-sort-order-400"></span> 400 - Bad Request
+Status: Bad Request
+
+###### <span id="post-homepage-set-item-fav-sort-order-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-homepage-set-item-fav-sort-order-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-homepage-set-item-fav-sort-order-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-homepage-set-item-favorite"></span> Set homepage item favorite (*PostHomepageSetItemFavorite*)
+
+```
+POST /api/v1/homepage/set/item_favorite
+```
+
+Set homepage item favorite.
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| request | `body` | [HomepageOverrideItemFavoriteParams](#homepage-override-item-favorite-params) | `models.HomepageOverrideItemFavoriteParams` | | ✓ | | Set item favorite |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-homepage-set-item-favorite-200) | OK | OK |  | [schema](#post-homepage-set-item-favorite-200-schema) |
+| [400](#post-homepage-set-item-favorite-400) | Bad Request | Bad Request |  | [schema](#post-homepage-set-item-favorite-400-schema) |
+| [500](#post-homepage-set-item-favorite-500) | Internal Server Error | Internal Server Error |  | [schema](#post-homepage-set-item-favorite-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-homepage-set-item-favorite-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-homepage-set-item-favorite-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-homepage-set-item-favorite-400"></span> 400 - Bad Request
+Status: Bad Request
+
+###### <span id="post-homepage-set-item-favorite-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-homepage-set-item-favorite-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-homepage-set-item-favorite-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-homepage-set-item-sort-order"></span> Set homepage item sort order (*PostHomepageSetItemSortOrder*)
+
+```
+POST /api/v1/homepage/set/item_sort_order
+```
+
+Set homepage item sort order.
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| request | `body` | [HomepageOverrideItemSortOrderParams](#homepage-override-item-sort-order-params) | `models.HomepageOverrideItemSortOrderParams` | | ✓ | | Set item sort order |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-homepage-set-item-sort-order-200) | OK | OK |  | [schema](#post-homepage-set-item-sort-order-200-schema) |
+| [400](#post-homepage-set-item-sort-order-400) | Bad Request | Bad Request |  | [schema](#post-homepage-set-item-sort-order-400-schema) |
+| [500](#post-homepage-set-item-sort-order-500) | Internal Server Error | Internal Server Error |  | [schema](#post-homepage-set-item-sort-order-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-homepage-set-item-sort-order-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-homepage-set-item-sort-order-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-homepage-set-item-sort-order-400"></span> 400 - Bad Request
+Status: Bad Request
+
+###### <span id="post-homepage-set-item-sort-order-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-homepage-set-item-sort-order-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-homepage-set-item-sort-order-500-schema"></span> Schema
    
   
 
@@ -2098,8 +2757,8 @@ Status: Internal Server Error
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
 | addr | string| `string` |  | |  |  |
-| is_nerdctl | boolean| `bool` |  | |  |  |
 | name | string| `string` |  | |  |  |
+| runtime | [AgentContainerRuntime](#agent-container-runtime)| `AgentContainerRuntime` |  | |  |  |
 | version | string| `string` |  | |  |  |
 
 
@@ -2170,6 +2829,7 @@ Status: Internal Server Error
 | public_hostname | string| `string` |  | |  |  |
 | public_ports | [Container](#container)| `Container` |  | | non-zero publicPort:types.Port |  |
 | running | boolean| `bool` |  | |  |  |
+| state | [ContainerContainerState](#container-container-state)| `ContainerContainerState` |  | |  |  |
 
 
 
@@ -2207,7 +2867,7 @@ Status: Internal Server Error
 | image | string| `string` |  | |  |  |
 | name | string| `string` |  | |  |  |
 | server | string| `string` |  | |  |  |
-| state | [ContainerState](#container-state)| `ContainerState` |  | |  |  |
+| state | [ContainerResponse](#container-response)| `ContainerResponse` |  | |  |  |
 
 
 
@@ -2382,12 +3042,90 @@ Status: Internal Server Error
 
 [HealthMap](#health-map)
 
-### <span id="homepage-items"></span> HomepageItems
+### <span id="homepage-category"></span> HomepageCategory
 
 
   
 
-[HomepageItem](#homepage-item)
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| items | [][HomepageItem](#homepage-item)| `[]*HomepageItem` |  | |  |  |
+| name | string| `string` |  | |  |  |
+
+
+
+### <span id="homepage-item"></span> HomepageItem
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| alias | string| `string` |  | |  |  |
+| all_sort_order | integer| `int64` |  | | sort order in all |  |
+| category | string| `string` |  | |  |  |
+| clicks | integer| `int64` |  | |  |  |
+| container_id | string| `string` |  | |  |  |
+| description | string| `string` |  | |  |  |
+| fav_sort_order | integer| `int64` |  | | sort order in favorite |  |
+| favorite | boolean| `bool` |  | |  |  |
+| icon | string| `string` |  | |  |  |
+| name | string| `string` |  | | display name |  |
+| origin_url | string| `string` |  | |  |  |
+| provider | string| `string` |  | |  |  |
+| show | boolean| `bool` |  | |  |  |
+| sort_order | integer| `int64` |  | | sort order in category |  |
+| url | string| `string` |  | |  |  |
+| widget_config | [HomepageItem](#homepage-item)| `HomepageItem` |  | |  |  |
+| widgets | [][HomepageItemWidget](#homepage-item-widget)| `[]*HomepageItemWidget` |  | |  |  |
+
+
+
+### <span id="homepage-item-config"></span> HomepageItemConfig
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| category | string| `string` |  | |  |  |
+| description | string| `string` |  | |  |  |
+| favorite | boolean| `bool` |  | |  |  |
+| icon | string| `string` |  | |  |  |
+| name | string| `string` |  | | display name |  |
+| show | boolean| `bool` |  | |  |  |
+| url | string| `string` |  | |  |  |
+| widget_config | [HomepageItemConfig](#homepage-item-config)| `HomepageItemConfig` |  | |  |  |
+
+
+
+### <span id="homepage-item-widget"></span> HomepageItemWidget
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| label | string| `string` |  | |  |  |
+| value | string| `string` |  | |  |  |
+
+
 
 ### <span id="homepage-override-category-order-params"></span> HomepageOverrideCategoryOrderParams
 
@@ -2405,6 +3143,54 @@ Status: Internal Server Error
 
 
 
+### <span id="homepage-override-item-all-sort-order-params"></span> HomepageOverrideItemAllSortOrderParams
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| value | integer| `int64` |  | |  |  |
+| which | string| `string` |  | |  |  |
+
+
+
+### <span id="homepage-override-item-fav-sort-order-params"></span> HomepageOverrideItemFavSortOrderParams
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| value | integer| `int64` |  | |  |  |
+| which | string| `string` |  | |  |  |
+
+
+
+### <span id="homepage-override-item-favorite-params"></span> HomepageOverrideItemFavoriteParams
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| value | boolean| `bool` |  | |  |  |
+| which | []string| `[]string` |  | |  |  |
+
+
+
 ### <span id="homepage-override-item-params"></span> HomepageOverrideItemParams
 
 
@@ -2417,6 +3203,22 @@ Status: Internal Server Error
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
 | value | [HomepageItemConfig](#homepage-item-config)| `HomepageItemConfig` |  | |  |  |
+| which | string| `string` |  | |  |  |
+
+
+
+### <span id="homepage-override-item-sort-order-params"></span> HomepageOverrideItemSortOrderParams
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| value | integer| `int64` |  | |  |  |
 | which | string| `string` |  | |  |  |
 
 
@@ -2640,7 +3442,7 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
-| container_runtime | [NewAgentRequest](#new-agent-request)| `NewAgentRequest` |  | |  |  |
+| container_runtime | [NewAgentRequest](#new-agent-request)| `NewAgentRequest` |  | `"docker"`|  |  |
 | host | string| `string` | ✓ | |  |  |
 | name | string| `string` | ✓ | |  |  |
 | nightly | boolean| `bool` |  | |  |  |
@@ -2784,6 +3586,7 @@ Status: Internal Server Error
 | container | [Route](#route)| `Route` |  | | Docker only |  |
 | disable_compression | boolean| `bool` |  | |  |  |
 | excluded | boolean| `bool` |  | |  |  |
+| excluded_reason | string| `string` |  | |  |  |
 | health | [Route](#route)| `Route` |  | | for swagger |  |
 | healthcheck | [HealthCheckConfig](#health-check-config)| `HealthCheckConfig` |  | |  |  |
 | homepage | [HomepageItemConfig](#homepage-item-config)| `HomepageItemConfig` |  | |  |  |
@@ -2794,7 +3597,7 @@ Status: Internal Server Error
 | middlewares | map of [TypesLabelMap](#types-label-map)| `map[string]TypesLabelMap` |  | |  |  |
 | no_tls_verify | boolean| `bool` |  | |  |  |
 | path_patterns | []string| `[]string` |  | |  |  |
-| port | [RoutePort](#route-port)| `RoutePort` |  | |  |  |
+| port | [GithubComYusingGoProxyInternalRouteTypesPort](#github-com-yusing-go-proxy-internal-route-types-port)| `GithubComYusingGoProxyInternalRouteTypesPort` |  | |  |  |
 | provider | string| `string` |  | | for backward compatibility |  |
 | purl | string| `string` |  | |  |  |
 | response_header_timeout | integer| `int64` |  | |  |  |
@@ -2886,9 +3689,11 @@ Status: Internal Server Error
 |------|------|---------|:--------:| ------- |-------------|---------|
 | alias | string| `string` |  | |  |  |
 | avg_latency | number| `float64` |  | |  |  |
+| current_status | string| `string` |  | |  |  |
 | display_name | string| `string` |  | |  |  |
 | downtime | number| `float64` |  | |  |  |
 | idle | number| `float64` |  | |  |  |
+| is_docker | boolean| `bool` |  | |  |  |
 | statuses | [][RouteStatus](#route-status)| `[]*RouteStatus` |  | |  |  |
 | uptime | number| `float64` |  | |  |  |
 
@@ -2926,7 +3731,7 @@ Status: Internal Server Error
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
 | proxies | [ProxyStats](#proxy-stats)| `ProxyStats` |  | |  |  |
-| uptime | string| `string` |  | |  |  |
+| uptime | integer| `int64` |  | |  |  |
 
 
 
@@ -3134,6 +3939,17 @@ Status: Internal Server Error
 
 
 
+### <span id="container-container-state"></span> container.ContainerState
+
+
+  
+
+| Name | Type | Go type | Default | Description | Example |
+|------|------|---------| ------- |-------------|---------|
+| container.ContainerState | string| string | |  |  |
+
+
+
 ### <span id="container-port"></span> container.Port
 
 
@@ -3194,6 +4010,56 @@ Status: Internal Server Error
 
 
 
+### <span id="dockerapi-start-request"></span> dockerapi.StartRequest
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| checkpointDir | string| `string` |  | |  |  |
+| checkpointID | string| `string` |  | |  |  |
+| id | string| `string` | ✓ | |  |  |
+
+
+
+### <span id="dockerapi-stop-request"></span> dockerapi.StopRequest
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| id | string| `string` | ✓ | |  |  |
+| signal | string| `string` |  | | Signal (optional) is the signal to send to the container to (gracefully)</br>stop it before forcibly terminating the container with SIGKILL after the</br>timeout expires. If not value is set, the default (SIGTERM) is used. |  |
+| timeout | integer| `int64` |  | | Timeout (optional) is the timeout (in seconds) to wait for the container</br>to stop gracefully before forcibly terminating it with SIGKILL.</br></br>- Use nil to use the default timeout (10 seconds).</br>- Use '-1' to wait indefinitely.</br>- Use '0' to not wait for the container to exit gracefully, and</br>  immediately proceeds to forcibly terminating the container.</br>- Other positive values are used as timeout (in seconds). |  |
+
+
+
+### <span id="github-com-yusing-go-proxy-internal-route-types-port"></span> github_com_yusing_go-proxy_internal_route_types.Port
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| listening | integer| `int64` |  | |  |  |
+| proxy | integer| `int64` |  | |  |  |
+
+
+
 ### <span id="homepage-fetch-result"></span> homepage.FetchResult
 
 
@@ -3243,52 +4109,6 @@ Status: Internal Server Error
 
 
 
-### <span id="homepage-item"></span> homepage.Item
-
-
-  
-
-
-
-**Properties**
-
-| Name | Type | Go type | Required | Default | Description | Example |
-|------|------|---------|:--------:| ------- |-------------|---------|
-| alias | string| `string` |  | |  |  |
-| category | string| `string` |  | |  |  |
-| description | string| `string` |  | |  |  |
-| icon | string| `string` |  | |  |  |
-| name | string| `string` |  | | display name |  |
-| origin_url | string| `string` |  | |  |  |
-| provider | string| `string` |  | |  |  |
-| show | boolean| `bool` |  | |  |  |
-| sort_order | integer| `int64` |  | |  |  |
-| url | string| `string` |  | |  |  |
-| widget_config | [HomepageItem](#homepage-item)| `HomepageItem` |  | |  |  |
-
-
-
-### <span id="homepage-item-config"></span> homepage.ItemConfig
-
-
-  
-
-
-
-**Properties**
-
-| Name | Type | Go type | Required | Default | Description | Example |
-|------|------|---------|:--------:| ------- |-------------|---------|
-| category | string| `string` |  | |  |  |
-| description | string| `string` |  | |  |  |
-| icon | string| `string` |  | |  |  |
-| name | string| `string` |  | | display name |  |
-| show | boolean| `bool` |  | |  |  |
-| sort_order | integer| `int64` |  | |  |  |
-| url | string| `string` |  | |  |  |
-
-
-
 ### <span id="mem-virtual-memory-stat"></span> mem.VirtualMemoryStat
 
 
@@ -3326,22 +4146,6 @@ Status: Internal Server Error
 
 
 
-### <span id="route-port"></span> route.Port
-
-
-  
-
-
-
-**Properties**
-
-| Name | Type | Go type | Required | Default | Description | Example |
-|------|------|---------|:--------:| ------- |-------------|---------|
-| listening | integer| `int64` |  | |  |  |
-| proxy | integer| `int64` |  | |  |  |
-
-
-
 ### <span id="route-route"></span> route.Route
 
 
@@ -3359,6 +4163,7 @@ Status: Internal Server Error
 | container | [RouteRoute](#route-route)| `RouteRoute` |  | | Docker only |  |
 | disable_compression | boolean| `bool` |  | |  |  |
 | excluded | boolean| `bool` |  | |  |  |
+| excluded_reason | string| `string` |  | |  |  |
 | health | [RouteRoute](#route-route)| `RouteRoute` |  | | for swagger |  |
 | healthcheck | [HealthCheckConfig](#health-check-config)| `HealthCheckConfig` |  | |  |  |
 | homepage | [HomepageItemConfig](#homepage-item-config)| `HomepageItemConfig` |  | |  |  |
@@ -3369,7 +4174,7 @@ Status: Internal Server Error
 | middlewares | map of [TypesLabelMap](#types-label-map)| `map[string]TypesLabelMap` |  | |  |  |
 | no_tls_verify | boolean| `bool` |  | |  |  |
 | path_patterns | []string| `[]string` |  | |  |  |
-| port | [RoutePort](#route-port)| `RoutePort` |  | |  |  |
+| port | [GithubComYusingGoProxyInternalRouteTypesPort](#github-com-yusing-go-proxy-internal-route-types-port)| `GithubComYusingGoProxyInternalRouteTypesPort` |  | |  |  |
 | provider | string| `string` |  | | for backward compatibility |  |
 | purl | string| `string` |  | |  |  |
 | response_header_timeout | integer| `int64` |  | |  |  |
@@ -3415,13 +4220,6 @@ Status: Internal Server Error
 
 
 
-### <span id="rules-command"></span> rules.Command
-
-
-  
-
-[interface{}](#interface)
-
 ### <span id="rules-rule"></span> rules.Rule
 
 
@@ -3433,18 +4231,11 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
-| do | [RulesCommand](#rules-command)| `RulesCommand` |  | |  |  |
+| do | string| `string` |  | |  |  |
 | name | string| `string` |  | |  |  |
-| on | [RulesRuleOn](#rules-rule-on)| `RulesRuleOn` |  | |  |  |
+| on | string| `string` |  | |  |  |
 
 
-
-### <span id="rules-rule-on"></span> rules.RuleOn
-
-
-  
-
-[interface{}](#interface)
 
 ### <span id="sensors-temperature-stat"></span> sensors.TemperatureStat
 
