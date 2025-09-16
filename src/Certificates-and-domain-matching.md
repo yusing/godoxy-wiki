@@ -61,8 +61,6 @@ autocert:
     auth_token: your-zone-api-token
 ```
 
-![Cloudflare autocert](images/config/cf-autocert.png)
-
 ### Autocert with a Custom Internal CA
 
 You may use internal CA like [step-ca](https://github.com/smallstep/certificates) for issuing certificates.

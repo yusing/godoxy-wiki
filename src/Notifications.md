@@ -77,11 +77,6 @@ To enable notifications, you need to configure it on WebUI or in your `config.ym
 - Set the `payload` to appropriate JSON body for your webhook provider.
 - Set the `token` if your provider requires authentication.
 
-### WebUI config example
-
-<img src="/images/config/gotify-notification.png" height="250" alt="Gotify Notification" title="Gotify Notification"/>
-<img src="/images/config/discord-notification.png" height="250" alt="Discord Notification" title="Discord Notification"/>
-
 ## Full documentation
 
 ### Common Field

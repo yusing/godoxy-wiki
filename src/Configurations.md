@@ -113,8 +113,6 @@ providers:
     database: geolite # or geoip2 if you have subscription
 ```
 
-![Providers](images/config/providers.png)
-
 ### Homepage Settings
 
 Configure how GoDoxy handles the WebUI App dashboard.
