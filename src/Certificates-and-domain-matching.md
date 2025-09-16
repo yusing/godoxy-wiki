@@ -1,18 +1,43 @@
 # Certificates and domain matching
 
+## TL;DR
+
+- **One certificate for all domains** in `autocert.domains`; not per-route.
+- Certificates are managed by [`lego`](https://github.com/go-acme/lego) (ACME) with DNS-01; auto-issued and auto-renewed.
+- You can bring your own certificate by setting `provider: local`.
+- Short alias vs FQDN determines how domains match; `match_domains` restricts which base domains are valid.
+
 ## Certificates
 
-- GoDoxy **DOES NOT** register certificate for **each route**. Instead, it registers for all `autocert.domains` in your `config.yml` then combine into one certificate. All HTTP(s) requests to **GoDoxy** will be handled by the same certificate.
+- GoDoxy **does not** create a certificate per route. It issues a single certificate that covers every domain listed in `autocert.domains` in `config.yml`. All HTTPS requests are served with this same certificate.
 
-- GoDoxy uses <https://github.com/go-acme/lego>, similar to other reverse proxies powered by [Golang](https://golang.org). Powered by [ACME](<https://en.wikipedia.org/wiki/ACME_(protocol)>) and [Let's Encrypt](https://letsencrypt.org) via [DNS-01](https://en.wikipedia.org/wiki/DNS-01) challenge.
+- Certificates are issued/managed by `lego` using [ACME](<https://en.wikipedia.org/wiki/ACME_(protocol)>) and typically [Let's Encrypt](https://letsencrypt.org) via the [DNS-01](https://en.wikipedia.org/wiki/DNS-01) challenge.
 
-- GoDoxy obtain / renew certificates automatically, with 1 hour cooldown for every failed requests. It only renew when these conditions are met:
+- Auto-issue/renew behavior (with a 1-hour cooldown after failures). Renewal happens when:
 
-  - `autocert` is enabled but no certs are found under `certs/`
-  - `autocert.domains` does not match current certs
-  - Certificates are about to expire in a month
+  - `autocert` is enabled but no certs are present in `certs/`.
+  - The set of `autocert.domains` no longer matches the loaded certificate.
+  - The certificate will expire within 30 days.
 
-- You can either also use existing (self-signed) certificate.
+- You can also use an existing (including self-signed) certificate.
+
+### Autocert Configuration
+
+| Field        | Type   | Default          | Required              | Description                                  |
+| ------------ | ------ | ---------------- | --------------------- | -------------------------------------------- |
+| `provider`   | string | local            | Yes                   | Certificate / DNS-01 provider                |
+| `email`      | string | -                | Yes                   | ACME Email                                   |
+| `domains`    | array  | -                | Yes                   | Certificate domains                          |
+| `options`    | object | -                | `provider` != `local` | Provider-specific options                    |
+| `resolvers`  | array  | -                | No                    | DNS resolvers to use                         |
+| `cert_path`  | string | `certs/cert.crt` | No                    | Path to the certificate file to load / store |
+| `key_path`   | string | `certs/priv.key` | No                    | Path to the private key file to load / store |
+| `ca_dir_url` | string | -                | No                    | URL to the CA directory                      |
+| `ca_certs`   | array  | -                | No                    | CA certificates to use                       |
+| `eab_kid`    | string | -                | No                    | EAB¹ Key ID                                  |
+| `eab_hmac`   | string | -                | No                    | Base64 encoded EAB¹ HMAC                     |
+
+1. EAB refers to External Account Binding.
 
 ### Using Existing SSL Certificate
 
@@ -24,7 +49,7 @@ autocert:
   key_path: certs/priv.key
 ```
 
-### Auto SSL with Cloudflare
+### Autocert with Cloudflare
 
 ```yaml
 autocert:
@@ -38,7 +63,7 @@ autocert:
 
 ![Cloudflare autocert](images/config/cf-autocert.png)
 
-### Auto SSL with Custom Internal CA
+### Autocert with a Custom Internal CA
 
 You may use internal CA like [step-ca](https://github.com/smallstep/certificates) for issuing certificates.
 
@@ -64,7 +89,7 @@ autocert:
 
 #### EAB
 
-If you are using EAB (External Account Binding), you can set `eab_kid` and `eab_hmac` in `autocert.options`. It can also be used with custom ACME CA.
+If you are using EAB (External Account Binding), set `eab_kid` and `eab_hmac` in `autocert`. This also works with custom ACME CAs.
 
 ```yaml
 autocert:
@@ -76,57 +101,45 @@ autocert:
   eab_hmac: base64-encoded-hmac
 ```
 
-### Auto SSL with other DNS providers
+### Other DNS providers
 
 Check [DNS-01 Providers](DNS-01-Providers.md)
 
 ### Troubleshooting
 
-If you encounter issues, try these steps:
+If you encounter issues:
 
 - Set `LEGO_DISABLE_CNAME_SUPPORT=1` if your domain has a CNAME record.
-- Use a different DNS server.
-
-  ```yaml
-  services:
-    app:
-      container_name: godoxy
-      ...
-      environment:
-        - LEGO_DISABLE_CNAME_SUPPORT=1
-      dns:
-        - 1.1.1.1
-        - 1.1.1.2
-  ```
+- Try different DNS resolvers via `autocert.resolvers`.
 
 ## Domain matching
 
-An alias can either be short alias or FQDN (Fully Qualified Domain Name) alias.
+An alias is either a short alias or an FQDN (Fully Qualified Domain Name) alias.
 
 ### Docker
 
-Uses container name as short alias by default, unless `proxy.aliases` is specified.
+By default, the container name is used as the short alias unless `proxy.aliases` is set.
 
 ### General
 
 #### Without `match_domains`
 
-When no `match_domains` is set in `config.yml`, a route with short alias `app` can be accessed at:
+If `match_domains` is not set in `config.yml`, below will match route with short alias `app`:
 
 - `app.anydomain.com`
 - `app.*.anydomain.com`
 - ...
 
-A route with FQDN alias `app.example.com` can be accessed at:
+Below will match route with FQDN alias `app.example.com`:
 
 - `app.example.com`
-- `app.*.example.com`
+- `app.example.com.*`
 
 #### Using `match_domains`
 
-This feature is useful when you want to limit routes to certain domains.
+Use this to restrict which base domains are valid.
 
-With `match_domains` set under `config.yml` like this:
+With `match_domains` in `config.yml`:
 
 ```yaml
 match_domains:
@@ -134,22 +147,20 @@ match_domains:
   - example.org
 ```
 
-A route with short alias `app` can only be accessed at:
+Then a short alias `app` can be accessed only at:
 
 - `app.example.com`
 - `app.example.org`
 
-A route with FQDN alias `app.example.com` can be accessed at:
+And a route with FQDN alias `app.example.com` can be accessed at:
 
 - `app.example.com`
-- `app.*.example.com`
-- `app.*.example.org`
 
 #### Use case example for `match_domains`
 
-Given your main domain is `my.app`
+Given your main domain is `my.app`:
 
-- Add `my.app` to `autocert.domains` and `match_domains` in `config.yml`
+- Add `my.app` to `autocert.domains` and `match_domains` in `config.yml`.
 
   ```yaml
   autocert:
@@ -159,7 +170,7 @@ Given your main domain is `my.app`
     - my.app
   ```
 
-- Use short aliases like `adguard` and `sonarr` when you want them to be accessible at your main domain
+- Use short aliases like `adguard` and `sonarr` when you want them accessible under your main domain.
 
   ```yaml
   services:
@@ -173,7 +184,7 @@ Given your main domain is `my.app`
         proxy.aliases: sonarr
   ```
 
-- Use FQDN aliases like `adguard.other.app` and `sonarr.other.app` when you want them to be accessible at other domains
+- Use FQDN aliases like `adguard.other.app` and `sonarr.other.app` when you want them accessible under other domains.
 
   ```yaml
   # docker compose
