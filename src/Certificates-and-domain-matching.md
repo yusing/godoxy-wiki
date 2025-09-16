@@ -72,9 +72,8 @@ autocert:
   email: your-email@example.com
   domains:
     - "*.yourdomain.com"
-  options:
-    eab_kid: your-eab-kid
-    eab_hmac: base64-encoded-hmac
+  eab_kid: your-eab-kid
+  eab_hmac: base64-encoded-hmac
 ```
 
 ### Auto SSL with other DNS providers
