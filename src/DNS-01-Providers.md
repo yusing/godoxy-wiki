@@ -11,7 +11,7 @@ autocert:
 
 `auth_token` your zone API token
 
-Follow [this guide](https://cloudkul.com/blog/automcatic-renew-and-generate-ssl-on-your-website-using-lego-client/) to create a new token with `Zone.DNS` read and edit permissions
+Follow [this guide from LEGO](https://go-acme.github.io/lego/dns/cloudflare/#api-tokens) to create a new token with required permissions
 
 ## CloudDNS
 
