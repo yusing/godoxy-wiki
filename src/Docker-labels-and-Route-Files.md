@@ -242,16 +242,16 @@ app-backend.domain.com:
 
 These properties are only available for HTTP/HTTPS routes.
 
-| Property                  | Description                        | Type    | Default | Allowed Values / Syntax                    |
-| ------------------------- | ---------------------------------- | ------- | ------- | ------------------------------------------ |
-| `no_tls_verify`           | Skip TLS verification              | boolean | `false` | boolean                                    |
-| `response_header_timeout` | Response header timeout            | string  | `60s`   | duration                                   |
-| `disable_compression`     | Disable compression for this route | boolean | `false` | boolean                                    |
-| `ssl_server_name`         | SNI server name                    | string  |         | string                                     |
-| `ssl_trusted_certificate` | Path to trusted CA certificates    | string  |         | string                                     |
-| `ssl_certificate`         | Path to client certificate         | string  |         | string                                     |
-| `ssl_certificate_key`     | Path to client key                 | string  |         | string                                     |
-| `ssl_protocols`           | Allowed TLS protocols              | array   |         | `tlsv1.0`, `tlsv1.1`, `tlsv1.2`, `tlsv1.3` |
+| Property                  | Description                        | Type    | Default | Allowed Values / Syntax                                             |
+| ------------------------- | ---------------------------------- | ------- | ------- | ------------------------------------------------------------------- |
+| `no_tls_verify`           | Skip TLS verification              | boolean | `false` | boolean                                                             |
+| `response_header_timeout` | Response header timeout            | string  | `60s`   | duration                                                            |
+| `disable_compression`     | Disable compression for this route | boolean | `false` | boolean                                                             |
+| `ssl_server_name`         | SNI server name                    | string  |         | string, `on` or `off`                                               |
+| `ssl_trusted_certificate` | Path to trusted CA certificates    | string  |         | string                                                              |
+| `ssl_certificate`         | Path to client certificate         | string  |         | string                                                              |
+| `ssl_certificate_key`     | Path to client key                 | string  |         | string                                                              |
+| `ssl_protocols`           | Allowed TLS protocols              | array   |         | case-insensitive list of `TLSv1.0`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3` |
 
 ### Route Files
 
