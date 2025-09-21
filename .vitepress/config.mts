@@ -7,6 +7,12 @@ export default defineConfig({
   srcDir: "src",
   lastUpdated: true,
   cleanUrls: true,
+  markdown: {
+    theme: {
+      light: "catppuccin-latte",
+      dark: "catppuccin-mocha",
+    },
+  },
   themeConfig: {
     search: {
       provider: "local",
