@@ -207,20 +207,20 @@ app-backend.domain.com:
 > - Parts surrounded by `[]` are optional\*\*
 > - If `alias` is not in `proxy.aliases`, it will be created automatically
 
-| Label                       | Description                                                   | Example                            | Default               | Accepted values                                                           |
-| --------------------------- | ------------------------------------------------------------- | ---------------------------------- | --------------------- | ------------------------------------------------------------------------- |
-| `proxy.{alias}.{property}`  | set field for specific alias                                  | `proxy.gitlab-ssh.scheme`          |                       |                                                                           |
-| `proxy.#{index}.{property}` | set field for alias at index (starting from **1**)            | `proxy.#3.port`                    |                       |                                                                           |
-| `proxy.*.{property}`        | set field for all aliases                                     | `proxy.*.set_headers`              |                       |                                                                           |
-| `proxy.aliases`             | subdomains or FQDN for url matching (comma separated)         | `app`, `app.domain.com`, `app-tcp` | `container_name`      | any                                                                       |
-| `proxy.exclude`             | should GoDoxy ignore this container                           |                                    | false                 | boolean                                                                   |
-| `proxy.network`             | network to use for this container                              |                                    | first available network              | valid network name or empty                                                  |
-| `proxy.idle_timeout`        | inactivity timeout before put it into sleep<br/>**❌TCP/UDP** | `1h30s`                            | empty **(disabled)**  | `number[unit]...`                                                         |
-| `proxy.wake_timeout`        | time to wait for target site to be ready                      |                                    | `30s`                 | `number[unit]...`                                                         |
-| `proxy.stop_method`         | method to stop after `idle_timeout`                           |                                    | `stop`                | `stop`, `pause`, `kill`                                                   |
-| `proxy.stop_timeout`        | time to wait for stop command                                 |                                    | `10s`                 | `number[unit]...`                                                         |
-| `proxy.stop_signal`         | signal sent to container for `stop` and `kill` methods        |                                    | docker's default      | `SIGINT`, `SIGTERM`, `SIGHUP`, `SIGQUIT` and those without **SIG** prefix |
-| `proxy.start_endpoint`      | allow waking only from specific endpoint                      | `/start`                           | empty **(allow any)** | relative path                                                             |
+| Label                       | Description                                            | Example                            | Default                 | Accepted values                                                           |
+| --------------------------- | ------------------------------------------------------ | ---------------------------------- | ----------------------- | ------------------------------------------------------------------------- |
+| `proxy.{alias}.{property}`  | set field for specific alias                           | `proxy.gitlab-ssh.scheme`          |                         |                                                                           |
+| `proxy.#{index}.{property}` | set field for alias at index (starting from **1**)     | `proxy.#3.port`                    |                         |                                                                           |
+| `proxy.*.{property}`        | set field for all aliases                              | `proxy.*.set_headers`              |                         |                                                                           |
+| `proxy.aliases`             | subdomains or FQDN for url matching (comma separated)  | `app`, `app.domain.com`, `app-tcp` | `container_name`        | any                                                                       |
+| `proxy.exclude`             | should GoDoxy ignore this container                    |                                    | false                   | boolean                                                                   |
+| `proxy.network`             | network to use for this container                      |                                    | first available network | valid network name or empty                                               |
+| `proxy.idle_timeout`        | inactivity timeout before put it into sleep            | `1h30s`                            | empty **(disabled)**    | `number[unit]...`                                                         |
+| `proxy.wake_timeout`        | time to wait for target site to be ready               |                                    | `30s`                   | `number[unit]...`                                                         |
+| `proxy.stop_method`         | method to stop after `idle_timeout`                    |                                    | `stop`                  | `stop`, `pause`, `kill`                                                   |
+| `proxy.stop_timeout`        | time to wait for stop command                          |                                    | `10s`                   | `number[unit]...`                                                         |
+| `proxy.stop_signal`         | signal sent to container for `stop` and `kill` methods |                                    | docker's default        | `SIGINT`, `SIGTERM`, `SIGHUP`, `SIGQUIT` and those without **SIG** prefix |
+| `proxy.start_endpoint`      | allow waking only from specific endpoint               | `/start`                           | empty **(allow any)**   | relative path                                                             |
 
 #### Proxy Properties
 
