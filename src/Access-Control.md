@@ -15,13 +15,22 @@ Connection level access control handles IP addresses before the request is even 
 
 ### ACL Configuration
 
-| Key           | Type        | Description                          | Required | Default |
-| ------------- | ----------- | ------------------------------------ | -------- | ------- |
-| `default`     | string      | Default action                       | **Yes**  | `allow` |
-| `allow_local` | bool        | Allow local addresses                | No       | `true`  |
-| `allow`       | Filter List | Allow list                           | No       | `[]`    |
-| `deny`        | Filter List | Deny list                            | No       | `[]`    |
-| `log`         | object      | [Log configuration](#access-logging) | No       | `{}`    |
+| Key           | Type        | Description                                                         | Required | Default |
+| ------------- | ----------- | ------------------------------------------------------------------- | -------- | ------- |
+| `default`     | string      | Default action                                                      | **Yes**  | `allow` |
+| `allow_local` | bool        | Allow local addresses                                               | No       | `true`  |
+| `allow`       | Filter List | Allow list                                                          | No       | `[]`    |
+| `deny`        | Filter List | Deny list                                                           | No       | `[]`    |
+| `log`         | object      | [Log configuration](#access-logging) with extra `log_allowed` field | No       | `{}`    |
+| `notify`      | object      | Periodically send access summary to notification provider           | No       | `{}`    |
+
+### ACL Notification Configuration
+
+| Key               | Type        | Description                                 | Required | Default |
+| ----------------- | ----------- | ------------------------------------------- | -------- | ------- |
+| `to`              | string list | List of notification provider names         | No       | `[]`    |
+| `interval`        | duration    | Interval between notifications              | No       | `1h`    |
+| `include_allowed` | bool        | Include allowed connections in notification | No       | `false` |
 
 ### ACL Example
 
@@ -46,6 +55,10 @@ acl:
     stdout: false # (default: false)
     keep: last 10 # (default: none)
     log_allowed: true # (default: false)
+  notify:
+    to: [discord]
+    interval: 1h
+    include_allowed: true
 providers:
   maxmind:
     account_id: 123456
