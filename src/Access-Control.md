@@ -29,7 +29,7 @@ Connection level access control handles IP addresses before the request is even 
 | Key               | Type        | Description                                 | Required | Default |
 | ----------------- | ----------- | ------------------------------------------- | -------- | ------- |
 | `to`              | string list | List of notification provider names         | No       | `[]`    |
-| `interval`        | duration    | Interval between notifications              | No       | `1h`    |
+| `interval`        | duration    | Interval between notifications              | No       | `1m`    |
 | `include_allowed` | bool        | Include allowed connections in notification | No       | `false` |
 
 ### ACL Example
