@@ -51,6 +51,7 @@ header Some-Header 'foo \"bar\"' # Escaped quotes inside single quotes
 | `\"`     | Double quote             | String values                 |
 | `\'`     | Single quote             | String values                 |
 | `\`      | Space                    | String values                 |
+| `$$`     | Dollar sign (literal)    | String values, regex patterns |
 | `\b`     | Word boundary            | Regex patterns only           |
 | `\B`     | Non-word boundary        | Regex patterns only           |
 | `\s`     | Whitespace character     | Regex patterns only           |
