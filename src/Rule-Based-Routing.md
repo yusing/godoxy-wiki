@@ -1,6 +1,7 @@
 # Rule-Based Routing
 
-> [!DANGER] > **Experimental Feature**
+> [!WARNING]
+> **Experimental Feature**
 >
 > This feature is experimental and not fully tested. Everything, including syntax, may change until it is considered complete and stable.
 
@@ -33,7 +34,7 @@ Each rule consists of three main fields:
 
 Like in Linux shell, values containing spaces and quotes should be quoted or escaped:
 
-```bash
+```sh
 header Some-Header "foo bar"     # Double quotes
 header Some-Header 'foo bar'     # Single quotes
 header Some-Header foo\ bar      # Escaped space
@@ -51,7 +52,7 @@ header Some-Header 'foo \"bar\"' # Escaped quotes inside single quotes
 | `\"`     | Double quote             | String values                 |
 | `\'`     | Single quote             | String values                 |
 | `\`      | Space                    | String values                 |
-| `$$`     | Dollar sign (literal)    | String values, regex patterns |
+| `$$`     | Dollar sign (literal)    | Any                           |
 | `\b`     | Word boundary            | Regex patterns only           |
 | `\B`     | Non-word boundary        | Regex patterns only           |
 | `\s`     | Whitespace character     | Regex patterns only           |
@@ -127,24 +128,27 @@ The `on` field defines the conditions that must be met for a rule to execute. Co
 
 ### Available Conditions
 
-| Condition    | Arguments                      | Description                                | Example                                                                            |
-| ------------ | ------------------------------ | ------------------------------------------ | ---------------------------------------------------------------------------------- |
-| `header`     | `<name> <pattern>`             | Match when request header matches pattern  | `header Content-Type application/json`, `header X-API-Key regex("^sk-.*")`         |
-| `header`     | `<name>`                       | Match when header exists (any value)       | `header X-API-Key`                                                                 |
-| `query`      | `<name> <pattern>`             | Match when query parameter matches pattern | `query debug true`, `query id regex("^[a-f0-9-]{36}$")`                            |
-| `query`      | `<name>`                       | Match when query parameter exists          | `query debug`                                                                      |
-| `cookie`     | `<name> <pattern>`             | Match when cookie matches pattern          | `cookie session_id abc123`, `cookie token glob("sess_*")`                          |
-| `cookie`     | `<name>`                       | Match when cookie exists                   | `cookie session_id`                                                                |
-| `form`       | `<name> <pattern>`             | Match when form field matches pattern      | `form action submit`, `form email regex("^[^@]+@[^@]+$")`                          |
-| `form`       | `<name>`                       | Match when form field exists               | `form action`                                                                      |
-| `postform`   | `<name> <pattern>`             | Match when POST form field matches pattern | `postform action submit`, `postform file glob("*.pdf")`                            |
-| `postform`   | `<name>`                       | Match when POST form field exists          | `postform action`                                                                  |
-| `method`     | `<method>`                     | Match when HTTP method equals value        | `method POST`                                                                      |
-| `host`       | `<pattern>`                    | Match when host matches pattern            | `host example.com`, `host glob(*.example.com)`, `host regex("^[a-z]+-prod\.com$")` |
-| `path`       | `<pattern>`                    | Match when path matches pattern            | `path /api/*`, `path regex("^/api/v[0-9]+/.*)`                                     |
-| `remote`     | `<ip \| cidr>`                 | Match when client IP matches CIDR range    | `remote 192.168.1.0/24`                                                            |
-| `route`      | `<pattern>`                    | Match when route name matches pattern      | `route api`, `route glob(api-*)`                                                   |
-| `basic_auth` | `<username> <hashed_password>` | Match when basic auth credentials match    | `basic_auth admin $2y$10$...`                                                      |
+| Condition     | Arguments                      | Description                                | Example                                                                              |
+| ------------- | ------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `header`      | `<name> <pattern>`             | Match when request header matches pattern  | `header Content-Type application/json`, `header X-API-Key regex("^sk-.*")`           |
+| `header`      | `<name>`                       | Match when header exists (any value)       | `header X-API-Key`                                                                   |
+| `query`       | `<name> <pattern>`             | Match when query parameter matches pattern | `query debug true`, `query id regex("^[a-f0-9-]{36}$")`                              |
+| `query`       | `<name>`                       | Match when query parameter exists          | `query debug`                                                                        |
+| `cookie`      | `<name> <pattern>`             | Match when cookie matches pattern          | `cookie session_id abc123`, `cookie token glob("sess_*")`                            |
+| `cookie`      | `<name>`                       | Match when cookie exists                   | `cookie session_id`                                                                  |
+| `form`        | `<name> <pattern>`             | Match when form field matches pattern      | `form action submit`, `form email regex("^[^@]+@[^@]+$")`                            |
+| `form`        | `<name>`                       | Match when form field exists               | `form action`                                                                        |
+| `postform`    | `<name> <pattern>`             | Match when POST form field matches pattern | `postform action submit`, `postform file glob("*.pdf")`                              |
+| `postform`    | `<name>`                       | Match when POST form field exists          | `postform action`                                                                    |
+| `method`      | `<method>`                     | Match when HTTP method equals value        | `method POST`                                                                        |
+| `host`        | `<pattern>`                    | Match when host matches pattern            | `host example.com`, `host glob(*.example.com)`, `host regex("^[a-z]+-prod\.com$")`   |
+| `path`        | `<pattern>`                    | Match when path matches pattern            | `path /api/*`, `path regex("^/api/v[0-9]+/.*)`                                       |
+| `remote`      | `<ip \| cidr>`                 | Match when client IP matches CIDR range    | `remote 192.168.1.0/24`                                                              |
+| `route`       | `<pattern>`                    | Match when route name matches pattern      | `route api`, `route glob(api-*)`                                                     |
+| `basic_auth`  | `<username> <hashed_password>` | Match when basic auth credentials match    | `basic_auth admin $2y$10$...`                                                        |
+| `status`      | `<status>`                     | Match when status code matches value       | `status 200`, `status 200-300`, `status 2xx`                                         |
+| `resp_header` | `<name> <pattern>`             | Match when response header matches pattern | `resp_header Content-Type application/json`, `resp_header X-API-Key regex("^sk-.*")` |
+| `resp_header` | `<name>`                       | Match when response header exists          | `resp_header Content-Type`                                                           |
 
 ### Form Field Conditions
 
@@ -162,7 +166,7 @@ Both `form` and `postform` conditions match form field values, but they have dif
 
 #### Example
 
-```bash
+```sh
 # For a POST request with query param ?action=query and form body action=form
 postform action query    # Matches "query" (query param takes precedence)
 form action form         # Matches "form" (only form body)
@@ -172,7 +176,7 @@ form action form         # Matches "form" (only form body)
 
 For `basic_auth` conditions, the password must be bcrypt hashed. Generate the hash using:
 
-```bash
+```sh
 htpasswd -nbB '' your-password | cut -c 2-
 ```
 
@@ -204,7 +208,7 @@ The `path` condition supports three types of patterns for matching request paths
 
 #### String Matching
 
-```yaml
+```sh
 path /api/users # Exact match for /api/users
 ```
 
@@ -227,7 +231,7 @@ Glob patterns use the following syntax based on the [github.com/gobwas/glob](htt
 
 #### Advanced Glob Examples
 
-```yaml
+```sh
 # Match common web asset files
 path glob("/static/**/*.{css,js,png,jpg,jpeg,gif,svg}")
 
@@ -249,26 +253,9 @@ path glob("/images/[!_]*")  # Exclude files starting with underscore
 
 #### Regular Expressions
 
-```yaml
+```sh
 path regex("^/api/v[0-9]+/users/[a-f0-9-]{36}$")  # Match specific UUID pattern
 path regex("^/files/[0-9]{4}-[0-9]{2}-[0-9]{2}$")  # Match date pattern
-```
-
-#### Examples
-
-```yaml
-# String matching
-path /api/users                    # Exact match
-
-# Glob patterns
-path /api/*                       # Matches /api/users, /api/posts, etc.
-path /static/**                   # Matches /static/css/style.css, /static/js/app.js
-path /file?.txt                   # Matches /file1.txt, /fileA.txt
-path /admin/{users,posts}         # Matches /admin/users or /admin/posts
-
-# Regex patterns
-path regex("^/api/v[0-9]+/.+")    # Matches any API v1+ path
-path regex("^/uploads/.*\.(jpg|png)$")  # Matches image uploads
 ```
 
 ## Actions (`do`)
@@ -277,9 +264,21 @@ The `do` field defines the actions to execute when rule conditions are met.
 
 ### Action Execution Rules
 
-- **Order**: Actions are executed in the order they are defined
-- **Terminating Actions**: Actions that return a response must be the last action in the sequence
-- **Non-terminating Actions**: Actions that don't return a response can be followed by other actions
+- **Order**: Actions are executed in the order they are defined.
+- **Command Types**: Actions are classified into different command types that determine their execution behavior:
+  - **Non-terminating Commands**: Modify the request or response and continue execution
+  - **Terminating Commands**: Return a response and continue on response handler execution
+  - **Bypass Commands**: Skip all remaining rules, pass directly to the reverse proxy, then continue on response handler execution
+  - **Response Handlers**: Execute after the upstream response is received
+
+#### Command Type Classification
+
+| Command Type          | Commands                                                    | Behavior                             |
+| --------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| **Non-terminating**   | `rewrite`, `set`, `add`, `remove`                           | Modify request/response and continue |
+| **Terminating**       | `serve`, `proxy`, `redirect`, `error`, `require_basic_auth` | Return response and stop execution   |
+| **Bypass**            | `pass`, `bypass`                                            | Skip rules and pass to reverse proxy |
+| **Response Handlers** | `log`, `notify`                                             | Execute after upstream response      |
 
 #### Valid Action Sequences
 
@@ -290,41 +289,81 @@ do: |
   rewrite / /index.html
   serve /static
 
+# ✅ Valid: Multiple non-terminating actions
+on: method POST
+do: |
+  set header X-Custom value
+  add query debug true
+  remove header X-Secret
+
+# ✅ Valid: Response handlers (they always run last)
+on: path /api/*
+do: |
+  proxy http://backend:8080
+  log info /dev/stdout "{{ .Request.Method }} {{ .Response.StatusCode }}"
+
+# ✅ Valid: Bypass command (passes to reverse proxy)
+on: header X-Bypass true
+do: bypass
+
+# ✅ Valid: Response handler before terminating action
+#           but {{ .Response.StatusCode }} will always be 200 and {{ .Response.Header }} will be empty
+on: method GET
+do: |
+  log info /dev/stdout "{{ .Request.Method }} {{ .Request.URL }} {{ .Response.StatusCode }}"
+  set resp_header X-Custom value
+  error 500 "Internal Error" # won't be logged
+
 # ❌ Invalid: Terminating action followed by another action
 on: method GET
 do: |
   serve /static/index.html
   serve /static/404.html
-
-# ❌ Invalid: Terminating action followed by another action
-on: method GET
-do: |
-  redirect /foo/bar
-  serve /static/index.html
 ```
 
 ### Available Actions
 
-| Action               | Arguments               | Returns | Description                                              | Example                      |
-| -------------------- | ----------------------- | ------- | -------------------------------------------------------- | ---------------------------- |
-| `rewrite`            | `<from> <to>`           | false   | Rewrite request path                                     | `rewrite /api /backend`      |
-| `serve`              | `<path>`                | true    | Serve static files/directory                             | `serve /static`              |
-| `proxy`              | `<target>`              | true    | Proxy request to target                                  | `proxy http://backend:8080`  |
-| `redirect`           | `<url \| path>`         | true    | Redirect to URL or path                                  | `redirect /login`            |
-| `error`              | `<status> <msg>`        | true    | Return error response                                    | `error 403 "Forbidden"`      |
-| `require_basic_auth` | `<realm>`               | true    | Set `WWW-Authenticate` header and return 401 status code | `require_basic_auth "Admin"` |
-| `set`                | `<field> <key> <value>` | false   | Set field value                                          | `set headers X-Custom value` |
-| `add`                | `<field> <key> <value>` | false   | Add value to field                                       | `add headers X-Custom value` |
-| `remove`             | `<field> <key>`         | false   | Remove field key                                         | `remove headers X-Custom`    |
-| `pass`               |                         | true    | Pass to reverse proxy                                    | `pass`                       |
+| Action               | Arguments                               | Returns | Description                                  | Example                      |
+| -------------------- | --------------------------------------- | ------- | -------------------------------------------- | ---------------------------- |
+| `rewrite`            | `<from> <to>`                           | false   | Rewrite request path                         | `rewrite /api /backend`      |
+| `serve`              | `<path>`                                | true    | Serve static files/directory                 | `serve /static`              |
+| `proxy`              | `<target>`                              | true    | Proxy request to target                      | `proxy http://backend:8080`  |
+| `redirect`           | `<url \| path>`                         | true    | Redirect to URL or path                      | `redirect /login`            |
+| `error`              | `<status> <msg>`                        | true    | Return error response                        | `error 403 "Forbidden"`      |
+| `require_basic_auth` | `<realm>`                               | true    | Set `WWW-Authenticate` header and return 401 | `require_basic_auth "Admin"` |
+| `set`                | `<field> <key> <value>`                 | false   | Set field value                              | `set headers X-Custom value` |
+| `add`                | `<field> <key> <value>`                 | false   | Add value to field                           | `add headers X-Custom value` |
+| `remove`             | `<field> <key>`                         | false   | Remove field key                             | `remove headers X-Custom`    |
+| `log`                | `<level> <path> <template>`             | false\* | Log message (response handler)               | See below                    |
+| `notify`             | `<level> <service_name> <title> <body>` | false\* | Send notification (response handler)         | See below                    |
+| `pass`               |                                         | true    | Pass to reverse proxy                        | `pass`                       |
+| `bypass`             |                                         | true    | Pass to reverse proxy (alias for pass)       | `bypass`                     |
+
+#### `log` example 
+
+```sh
+log info /dev/stdout "{{ .Request.Method }} {{ .Request.URL }} {{ .Response.StatusCode }}"
+```
+
+#### `notify` example
+
+```sh
+notify info ntfy "Request received" "{{ .Request.Method }} {{ .Response.StatusCode }}"
+```
+
+\*Response handlers execute after the upstream response and do not terminate execution by themselves.
 
 ### Field Modifications
 
 The `set`, `add`, and `remove` actions can modify these fields:
 
 - **`headers`** - HTTP headers
+- **`resp_headers`** - HTTP response headers
 - **`query`** - Query parameters
-- **`cookies`** - HTTP cookies
+- **`cookie`** - HTTP cookies
+- **`body`** - Request body
+- **`resp_body`** - Response body
+- **`status_code`** - Status code
 
 ## Configuration Examples
 
