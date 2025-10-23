@@ -8,12 +8,12 @@ Middleware system allows you to modify, filter, and enhance HTTP requests and re
 
 Middlewares can be applied in four ways:
 
-| Method | Order | Use Case | Configuration |
-|--------|-------|----------|---------------|
-| **Entrypoint** | Ordered | Global middlewares applied to all routes | `config.yml` |
-| **Middleware Compose** | Ordered | Reusable middleware configurations | `config/middlewares/*.yml` |
-| **Docker Labels** | Unordered* | Per-route middlewares | Container labels |
-| **Route Files** | Unordered* | Per-route middlewares | Route configuration files |
+| Method                 | Order       | Use Case                                 | Configuration              |
+| ---------------------- | ----------- | ---------------------------------------- | -------------------------- |
+| **Entrypoint**         | Ordered     | Global middlewares applied to all routes | `config.yml`               |
+| **Middleware Compose** | Ordered     | Reusable middleware configurations       | `config/middlewares/*.yml` |
+| **Docker Labels**      | Unordered\* | Per-route middlewares                    | Container labels           |
+| **Route Files**        | Unordered\* | Per-route middlewares                    | Route configuration files  |
 
 > [!TIP]
 > For unordered middlewares, set `priority` manually when order matters.
@@ -78,8 +78,8 @@ myWhitelist:
 
 ```yaml
 # Single line format
-proxy.#1.middlewares.{middlewareName}.{optionName}: {value}
-proxy.#1.middlewares.{middlewareName}.{optionName2}: {value2}
+proxy.#1.middlewares.{middlewareName}.{optionName}: { value }
+proxy.#1.middlewares.{middlewareName}.{optionName2}: { value2 }
 
 # YAML block format
 proxy.#1.middlewares.{middlewareName}: |
@@ -94,9 +94,9 @@ proxy.#1.middlewares.{middlewareName}: |
 ```yaml
 myapp:
   middlewares:
-    {middlewareName}:
-      {optionName}: {value}
-      {optionName2}: {value2}
+    { middlewareName }:
+      { optionName }: { value }
+      { optionName2 }: { value2 }
 ```
 
 ### 4. Reusing Middleware Compositions
@@ -128,7 +128,7 @@ Skip middleware execution based on matching conditions.
 ```yaml
 middleware:
   bypass:
-    - route myapp & path /api/*
+    - route myapp & path glob(/api/*)
     - remote 192.168.0.0/16
     - header User-Agent: *bot*
 ```
@@ -184,8 +184,8 @@ entrypoint:
       bypass:
         # Bypass specific routes
         - route pocket-id
-        - route immich & path /api/*
-        - route karakeep & path /api/v1/*
+        - route immich & glob(path /api/*)
+        - route karakeep & glob(path /api/v1/*)
         # Bypass local networks
         - remote 127.0.0.1
         - remote 192.168.0.0/16
@@ -198,11 +198,11 @@ services:
   vaultwarden:
     labels:
       # Allow Bitwarden apps to bypass OIDC
-      proxy.#1.middlewares.oidc.bypass: path /identity/* | path /api/* | path /icons/*
-  
+      proxy.#1.middlewares.oidc.bypass: path glob(/identity/*) | path glob(/api/*) | path glob(/icons/*)
+
   karakeep:
     labels:
-      proxy.#1.middlewares.oidc.bypass: path /api/v1/*
+      proxy.#1.middlewares.oidc.bypass: path glob(/api/v1/*)
 ```
 
 ## Available Middlewares
@@ -216,24 +216,24 @@ services:
 
 Uses settings from `.env` file with configurable overrides.
 
-| Option | Description | Default | Required |
-|--------|-------------|---------|----------|
-| `allowed_users` | Override allowed users | `GODOXY_OIDC_ALLOWED_USERS` | No |
-| `allowed_groups` | Override allowed groups | `GODOXY_OIDC_ALLOWED_GROUPS` | No |
-| `client_id` | Override client ID | `GODOXY_OIDC_CLIENT_ID` | No |
-| `client_secret` | Override client secret | `GODOXY_OIDC_CLIENT_SECRET` | No |
-| `scope` | Override OAuth scope | `GODOXY_OIDC_SCOPE` | No |
+| Option           | Description             | Default                      | Required |
+| ---------------- | ----------------------- | ---------------------------- | -------- |
+| `allowed_users`  | Override allowed users  | `GODOXY_OIDC_ALLOWED_USERS`  | No       |
+| `allowed_groups` | Override allowed groups | `GODOXY_OIDC_ALLOWED_GROUPS` | No       |
+| `client_id`      | Override client ID      | `GODOXY_OIDC_CLIENT_ID`      | No       |
+| `client_secret`  | Override client secret  | `GODOXY_OIDC_CLIENT_SECRET`  | No       |
+| `scope`          | Override OAuth scope    | `GODOXY_OIDC_SCOPE`          | No       |
 
 #### hCaptcha
 
 **Name:** `hcaptcha`  
 **Purpose:** Protect against bots using [hCaptcha](https://hcaptcha.com/) challenges
 
-| Option | Description | Default | Required |
-|--------|-------------|---------|----------|
-| `site_key` | hCaptcha site key | - | Yes |
-| `secret_key` | hCaptcha secret key | - | Yes |
-| `session_expiry` | Session expiry time | `24h` | No |
+| Option           | Description         | Default | Required |
+| ---------------- | ------------------- | ------- | -------- |
+| `site_key`       | hCaptcha site key   | -       | Yes      |
+| `secret_key`     | hCaptcha secret key | -       | Yes      |
+| `session_expiry` | Session expiry time | `24h`   | No       |
 
 **How it works:**
 
@@ -251,16 +251,16 @@ Uses settings from `.env` file with configurable overrides.
 
 Authenticates requests by sending metadata to an external auth service and either forwards the request upstream (with enriched headers) or returns the auth response to the client.
 
-| Option | Description | Default | Required |
-|--------|-------------|---------|----------|
-| `route` | Forward-auth route name (alias) pointing to auth server | `tinyauth` | Yes |
-| `auth_endpoint` | Auth server endpoint path | `/api/auth/traefik` | Yes |
-| `headers` | Headers to forward from auth server to upstream | `["Remote-User", "Remote-Name", "Remote-Email", "Remote-Groups"]` | No |
+| Option          | Description                                             | Default                                                           | Required |
+| --------------- | ------------------------------------------------------- | ----------------------------------------------------------------- | -------- |
+| `route`         | Forward-auth route name (alias) pointing to auth server | `tinyauth`                                                        | Yes      |
+| `auth_endpoint` | Auth server endpoint path                               | `/api/auth/traefik`                                               | Yes      |
+| `headers`       | Headers to forward from auth server to upstream         | `["Remote-User", "Remote-Name", "Remote-Email", "Remote-Groups"]` | No       |
 
 **Behavior:**
 
 1. Sends GET request to auth service at `route origin + auth_endpoint`
-2. Clones request headers and populates X-Forwarded-* headers
+2. Clones request headers and populates X-Forwarded-\* headers
 3. **Non-2xx/3xx response:** Returns auth response to client (including redirects)
 4. **2xx response:** Copies configured headers to request and forwards upstream
 
@@ -308,11 +308,11 @@ See [Custom Error Pages](Custom-Error-Pages) for detailed documentation.
 > [!NOTE]
 > **Recommended for entrypoint** - affects `$remote_addr`, `$remote_host`, access logs, and CIDRWhitelist middleware.
 
-| Option | Description | Default | Required |
-|--------|-------------|---------|----------|
-| `header` | Real IP header name | `X-Real-IP` | No |
-| `from` | List of trusted CIDRs or IPs | - | Yes |
-| `recursive` | Recursive mode | `true` | No |
+| Option      | Description                  | Default     | Required |
+| ----------- | ---------------------------- | ----------- | -------- |
+| `header`    | Real IP header name          | `X-Real-IP` | No       |
+| `from`      | List of trusted CIDRs or IPs | -           | Yes      |
+| `recursive` | Recursive mode               | `true`      | No       |
 
 **Recursive Mode:**
 
@@ -324,10 +324,10 @@ See [Custom Error Pages](Custom-Error-Pages) for detailed documentation.
 - `X-Forwarded-For: 1.2.3.4, 192.168.0.123, 10.0.0.123`
 - `from: 192.168.0.0/16, 10.0.0.1`
 
-| Recursive | Result |
-|-----------|--------|
-| `true` | `1.2.3.4` |
-| `false` | `10.0.0.123` |
+| Recursive | Result       |
+| --------- | ------------ |
+| `true`    | `1.2.3.4`    |
+| `false`   | `10.0.0.123` |
 
 ```yaml
 entrypoint:
@@ -375,11 +375,11 @@ entrypoint:
 **Name:** `rate_limit`  
 **Purpose:** Limit request rate per client
 
-| Option | Description | Default | Required |
-|--------|-------------|---------|----------|
-| `average` | Average requests per period | - | Yes |
-| `burst` | Maximum requests allowed in a period | - | Yes |
-| `periods` | Time period format: `number[unit]` | `1s` | No |
+| Option    | Description                          | Default | Required |
+| --------- | ------------------------------------ | ------- | -------- |
+| `average` | Average requests per period          | -       | Yes      |
+| `burst`   | Maximum requests allowed in a period | -       | Yes      |
+| `periods` | Time period format: `number[unit]`   | `1s`    | No       |
 
 **Example:**
 
@@ -397,12 +397,12 @@ rate_limit:
 **Names:** `modify_request` / `request` / `modify_response` / `response`  
 **Purpose:** Modify HTTP headers and paths before sending to upstream
 
-| Option | Description | Default | Required |
-|--------|-------------|---------|----------|
-| `set_headers` | Set/replace headers | - | No |
-| `add_headers` | Add additional headers | - | No |
-| `hide_headers` | Remove headers | - | No |
-| `add_prefix` | Add prefix to request path | - | No |
+| Option         | Description                | Default | Required |
+| -------------- | -------------------------- | ------- | -------- |
+| `set_headers`  | Set/replace headers        | -       | No       |
+| `add_headers`  | Add additional headers     | -       | No       |
+| `hide_headers` | Remove headers             | -       | No       |
+| `add_prefix`   | Add prefix to request path | -       | No       |
 
 #### Supported Variables
 
@@ -411,39 +411,39 @@ rate_limit:
 >
 > **Use `$$` in Docker Compose, single `$` will result in environment variable substitution.**
 
-| Variable | Description |
-|----------|-------------|
-| **Request Variables** | |
-| `req_method` | HTTP method (GET, POST, etc.) |
-| `req_scheme` | URL scheme (http/https) |
-| `req_host` | Host without port |
-| `req_port` | Port number |
-| `req_addr` | Host with port |
-| `req_path` | URL path |
-| `req_query` | Raw query string |
-| `req_url` | Full request URL |
-| `req_uri` | Encoded path?query |
-| `req_content_type` | Content-Type header |
-| `req_content_length` | Request body length |
-| **Client Variables** | |
-| `remote_addr` | Client IP address |
-| `remote_host` | Client IP (parsed) |
-| `remote_port` | Client port |
-| **Response Variables** | |
-| `resp_content_type` | Response Content-Type |
-| `resp_content_length` | Response body length |
-| `status_code` | HTTP status code |
-| **Upstream Variables** | |
-| `upstream_name` | Server name/alias |
-| `upstream_scheme` | Server scheme |
-| `upstream_host` | Server host |
-| `upstream_port` | Server port |
-| `upstream_addr` | Server address with port |
-| `upstream_url` | Full server URL |
-| **Dynamic Variables** | |
-| `header(name)` | Get request header |
-| `resp_header(name)` | Get response header |
-| `arg(name)` | Get query parameter |
+| Variable               | Description                   |
+| ---------------------- | ----------------------------- |
+| **Request Variables**  |                               |
+| `req_method`           | HTTP method (GET, POST, etc.) |
+| `req_scheme`           | URL scheme (http/https)       |
+| `req_host`             | Host without port             |
+| `req_port`             | Port number                   |
+| `req_addr`             | Host with port                |
+| `req_path`             | URL path                      |
+| `req_query`            | Raw query string              |
+| `req_url`              | Full request URL              |
+| `req_uri`              | Encoded path?query            |
+| `req_content_type`     | Content-Type header           |
+| `req_content_length`   | Request body length           |
+| **Client Variables**   |                               |
+| `remote_addr`          | Client IP address             |
+| `remote_host`          | Client IP (parsed)            |
+| `remote_port`          | Client port                   |
+| **Response Variables** |                               |
+| `resp_content_type`    | Response Content-Type         |
+| `resp_content_length`  | Response body length          |
+| `status_code`          | HTTP status code              |
+| **Upstream Variables** |                               |
+| `upstream_name`        | Server name/alias             |
+| `upstream_scheme`      | Server scheme                 |
+| `upstream_host`        | Server host                   |
+| `upstream_port`        | Server port                   |
+| `upstream_addr`        | Server address with port      |
+| `upstream_url`         | Full server URL               |
+| **Dynamic Variables**  |                               |
+| `header(name)`         | Get request header            |
+| `resp_header(name)`    | Get response header           |
+| `arg(name)`            | Get query parameter           |
 
 #### Header Modification Examples
 
@@ -535,11 +535,11 @@ myapp:
 **Name:** `modify_html`  
 **Purpose:** Inject or replace HTML content using CSS selectors
 
-| Option | Description | Default | Required |
-|--------|-------------|---------|----------|
-| `target` | CSS selector for target element | - | Yes |
-| `html` | HTML content to inject | - | Yes |
-| `replace` | Replace instead of append | `false` | No |
+| Option    | Description                     | Default | Required |
+| --------- | ------------------------------- | ------- | -------- |
+| `target`  | CSS selector for target element | -       | Yes      |
+| `html`    | HTML content to inject          | -       | Yes      |
+| `replace` | Replace instead of append       | `false` | No       |
 
 **Behavior:**
 
@@ -566,7 +566,10 @@ When multiple elements match the CSS selector:
 <div class="container">Second container</div>
 
 <!-- Append mode: target=".container", html="<p>Added</p>" -->
-<div class="container">First container<p>Added</p></div>
+<div class="container">
+  First container
+  <p>Added</p>
+</div>
 <div class="container">Second container</div>
 
 <!-- Replace mode: target=".container", html="<p>Replaced</p>", replace=true -->
@@ -583,11 +586,11 @@ When multiple elements match the CSS selector:
 
 **Supported CSS Selectors:**
 
-| Type | Example | Description |
-|------|---------|-------------|
-| Element | `body`, `head`, `div` | Select by element name |
-| ID | `#main` | Select by ID attribute |
-| Class | `.container` | Select by class attribute |
+| Type      | Example                | Description               |
+| --------- | ---------------------- | ------------------------- |
+| Element   | `body`, `head`, `div`  | Select by element name    |
+| ID        | `#main`                | Select by ID attribute    |
+| Class     | `.container`           | Select by class attribute |
 | Attribute | `[data-test='target']` | Select by attribute value |
 
 **Examples:**
@@ -660,12 +663,12 @@ myapp:
 **Name:** `themed`  
 **Purpose:** A preset for `modify_html` that easily injects theme CSS into HTML responses
 
-| Option | Description | Conflicts With | Allowed Values |
-|--------|-------------|----------------|----------------|
-| `theme` | Predefined theme name | `css` | `dark`, `dark-grey`, `solarized-dark` |
-| `font_url` | Custom font URL | - | Full URL |
-| `font_family` | Font family name | - | String |
-| `css` | Custom CSS | `theme` | URL, File with `file://` prefix, Full CSS |
+| Option        | Description           | Conflicts With | Allowed Values                            |
+| ------------- | --------------------- | -------------- | ----------------------------------------- |
+| `theme`       | Predefined theme name | `css`          | `dark`, `dark-grey`, `solarized-dark`     |
+| `font_url`    | Custom font URL       | -              | Full URL                                  |
+| `font_family` | Font family name      | -              | String                                    |
+| `css`         | Custom CSS            | `theme`        | URL, File with `file://` prefix, Full CSS |
 
 **Example:**
 
