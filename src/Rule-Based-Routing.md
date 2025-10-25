@@ -156,13 +156,13 @@ Both `form` and `postform` conditions match form field values, but they have dif
 
 #### `postform` Precedence Order
 
-1. `application/x-www-form-urlencoded` form body (POST, PUT, PATCH only)
-2. Query parameters (always)
-3. `multipart/form-data` form body (always)
+- Only matches the POST, PUT, or PATCH request body
 
 #### `form` Precedence Order
 
-- Only matches the POST, PUT, or PATCH request body
+1. `application/x-www-form-urlencoded` form body (POST, PUT, PATCH only)
+2. Query parameters (always)
+3. `multipart/form-data` form body (always)
 
 #### Example
 
@@ -300,17 +300,17 @@ do: |
 on: path /api/*
 do: |
   proxy http://backend:8080
-  log info /dev/stdout "{{ .Request.Method }} {{ .Response.StatusCode }}"
+  log info /dev/stdout "$req_method $status_code"
 
 # ✅ Valid: Bypass command (passes to reverse proxy)
 on: header X-Bypass true
 do: bypass
 
 # ✅ Valid: Response handler before terminating action
-#           but {{ .Response.StatusCode }} will always be 200 and {{ .Response.Header }} will be empty
+#           but $status_code will always be 200 and $resp_header(...) will be empty
 on: method GET
 do: |
-  log info /dev/stdout "{{ .Request.Method }} {{ .Request.URL }} {{ .Response.StatusCode }}"
+  log info /dev/stdout "$req_method $req_url $status_code"
   set resp_header X-Custom value
   error 500 "Internal Error" # won't be logged
 
@@ -323,47 +323,168 @@ do: |
 
 ### Available Actions
 
-| Action               | Arguments                               | Returns | Description                                  | Example                      |
-| -------------------- | --------------------------------------- | ------- | -------------------------------------------- | ---------------------------- |
-| `rewrite`            | `<from> <to>`                           | false   | Rewrite request path                         | `rewrite /api /backend`      |
-| `serve`              | `<path>`                                | true    | Serve static files/directory                 | `serve /static`              |
-| `proxy`              | `<target>`                              | true    | Proxy request to target                      | `proxy http://backend:8080`  |
-| `redirect`           | `<url \| path>`                         | true    | Redirect to URL or path                      | `redirect /login`            |
-| `error`              | `<status> <msg>`                        | true    | Return error response                        | `error 403 "Forbidden"`      |
-| `require_basic_auth` | `<realm>`                               | true    | Set `WWW-Authenticate` header and return 401 | `require_basic_auth "Admin"` |
-| `set`                | `<field> <key> <value>`                 | false   | Set field value                              | `set headers X-Custom value` |
-| `add`                | `<field> <key> <value>`                 | false   | Add value to field                           | `add headers X-Custom value` |
-| `remove`             | `<field> <key>`                         | false   | Remove field key                             | `remove headers X-Custom`    |
-| `log`                | `<level> <path> <template>`             | false\* | Log message (response handler)               | See below                    |
-| `notify`             | `<level> <service_name> <title> <body>` | false\* | Send notification (response handler)         | See below                    |
-| `pass`               |                                         | true    | Pass to reverse proxy                        | `pass`                       |
-| `bypass`             |                                         | true    | Pass to reverse proxy (alias for pass)       | `bypass`                     |
+| Action               | Arguments                               | Terminating | Description                                                     | Example                      |
+| -------------------- | --------------------------------------- | ----------- | --------------------------------------------------------------- | ---------------------------- |
+| `require_auth`       |                                         | true        | Require authentication (Userpass or OIDC based on env variable) | `require_auth`               |
+| `rewrite`            | `<from> <to>`                           | false       | Rewrite request path                                            | `rewrite /api /backend`      |
+| `serve`              | `<path>`                                | true        | Serve static files/directory                                    | `serve /static`              |
+| `proxy`              | `<target>`                              | true        | Proxy request to absolute or relative URL                       | `proxy http://backend:8080`  |
+| `redirect`           | `<url \| path>`                         | true        | Redirect to URL or path                                         | `redirect /login`            |
+| `error`              | `<status> <msg>`                        | true        | Return error response                                           | `error 403 "Forbidden"`      |
+| `require_basic_auth` | `<realm>`                               | true        | Set `WWW-Authenticate` header and return 401                    | `require_basic_auth "Admin"` |
+| `set`                | `<field> <key> <template>`              | false       | Set field value                                                 | `set headers X-Custom value` |
+| `add`                | `<field> <key> <template>`              | false       | Add value to field                                              | `add headers X-Custom value` |
+| `remove`             | `<field> <key>`                         | false       | Remove field key                                                | `remove headers X-Custom`    |
+| `log`                | `<level> <path> <template>`             | false\*     | Log message (response handler)                                  | See below                    |
+| `notify`             | `<level> <service_name> <title> <body>` | false\*     | Send notification (response handler)                            | See below                    |
+| `pass`               |                                         | true        | Pass to reverse proxy                                           | `pass`                       |
+| `bypass`             |                                         | true        | Pass to reverse proxy (alias for pass)                          | `bypass`                     |
 
-#### `log` example 
+#### `log` example
 
 ```sh
-log info /dev/stdout "{{ .Request.Method }} {{ .Request.URL }} {{ .Response.StatusCode }}"
+log info /dev/stdout "$req_method $req_url $status_code"
 ```
 
 #### `notify` example
 
 ```sh
-notify info ntfy "Request received" "{{ .Request.Method }} {{ .Response.StatusCode }}"
+notify info ntfy "Request received" "$req_method $status_code"
 ```
 
 \*Response handlers execute after the upstream response and do not terminate execution by themselves.
 
-### Field Modifications
+## Template Variables
 
-The `set`, `add`, and `remove` actions can modify these fields:
+Template variables can be used in `log`, `notify`, `set`, `add`, `body`, and `resp_body` commands. Variables are expanded at runtime using the syntax `$variable_name` or `$function_name(args)`.
 
-- **`headers`** - HTTP headers
-- **`resp_headers`** - HTTP response headers
-- **`query`** - Query parameters
-- **`cookie`** - HTTP cookies
-- **`body`** - Request body
-- **`resp_body`** - Response body
-- **`status_code`** - Status code
+### Static Variables
+
+Static variables provide information about the request, response, and upstream service.
+
+| Variable                         | Description                | Example Value                         |
+| -------------------------------- | -------------------------- | ------------------------------------- |
+| **Request Information**          |
+| `$req_method`                    | HTTP request method        | `GET`, `POST`, `PUT`, etc.            |
+| `$req_scheme`                    | Request scheme             | `http` or `https`                     |
+| `$req_host`                      | Request host without port  | `example.com`                         |
+| `$req_port`                      | Request port               | `80`, `443`, `8080`                   |
+| `$req_addr`                      | Request host with port     | `example.com:443`                     |
+| `$req_path`                      | Request path               | `/api/users`                          |
+| `$req_query`                     | Query string (raw)         | `id=123&sort=desc`                    |
+| `$req_url`                       | Full request URL           | `http://example.com/api/users?id=123` |
+| `$req_uri`                       | Request URI (path + query) | `/api/users?id=123`                   |
+| `$req_content_type`              | Request content type       | `application/json`                    |
+| `$req_content_length`            | Request content length     | `1024`                                |
+| **Remote Client Information**    |
+| `$remote_host`                   | Client IP address          | `192.168.1.1`                         |
+| `$remote_port`                   | Client port                | `54321`                               |
+| `$remote_addr`                   | Client address with port   | `192.168.1.1:54321`                   |
+| **Response Information**         |
+| `$status_code`                   | HTTP response status code  | `200`, `404`, `500`                   |
+| `$resp_content_type`             | Response content type      | `application/json`, `text/html`       |
+| `$resp_content_length`           | Response content length    | `2048`                                |
+| **Upstream Service Information** |
+| `$upstream_name`                 | Upstream route name        | `api-backend`                         |
+| `$upstream_scheme`               | Upstream scheme            | `http` or `https`                     |
+| `$upstream_host`                 | Upstream host              | `backend.internal`                    |
+| `$upstream_port`                 | Upstream port              | `8080`                                |
+| `$upstream_addr`                 | Upstream host with port    | `backend.internal:8080`               |
+| `$upstream_url`                  | Upstream URL               | `http://backend.internal:8080`        |
+
+### Dynamic Variables (Functions)
+
+Dynamic variables accept arguments and can extract specific values from headers, query parameters, and form data.
+
+#### Request Headers: `$header(name)` or `$header(name, index)`
+
+Extract header values from the request.
+
+- **Arguments**:
+  - `name` (required): Header name (case-sensitive)
+  - `index` (optional): Index in the header value list (default: 0)
+
+- **Example**:
+  - `$header(User-Agent)` → `Mozilla/5.0...`
+  - `$header(Accept, 0)` → `text/html`
+
+#### Response Headers: `$resp_header(name)` or `$resp_header(name, index)`
+
+Extract header values from the response.
+
+- **Arguments**:
+  - `name` (required): Header name (case-sensitive)
+  - `index` (optional): Index in the header value list (default: 0)
+
+- **Example**:
+  - `$resp_header(Content-Type)` → `application/json`
+  - `$resp_header(Set-Cookie, 0)` → `session_id=abc123`
+
+#### Query Parameters: `$arg(name)` or `$arg(name, index)`
+
+Extract query parameter values.
+
+- **Arguments**:
+  - `name` (required): Parameter name
+  - `index` (optional): Index in the parameter value list (default: 0)
+
+- **Example**:
+  - `$arg(page)` → `1`
+  - `$arg(filter, 0)` → `active`
+
+#### Form Fields: `$form(name)` or `$form(name, index)`
+
+Extract form field values with query parameter fallback. Searches in these sources (from req.Form):
+
+- POST/PUT/PATCH form body (`application/x-www-form-urlencoded` and `multipart/form-data`)
+- Query parameters
+
+- **Arguments**:
+  - `name` (required): Field name
+  - `index` (optional): Index in the field value list (default: 0)
+
+- **Example**:
+  - `$form(username)` → `john_doe`
+  - `$form(tags, 1)` → `backend` (second tag)
+
+#### POST Form Fields: `$postform(name)` or `$postform(name, index)`
+
+Extract form field values from POST/PUT/PATCH request bodies only (no query parameter fallback). Only matches `application/x-www-form-urlencoded` format.
+
+- **Arguments**:
+  - `name` (required): Field name
+  - `index` (optional): Index in the field value list (default: 0)
+
+- **Example**:
+  - `$postform(action)` → matches only form field, not query parameter
+
+### Variable Examples
+
+Complete examples showing how to use variables in different commands:
+
+```sh
+# Logging with request and response information
+log info /dev/stdout "Method=$req_method Path=$req_path Status=$status_code"
+
+# Logging with headers
+log info /dev/stdout "User-Agent=$header(User-Agent) Auth=$header(Authorization)"
+
+# Logging with response headers
+log info /dev/stdout "Content-Type=$resp_header(Content-Type) Content-Length=$resp_content_length"
+
+# Notifications with request context
+notify info ntfy "New request" "From $remote_host to $req_host at $req_path"
+
+# Setting headers with upstream information
+set headers X-Upstream-URL $upstream_url
+set headers X-Request-Path $req_path
+
+# Body modifications with request info
+set body "Status: $status_code for $req_method $req_path"
+
+# Response body with request and response info
+set resp_body "Request: $req_method $req_url\nResponse: $status_code"
+```
 
 ## Configuration Examples
 
