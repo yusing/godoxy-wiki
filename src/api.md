@@ -58,6 +58,7 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 
 | Method  | URI     | Name   | Summary |
 |---------|---------|--------|---------|
+| GET | /api/v1/auth/logout | [get auth logout](#get-auth-logout) | Logout |
 | HEAD | /api/v1/auth/check | [head auth check](#head-auth-check) | Check authentication status |
 | POST | /api/v1/auth/callback | [post auth callback](#post-auth-callback) | Auth Callback |
 | POST | /api/v1/auth/login | [post auth login](#post-auth-login) | Login |
@@ -135,6 +136,7 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 | GET | /api/v1/route/list | [get route list](#get-route-list) | List routes |
 | GET | /api/v1/route/providers | [get route providers](#get-route-providers) | List route providers |
 | GET | /api/v1/route/{which} | [get route which](#get-route-which) | List route |
+| POST | /api/v1/route/playground | [post route playground](#post-route-playground) | Rule Playground |
   
 
 
@@ -172,7 +174,6 @@ List agents
 |------|--------|-------------|:-----------:|--------|
 | [200](#get-agent-list-200) | OK | OK |  | [schema](#get-agent-list-200-schema) |
 | [403](#get-agent-list-403) | Forbidden | Forbidden |  | [schema](#get-agent-list-403-schema) |
-| [500](#get-agent-list-500) | Internal Server Error | Internal Server Error |  | [schema](#get-agent-list-500-schema) |
 
 #### Responses
 
@@ -195,14 +196,33 @@ Status: Forbidden
 
 [ErrorResponse](#error-response)
 
-##### <span id="get-agent-list-500"></span> 500 - Internal Server Error
-Status: Internal Server Error
+### <span id="get-auth-logout"></span> Logout (*GetAuthLogout*)
 
-###### <span id="get-agent-list-500-schema"></span> Schema
+```
+GET /api/v1/auth/logout
+```
+
+Logs out the user by invalidating the token
+
+#### Produces
+  * text/plain
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [302](#get-auth-logout-302) | Found | Redirects to home page |  | [schema](#get-auth-logout-302-schema) |
+
+#### Responses
+
+
+##### <span id="get-auth-logout-302"></span> 302 - Redirects to home page
+Status: Found
+
+###### <span id="get-auth-logout-302-schema"></span> Schema
    
   
 
-[ErrorResponse](#error-response)
+
 
 ### <span id="get-cert-info"></span> Get cert info (*GetCertInfo*)
 
@@ -1502,7 +1522,7 @@ Checks if the user is authenticated by validating their token
 | Code | Status | Description | Has headers | Schema |
 |------|--------|-------------|:-----------:|--------|
 | [200](#head-auth-check-200) | OK | OK |  | [schema](#head-auth-check-200-schema) |
-| [403](#head-auth-check-403) | Forbidden | Forbidden: use X-Redirect-To header to redirect to login page |  | [schema](#head-auth-check-403-schema) |
+| [302](#head-auth-check-302) | Found | Redirects to login page or IdP |  | [schema](#head-auth-check-302-schema) |
 
 #### Responses
 
@@ -1516,10 +1536,10 @@ Status: OK
 
 
 
-##### <span id="head-auth-check-403"></span> 403 - Forbidden: use X-Redirect-To header to redirect to login page
-Status: Forbidden
+##### <span id="head-auth-check-302"></span> 302 - Redirects to login page or IdP
+Status: Found
 
-###### <span id="head-auth-check-403-schema"></span> Schema
+###### <span id="head-auth-check-302-schema"></span> Schema
    
   
 
@@ -1749,7 +1769,6 @@ Initiates the login process by redirecting the user to the provider's login page
 | Code | Status | Description | Has headers | Schema |
 |------|--------|-------------|:-----------:|--------|
 | [302](#post-auth-login-302) | Found | Redirects to login page or IdP |  | [schema](#post-auth-login-302-schema) |
-| [403](#post-auth-login-403) | Forbidden | Forbidden(webui): follow X-Redirect-To header |  | [schema](#post-auth-login-403-schema) |
 | [429](#post-auth-login-429) | Too Many Requests | Too Many Requests |  | [schema](#post-auth-login-429-schema) |
 
 #### Responses
@@ -1759,15 +1778,6 @@ Initiates the login process by redirecting the user to the provider's login page
 Status: Found
 
 ###### <span id="post-auth-login-302-schema"></span> Schema
-   
-  
-
-
-
-##### <span id="post-auth-login-403"></span> 403 - Forbidden(webui): follow X-Redirect-To header
-Status: Forbidden
-
-###### <span id="post-auth-login-403-schema"></span> Schema
    
   
 
@@ -2674,6 +2684,63 @@ Status: Internal Server Error
 
 [ErrorResponse](#error-response)
 
+### <span id="post-route-playground"></span> Rule Playground (*PostRoutePlayground*)
+
+```
+POST /api/v1/route/playground
+```
+
+Test rules against mock request/response
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| request | `body` | [PlaygroundRequest](#playground-request) | `models.PlaygroundRequest` | | ✓ | | Playground request |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-route-playground-200) | OK | OK |  | [schema](#post-route-playground-200-schema) |
+| [400](#post-route-playground-400) | Bad Request | Bad Request |  | [schema](#post-route-playground-400-schema) |
+| [403](#post-route-playground-403) | Forbidden | Forbidden |  | [schema](#post-route-playground-403-schema) |
+
+#### Responses
+
+
+##### <span id="post-route-playground-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-route-playground-200-schema"></span> Schema
+   
+  
+
+[PlaygroundResponse](#playground-response)
+
+##### <span id="post-route-playground-400"></span> 400 - Bad Request
+Status: Bad Request
+
+###### <span id="post-route-playground-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-route-playground-403"></span> 403 - Forbidden
+Status: Forbidden
+
+###### <span id="post-route-playground-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
 ### <span id="put-file-content"></span> Set file content (*PutFileContent*)
 
 ```
@@ -2955,6 +3022,43 @@ Status: Internal Server Error
 
 
 
+### <span id="final-request"></span> FinalRequest
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| body | string| `string` |  | |  |  |
+| headers | map of [[]string](#string)| `map[string][]string` |  | |  |  |
+| host | string| `string` |  | |  |  |
+| method | string| `string` |  | |  |  |
+| path | string| `string` |  | |  |  |
+| query | map of [[]string](#string)| `map[string][]string` |  | |  |  |
+
+
+
+### <span id="final-response"></span> FinalResponse
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| body | string| `string` |  | |  |  |
+| headers | map of [[]string](#string)| `map[string][]string` |  | |  |  |
+| statusCode | integer| `int64` |  | |  |  |
+
+
+
 ### <span id="http-header"></span> HTTPHeader
 
 
@@ -3004,6 +3108,41 @@ Status: Internal Server Error
 |------|------|---------|:--------:| ------- |-------------|---------|
 | config | [LoadBalancerConfig](#load-balancer-config)| `LoadBalancerConfig` |  | |  |  |
 | pool | map of any | `map[string]interface{}` |  | |  |  |
+
+
+
+### <span id="health-info"></span> HealthInfo
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| detail | string| `string` |  | |  |  |
+| latency | number| `float64` |  | | latency in microseconds |  |
+| status | string| `string` |  | |  |  |
+| uptime | number| `float64` |  | | uptime in milliseconds |  |
+
+
+
+### <span id="health-info-without-detail"></span> HealthInfoWithoutDetail
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| latency | number| `float64` |  | | latency in microseconds |  |
+| status | string| `string` |  | |  |  |
+| uptime | number| `float64` |  | | uptime in milliseconds |  |
 
 
 
@@ -3431,6 +3570,61 @@ Status: Internal Server Error
 
 
 
+### <span id="mock-cookie"></span> MockCookie
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| name | string| `string` |  | |  |  |
+| value | string| `string` |  | |  |  |
+
+
+
+### <span id="mock-request"></span> MockRequest
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| body | string| `string` |  | |  |  |
+| cookies | [][MockCookie](#mock-cookie)| `[]*MockCookie` |  | |  |  |
+| headers | map of [[]string](#string)| `map[string][]string` |  | |  |  |
+| host | string| `string` |  | |  |  |
+| method | string| `string` |  | |  |  |
+| path | string| `string` |  | |  |  |
+| query | map of [[]string](#string)| `map[string][]string` |  | |  |  |
+| remoteIP | string| `string` |  | |  |  |
+
+
+
+### <span id="mock-response"></span> MockResponse
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| body | string| `string` |  | |  |  |
+| headers | map of [[]string](#string)| `map[string][]string` |  | |  |  |
+| statusCode | integer| `int64` |  | |  |  |
+
+
+
 ### <span id="new-agent-request"></span> NewAgentRequest
 
 
@@ -3481,6 +3675,79 @@ Status: Internal Server Error
 |------|------|---------|:--------:| ------- |-------------|---------|
 | cert | base64 (formatted string)| `string` |  | |  |  |
 | key | base64 (formatted string)| `string` |  | |  |  |
+
+
+
+### <span id="parsed-rule"></span> ParsedRule
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| do | string| `string` |  | |  |  |
+| isResponseRule | boolean| `bool` |  | |  |  |
+| isValid | boolean| `bool` |  | |  |  |
+| name | string| `string` |  | |  |  |
+| on | string| `string` |  | |  |  |
+| validationError | string| `string` |  | |  |  |
+
+
+
+### <span id="playground-request"></span> PlaygroundRequest
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| mockRequest | [MockRequest](#mock-request)| `MockRequest` |  | |  |  |
+| mockResponse | [MockResponse](#mock-response)| `MockResponse` |  | |  |  |
+| rules | string| `string` | ✓ | |  |  |
+
+
+
+### <span id="playground-response"></span> PlaygroundResponse
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| executionError | string| `string` |  | |  |  |
+| finalRequest | [FinalRequest](#final-request)| `FinalRequest` |  | |  |  |
+| finalResponse | [FinalResponse](#final-response)| `FinalResponse` |  | |  |  |
+| matchedRules | []string| `[]string` |  | |  |  |
+| parsedRules | [][ParsedRule](#parsed-rule)| `[]*ParsedRule` |  | |  |  |
+| upstreamCalled | boolean| `bool` |  | |  |  |
+
+
+
+### <span id="port"></span> Port
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| listening | integer| `int64` |  | |  |  |
+| proxy | integer| `int64` |  | |  |  |
 
 
 
@@ -3597,13 +3864,19 @@ Status: Internal Server Error
 | middlewares | map of [TypesLabelMap](#types-label-map)| `map[string]TypesLabelMap` |  | |  |  |
 | no_tls_verify | boolean| `bool` |  | |  |  |
 | path_patterns | []string| `[]string` |  | |  |  |
-| port | [GithubComYusingGoProxyInternalRouteTypesPort](#github-com-yusing-go-proxy-internal-route-types-port)| `GithubComYusingGoProxyInternalRouteTypesPort` |  | |  |  |
+| port | [Port](#port)| `Port` |  | |  |  |
 | provider | string| `string` |  | | for backward compatibility |  |
 | purl | string| `string` |  | |  |  |
 | response_header_timeout | integer| `int64` |  | |  |  |
 | root | string| `string` |  | |  |  |
+| rule_file | string| `string` |  | |  |  |
 | rules | [][RulesRule](#rules-rule)| `[]*RulesRule` |  | |  |  |
-| scheme | [RouteScheme](#route-scheme)| `RouteScheme` |  | |  |  |
+| scheme | string| `string` |  | |  |  |
+| ssl_certificate | string| `string` |  | | Path to client certificate |  |
+| ssl_certificate_key | string| `string` |  | | Path to client certificate key |  |
+| ssl_protocols | []string| `[]string` |  | | Allowed TLS protocols |  |
+| ssl_server_name | string| `string` |  | | SSL/TLS proxy options (nginx-like) |  |
+| ssl_trusted_certificate | string| `string` |  | | Path to trusted CA certificates |  |
 
 
 
@@ -3671,7 +3944,7 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
-| statuses | map of [RoutesHealthInfo](#routes-health-info)| `map[string]RoutesHealthInfo` |  | |  |  |
+| statuses | map of [HealthInfoWithoutDetail](#health-info-without-detail)| `map[string]HealthInfoWithoutDetail` |  | |  |  |
 | timestamp | integer| `int64` |  | |  |  |
 
 
@@ -3979,14 +4252,14 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
-| iops | integer| `int64` |  | | godoxy |  |
+| iops | integer| `int64` |  | |  |  |
 | name | string| `string` |  | | ReadCount        uint64 `json:"readCount"`</br>MergedReadCount  uint64 `json:"mergedReadCount"`</br>WriteCount       uint64 `json:"writeCount"`</br>MergedWriteCount uint64 `json:"mergedWriteCount"`</br>ReadBytes        uint64 `json:"readBytes"`</br>WriteBytes       uint64 `json:"writeBytes"`</br>ReadTime         uint64 `json:"readTime"`</br>WriteTime        uint64 `json:"writeTime"`</br>IopsInProgress   uint64 `json:"iopsInProgress"`</br>IoTime           uint64 `json:"ioTime"`</br>WeightedIO       uint64 `json:"weightedIO"` |  |
 | read_bytes | integer| `int64` |  | | SerialNumber     string `json:"serialNumber"`</br>Label            string `json:"label"` |  |
 | read_count | integer| `int64` |  | |  |  |
-| read_speed | number| `float64` |  | | godoxy |  |
+| read_speed | number| `float64` |  | |  |  |
 | write_bytes | integer| `int64` |  | |  |  |
 | write_count | integer| `int64` |  | |  |  |
-| write_speed | number| `float64` |  | | godoxy |  |
+| write_speed | number| `float64` |  | |  |  |
 
 
 
@@ -4004,7 +4277,7 @@ Status: Internal Server Error
 | free | integer| `int64` |  | |  |  |
 | fstype | string| `string` |  | |  |  |
 | path | string| `string` |  | |  |  |
-| total | integer| `int64` |  | |  |  |
+| total | number| `float64` |  | |  |  |
 | used | integer| `int64` |  | |  |  |
 | used_percent | number| `float64` |  | |  |  |
 
@@ -4044,22 +4317,6 @@ Status: Internal Server Error
 
 
 
-### <span id="github-com-yusing-go-proxy-internal-route-types-port"></span> github_com_yusing_go-proxy_internal_route_types.Port
-
-
-  
-
-
-
-**Properties**
-
-| Name | Type | Go type | Required | Default | Description | Example |
-|------|------|---------|:--------:| ------- |-------------|---------|
-| listening | integer| `int64` |  | |  |  |
-| proxy | integer| `int64` |  | |  |  |
-
-
-
 ### <span id="homepage-fetch-result"></span> homepage.FetchResult
 
 
@@ -4071,7 +4328,6 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
-| errMsg | string| `string` |  | |  |  |
 | icon | []int32 (formatted integer)| `[]int32` |  | |  |  |
 | statusCode | integer| `int64` |  | |  |  |
 
@@ -4121,10 +4377,7 @@ Status: Internal Server Error
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
 | available | integer| `int64` |  | | RAM available for programs to allocate</br></br>This value is computed from the kernel specific values. |  |
-| free | integer| `int64` |  | | This is the kernel's notion of free memory; RAM chips whose bits nobody</br>cares about the value of right now. For a human consumable number,</br>Available is what you really want. |  |
-| total | integer| `int64` |  | | Total amount of RAM on this system |  |
 | used | integer| `int64` |  | | RAM used by programs</br></br>This value is computed from the kernel specific values. |  |
-| used_percent | number| `float64` |  | | Percentage of RAM used by programs</br></br>This value is computed from the kernel specific values. |  |
 
 
 
@@ -4174,24 +4427,19 @@ Status: Internal Server Error
 | middlewares | map of [TypesLabelMap](#types-label-map)| `map[string]TypesLabelMap` |  | |  |  |
 | no_tls_verify | boolean| `bool` |  | |  |  |
 | path_patterns | []string| `[]string` |  | |  |  |
-| port | [GithubComYusingGoProxyInternalRouteTypesPort](#github-com-yusing-go-proxy-internal-route-types-port)| `GithubComYusingGoProxyInternalRouteTypesPort` |  | |  |  |
+| port | [Port](#port)| `Port` |  | |  |  |
 | provider | string| `string` |  | | for backward compatibility |  |
 | purl | string| `string` |  | |  |  |
 | response_header_timeout | integer| `int64` |  | |  |  |
 | root | string| `string` |  | |  |  |
+| rule_file | string| `string` |  | |  |  |
 | rules | [][RulesRule](#rules-rule)| `[]*RulesRule` |  | |  |  |
-| scheme | [RouteScheme](#route-scheme)| `RouteScheme` |  | |  |  |
-
-
-
-### <span id="route-scheme"></span> route.Scheme
-
-
-  
-
-| Name | Type | Go type | Default | Description | Example |
-|------|------|---------| ------- |-------------|---------|
-| route.Scheme | string| string | |  |  |
+| scheme | string| `string` |  | |  |  |
+| ssl_certificate | string| `string` |  | | Path to client certificate |  |
+| ssl_certificate_key | string| `string` |  | | Path to client certificate key |  |
+| ssl_protocols | []string| `[]string` |  | | Allowed TLS protocols |  |
+| ssl_server_name | string| `string` |  | | SSL/TLS proxy options (nginx-like) |  |
+| ssl_trusted_certificate | string| `string` |  | | Path to trusted CA certificates |  |
 
 
 
@@ -4201,24 +4449,6 @@ Status: Internal Server Error
   
 
 [RouteRoute](#route-route)
-
-### <span id="routes-health-info"></span> routes.HealthInfo
-
-
-  
-
-
-
-**Properties**
-
-| Name | Type | Go type | Required | Default | Description | Example |
-|------|------|---------|:--------:| ------- |-------------|---------|
-| detail | string| `string` |  | |  |  |
-| latency | number| `float64` |  | | latency in microseconds |  |
-| status | string| `string` |  | |  |  |
-| uptime | number| `float64` |  | | uptime in milliseconds |  |
-
-
 
 ### <span id="rules-rule"></span> rules.Rule
 
