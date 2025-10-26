@@ -120,7 +120,7 @@ app:
   port: 80
   homepage:
     name: App
-    icon: "@selfhst/app.svg"
+    icon: '@selfhst/app.svg'
     description: An app
     category: app
 app-backend:
@@ -169,26 +169,21 @@ app-backend.domain.com:
 ## Key Proxy Properties
 
 1. **scheme**: Tells the proxy server what protocol to use to connect to your app
-
    - **Default**: Automatically determined based on the port.
    - **Values**: `http`, `https`, `tcp`, `udp`
 
 2. **host**: Tells the proxy server what IP/hostname to connect to your app
-
    - **Docker**: The IP or hostname of the Docker client.
    - **File**: Typically `localhost`.
 
 3. **port**: Tell the proxy server which port to connect to
-
    - **HTTP/HTTPS**: e.g., `80`, `443`
    - **TCP/UDP**: The port for GoDoxy to listen on, mapped to the target container's port. (e.g. `8080:80`)
 
 4. **agent**: Tells the proxy server which agent to route from **(for route files)**
-
    - **Values**: agent name (e.g. `Oracle`) or agent address `https://10.0.1.2:8890`
 
 5. **no_tls_verify** (optional): Whether skips TLS verification when scheme is `https`.
-
    - **Default**: `false`
    - **Values**: `true`, `false`
 
@@ -232,6 +227,7 @@ app-backend.domain.com:
 | `port`                                  | `tcp`, `udp`                  | Listening and Proxy port                                   | `0:lowest_port`                                                                                                                                                                                         | `from:to` <br/><ul><li>**from**: port for GoDoxy to listen on (`0` for random).</li><li>**to**: port to proxy from</li></ul> |
 | `agent`                                 | `http`, `https`               | Agent to use                                               |                                                                                                                                                                                                         | agent name or agent address                                                                                                  |
 | `rules`                                 | `http`, `https`, `fileserver` | [Experimental rule base routing](Rule-Based-Routing)       |                                                                                                                                                                                                         |                                                                                                                              |
+| `rule_file`                             | `http`, `https`, `fileserver` | [Rule file for conditional routing](Rule-Based-Routing)    | <ul><li>Cannot be used together with `rules`</li></ul>                                                                                                                                                  | `embed://preset_name`, `file:///path/to/rules.yml`, or `/path/to/rules.yml`                                                  |
 | `healthcheck.{property}`                | all                           | [Health Monitoring Configurations](Health-monitoring)      |                                                                                                                                                                                                         |                                                                                                                              |
 | `load_balance.{property}`               | `http`, `https`               | [Load Balancing Configuration](Load-Balancing)             |                                                                                                                                                                                                         |                                                                                                                              |
 | `middlewares.{middleware}[.{property}]` | `http`, `https`, `fileserver` | [Middlewares](Middlewares)                                 |                                                                                                                                                                                                         |                                                                                                                              |
