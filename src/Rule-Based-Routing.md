@@ -328,9 +328,9 @@ do: |
 | `require_auth`       |                                         | true        | Require authentication (Userpass or OIDC based on env variable) | `require_auth`               |
 | `rewrite`            | `<from> <to>`                           | false       | Rewrite request path                                            | `rewrite /api /backend`      |
 | `serve`              | `<path>`                                | true        | Serve static files/directory                                    | `serve /static`              |
-| `proxy`              | `<target>`                              | true        | Proxy request to absolute or relative URL                       | `proxy http://backend:8080`  |
-| `redirect`           | `<url \| path>`                         | true        | Redirect to URL or path                                         | `redirect /login`            |
-| `error`              | `<status> <msg>`                        | true        | Return error response                                           | `error 403 "Forbidden"`      |
+| `proxy`              | `<url \| path>`                         | true        | Proxy request to absolute or relative path                      | `proxy http://backend:8080`  |
+| `redirect`           | `<url \| path>`                         | true        | Redirect to absolute or relative path                           | `redirect /login`            |
+| `error`              | `<status> <template>`                   | true        | Return error response                                           | `error 403 "Forbidden"`      |
 | `require_basic_auth` | `<realm>`                               | true        | Set `WWW-Authenticate` header and return 401                    | `require_basic_auth "Admin"` |
 | `set`                | `<field> <key> <template>`              | false       | Set field value                                                 | `set headers X-Custom value` |
 | `add`                | `<field> <key> <template>`              | false       | Add value to field                                              | `add headers X-Custom value` |
@@ -356,7 +356,7 @@ notify info ntfy "Request received" "$req_method $status_code"
 
 ## Template Variables
 
-Template variables can be used in `log`, `notify`, `set`, `add`, `body`, and `resp_body` commands. Variables are expanded at runtime using the syntax `$variable_name` or `$function_name(args)`.
+Template variables can be used in `error`, `log`, `notify`, `set`, `add`, `body`, and `resp_body` commands. Variables are expanded at runtime using the syntax `$variable_name` or `$function_name(args)`.
 
 ### Static Variables
 
