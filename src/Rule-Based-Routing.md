@@ -670,3 +670,139 @@ rules:
       set headers X-Admin-Access true
       proxy http://admin-panel:8080
 ```
+
+## Additional Practical Examples
+
+### CORS Preflight and Simple CORS
+
+```yaml
+rules:
+  # Respond to CORS preflight automatically
+  - name: cors preflight
+    on: |
+      method OPTIONS
+      header Origin
+      header Access-Control-Request-Method
+    do: |
+      set headers Access-Control-Allow-Origin $header(Origin)
+      set headers Access-Control-Allow-Methods GET,POST,PUT,PATCH,DELETE,OPTIONS
+      set headers Access-Control-Allow-Headers $header(Access-Control-Request-Headers)
+      set headers Access-Control-Allow-Credentials true
+      error 204 ""
+
+  # Allow simple CORS on actual requests
+  - name: cors simple
+    on: header Origin
+    do: |
+      set headers Access-Control-Allow-Origin $header(Origin)
+      set headers Access-Control-Allow-Credentials true
+      pass
+```
+
+### A/B Routing via Cookie
+
+```yaml
+rules:
+  - name: experiment group B
+    on: cookie exp_group B
+    do: proxy http://backend-b:8080
+
+  - name: experiment default (group A)
+    do: proxy http://backend-a:8080
+```
+
+### Maintenance Window for Specific Paths
+
+```yaml
+rules:
+  - name: maintenance api
+    on: path glob(/api/**)
+    do: error 503 "Service under maintenance"
+
+  - name: default
+    do: pass
+```
+
+### SPA Served Under Subpath With Fallback
+
+```yaml
+rules:
+  - name: static assets under /app
+    on: path glob(/app/static/**)
+    do: serve /var/www/app/static
+
+  - name: spa fallback under /app
+    on: |
+      method GET
+      path glob(/app/**)
+    do: |
+      rewrite /app /app/index.html
+      serve /var/www/app
+```
+
+### Mutating Headers, Query, and Cookies
+
+```yaml
+rules:
+  - name: request mutations
+    on: path glob(/api/**)
+    do: |
+      set headers X-Request-Id $header(X-Request-Id)
+      add headers X-Forwarded-For $remote_host
+      remove headers X-Secret
+      add query debug true
+      set cookies locale en-US
+      proxy http://api-server:8080
+```
+
+### Response-Conditional Logging
+
+```yaml
+rules:
+  - name: proxy and log json responses
+    on: path glob(/api/**)
+    do: |
+      proxy http://api-server:8080
+      # Runs after upstream response
+      log info /dev/stdout "Status=$status_code CT=$resp_header(Content-Type)"
+```
+
+### Using Environment Variables
+
+```yaml
+rules:
+  - name: route by env-configured upstream
+    on: path glob(/service/**)
+    do: proxy https://${SERVICE_HOST}:${SERVICE_PORT}
+
+  - name: send redacted error with env variable
+    on: path /secret
+    do: error 403 "Forbidden: ${REDACT_REASON}"
+```
+
+### WebSocket Upgrade (Full Example)
+
+```yaml
+rules:
+  - name: websocket upgrade
+    on: |
+      header Connection Upgrade
+      header Upgrade websocket
+    do: pass
+
+  - name: default
+    do: proxy http://ws-backend:8080
+```
+
+### Combining AND and OR Conditions
+
+```yaml
+rules:
+  - name: admin tools access
+    on: |
+      path glob(/tools/**) & (header X-User-Role admin | cookie role admin)
+    do: pass
+
+  - name: default
+    do: error 403 "Admins only"
+```
