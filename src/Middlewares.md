@@ -130,7 +130,7 @@ middleware:
   bypass:
     - route myapp & path glob(/api/*)
     - remote 192.168.0.0/16
-    - header User-Agent: *bot*
+    - header User-Agent glob(*bot*)
 ```
 
 > See [Rules syntax](./Rule-Based-Routing.md#syntax) for complete bypass rule documentation.

@@ -20,21 +20,9 @@
 > [!NOTE]
 > GoDoxy will work without mapping ports to the host.
 
-Replace every `ports` section with `expose` section in your docker-compose.yml file.
+Remove `ports` section in your `docker-compose.yml` file.
 
 Doing this will make your host has only **one** exposed service, which is GoDoxy.
-
-```yaml
-# Before
-ports:
-  - 8080:80
-  - 4433:443
-
-# After
-expose:
-  - 80
-  - 443
-```
 
 ## Environment variables
 
@@ -45,7 +33,6 @@ expose:
 
 | Environment Variable   | Description                                 | Default          | Values        |
 | ---------------------- | ------------------------------------------- | ---------------- | ------------- |
-| `GODOXY_FRONTEND_PORT` | Frontend listening port                     | `3000`           | integer       |
 | `GODOXY_HTTP_ADDR`     | HTTP server listening address               | `:80`            | `[host]:port` |
 | `GODOXY_HTTPS_ADDR`    | HTTPS server listening address (if enabled) | `:443`           | `[host]:port` |
 | `GODOXY_API_ADDR`      | API server listening address                | `127.0.0.1:8888` | `[host]:port` |
