@@ -2,11 +2,13 @@
 
 ## Docker Image
 
-| Tag       | Description          |
-| --------- | -------------------- |
-| `latest`  | Stable release       |
-| `nightly` | Experimental release |
-| `vx.y.z`  | Stable release       |
+| Tag            | Description                             |
+| -------------- | --------------------------------------- |
+| `latest`       | Stable release                          |
+| `latest-lite`  | Stable release (lite, WebUI only)       |
+| `nightly`      | Experimental release                    |
+| `nightly-lite` | Experimental release (lite, WebUI only) |
+| `vx.y.z`       | Stable release                          |
 
 - Proxy `ghcr.io/yusing/godoxy:<tag>`
 - Frontend `ghcr.io/yusing/godoxy-frontend:<tag>`
@@ -14,6 +16,19 @@
 **Current version**
 
 ![GitHub Release](https://img.shields.io/github/v/release/yusing/godoxy?style=flat-square)
+
+### Lite Image
+
+Lite image is a smaller image that runs a static build of WebUI with nginx.
+
+Pros:
+
+- Have smaller image size
+- Use less resources
+
+Cons:
+
+- Less responsive compared to the full image
 
 ## Secure your containers
 
