@@ -27,6 +27,7 @@ The `config.yml` file is divided into several sections:
   - **notification**: Configures notifications for health monitoring
   - **maxmind**: MaxMind credentials
 - **match_domains**: List of domains to match
+- **defaults**: Default values
 - **homepage**: Configures homepage settings
 
 ### Environment Variables substitution
@@ -65,11 +66,11 @@ entrypoint:
   middlewares:
     - use: CIDRWhitelist
       allow:
-        - "127.0.0.1"
-        - "10.0.0.0/8"
-        - "192.168.0.0/16"
+        - '127.0.0.1'
+        - '10.0.0.0/8'
+        - '192.168.0.0/16'
       status: 403
-      message: "Forbidden"
+      message: 'Forbidden'
 
   access_log:
     format: combined
@@ -111,6 +112,16 @@ providers:
     account_id: 123456
     license_key: your-license-key
     database: geolite # or geoip2 if you have subscription
+```
+
+### Default Values
+
+```yaml
+defaults:
+  healthcheck:
+    interval: 5s
+    timeout: 15s
+    retries: 3
 ```
 
 ### Homepage Settings
