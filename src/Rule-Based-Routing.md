@@ -140,6 +140,7 @@ The `on` field defines the conditions that must be met for a rule to execute. Co
 | `form`        | `<name>`                       | Match when form field exists               | `form action`                                                                        |
 | `postform`    | `<name> <pattern>`             | Match when POST form field matches pattern | `postform action submit`, `postform file glob("*.pdf")`                              |
 | `postform`    | `<name>`                       | Match when POST form field exists          | `postform action`                                                                    |
+| `proto`       | `<http \| https \| h3>`        | Match when protocol equals value           | `proto http`                                                                         |
 | `method`      | `<method>`                     | Match when HTTP method equals value        | `method POST`                                                                        |
 | `host`        | `<pattern>`                    | Match when host matches pattern            | `host example.com`, `host glob(*.example.com)`, `host regex("^[a-z]+-prod\.com$")`   |
 | `path`        | `<pattern>`                    | Match when path matches pattern            | `path /api/*`, `path regex("^/api/v[0-9]+/.*)`                                       |
