@@ -216,6 +216,7 @@ app-backend.domain.com:
 | `proxy.stop_timeout`        | time to wait for stop command                          |                                    | `10s`                   | `number[unit]...`                                                         |
 | `proxy.stop_signal`         | signal sent to container for `stop` and `kill` methods |                                    | docker's default        | `SIGINT`, `SIGTERM`, `SIGHUP`, `SIGQUIT` and those without **SIG** prefix |
 | `proxy.start_endpoint`      | allow waking only from specific endpoint               | `/start`                           | empty **(allow any)**   | relative path                                                             |
+| `proxy.no_loading_page`     | disable loading page when waking up from sleep         |                                    | `false`                 | boolean                                                                   |
 
 ### Proxy Properties
 
