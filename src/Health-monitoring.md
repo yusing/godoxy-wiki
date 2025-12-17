@@ -13,7 +13,7 @@
 
    ```yaml
    healthcheck:
-     test: ["CMD", "curl", "-f", "http://localhost"]
+     test: ['CMD', 'curl', '-f', 'http://localhost']
      interval: 1m30s
      timeout: 10s
      retries: 3
@@ -46,9 +46,9 @@
 
 GoDoxy uses `HEAD` or `GET` to send a request to the specified `path` (default to `/`).
 
-**Healthy**: When server reply any HTTP response, except 503 SERVICE UNAVAILABLE
+**Healthy**: When server reply non 5xx HTTP response
 
-**Unhealthy**: Connection failure / Error, 503 SERVICE UNAVAILABLE
+**Unhealthy**: Connection failure / Error, 5xx HTTP response
 
 ### TCP/UDP healthcheck
 
