@@ -580,25 +580,6 @@ rules:
       require_basic_auth "Admin Access"
 ```
 
-### Static Site with SPA Fallback
-
-```yaml
-rules:
-  - name: static assets
-    on: path /static/*
-    do: serve /var/www/static
-
-  - name: api requests
-    on: path /api/*
-    do: proxy http://backend:3000
-
-  - name: spa fallback
-    on: method GET
-    do: |
-      rewrite / /index.html
-      serve /var/www
-```
-
 ### Rate Limiting and Security
 
 ```yaml
