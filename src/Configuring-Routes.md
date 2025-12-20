@@ -247,6 +247,14 @@ These properties are only available for HTTP/HTTPS routes.
 | `ssl_certificate_key`     | Path to client key                 | string  |         | string                                                              |
 | `ssl_protocols`           | Allowed TLS protocols              | array   |         | case-insensitive list of `TLSv1.0`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3` |
 
+### File Server Properties
+
+| Property | Description    | Type    | Default       | Allowed Values / Syntax |
+| -------- | -------------- | ------- | ------------- | ----------------------- |
+| `root`   | Root directory | string  |               | string                  |
+| `spa`    | SPA mode       | boolean | `false`       | boolean                 |
+| `index`  | Index file     | string  | `/index.html` | string                  |
+
 ### Route Files
 
 Like in docker compose, you can use x-properties for YAML anchors in route files
