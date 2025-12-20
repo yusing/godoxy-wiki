@@ -1,246 +1,250 @@
-import { defineConfig } from "vitepress";
+import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "GoDoxy",
-  description: "Documentations",
-  srcDir: "src",
+  title: 'GoDoxy',
+  description: 'Documentations',
+  srcDir: 'src',
   lastUpdated: true,
   cleanUrls: true,
   markdown: {
     theme: {
-      light: "catppuccin-latte",
-      dark: "catppuccin-mocha",
+      light: 'catppuccin-latte',
+      dark: 'catppuccin-mocha',
     },
   },
   themeConfig: {
     search: {
-      provider: "local",
+      provider: 'local',
     },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: "Home", link: "/" },
-      { text: "Install", link: "/Setup.md" },
-      { text: "API Docs", link: "/api.md" },
-      { text: "Gallery", link: "/Gallery.md" },
+      { text: 'Home', link: '/' },
+      { text: 'Install', link: '/Setup.md' },
+      { text: 'API Docs', link: '/api.md' },
+      { text: 'Gallery', link: '/Gallery.md' },
     ],
     sidebar: [
       {
-        text: "Install",
+        text: 'Install',
         items: [
-          { text: "Automatic", link: "/Setup.md#automatic" },
-          { text: "Manual", link: "/Setup.md#manual-setup" },
+          { text: 'Automatic', link: '/Setup.md#automatic' },
+          { text: 'Manual', link: '/Setup.md#manual-setup' },
         ],
       },
       {
-        text: "Getting Started",
+        text: 'Getting Started',
         items: [
-          { text: "Basics", link: "/Home.md" },
-          { text: "Examples", link: "/Examples.md" },
-          { text: "Configurations", link: "/Configurations.md" },
+          { text: 'Basics', link: '/Home.md' },
+          { text: 'Examples', link: '/Examples.md' },
+          { text: 'Configuring GoDoxy', link: '/Configuring-GoDoxy.md' },
           {
-            text: "Docker Labels and Route Files",
-            link: "/Docker-labels-and-Route-Files.md",
+            text: 'Configuring Routes',
+            link: '/Configuring-Routes.md',
           },
           {
-            text: "DNS-01 Providers",
-            link: "/DNS-01-Providers.md",
-          },
-        ],
-      },
-      {
-        text: "Customization",
-        items: [
-          {
-            text: "WebUI",
-            link: "/WebUI.md",
+            text: 'Multi Docker Nodes',
+            link: '/Multi-Docker-Nodes.md',
           },
           {
-            text: "Custom Error Pages",
-            link: "/Custom-Error-Pages.md",
-          },
-          {
-            text: "CSS Injection",
-            link: "/CSS-Injection.md",
+            text: 'DNS-01 Providers',
+            link: '/DNS-01-Providers.md',
           },
         ],
       },
       {
-        text: "Advanced Topics",
+        text: 'Customization',
         items: [
           {
-            text: "Access Control",
-            link: "/Access-Control.md",
+            text: 'WebUI',
+            link: '/WebUI.md',
+          },
+          {
+            text: 'Custom Error Pages',
+            link: '/Custom-Error-Pages.md',
+          },
+          {
+            text: 'CSS Injection',
+            link: '/CSS-Injection.md',
+          },
+        ],
+      },
+      {
+        text: 'Advanced Topics',
+        items: [
+          {
+            text: 'Access Control',
+            link: '/Access-Control.md',
             items: [
               {
-                text: "Connection Level",
-                link: "/Access-Control.md#connection-level-access-control",
+                text: 'Connection Level',
+                link: '/Access-Control.md#connection-level',
               },
               {
-                text: "Request Level",
-                link: "/Access-Control.md#request-level-access-control",
+                text: 'Request Level',
+                link: '/Access-Control.md#request-level',
               },
               {
-                text: "Access Logging",
-                link: "/Access-Control.md#access-logging",
+                text: 'Access Logging',
+                link: '/Access-Control.md#access-logging',
               },
             ],
           },
           {
-            text: "Idle-Sleep",
-            link: "/Idle-Sleep.md",
+            text: 'Idle-Sleep',
+            link: '/Idle-Sleep.md',
             items: [
               {
-                text: "Docker Containers",
-                link: "/Idle-Sleep.md#docker",
+                text: 'Docker Containers',
+                link: '/Idle-Sleep.md#docker',
               },
               {
-                text: "Proxmox LXCs",
-                link: "/Idle-Sleep.md#proxmox-lxcs",
+                text: 'Proxmox LXCs',
+                link: '/Idle-Sleep.md#proxmox-lxcs',
               },
             ],
           },
           {
-            text: "Health monitoring",
-            link: "/Health-monitoring.md",
+            text: 'Health monitoring',
+            link: '/Health-monitoring.md',
           },
           {
-            text: "Certificates and Domain Matching",
-            link: "/Certificates-and-domain-matching.md",
+            text: 'Certificates and Domain Matching',
+            link: '/Certificates-and-domain-matching.md',
           },
           {
-            text: "Middlewares",
-            link: "/Middlewares.md",
+            text: 'Middlewares',
+            link: '/Middlewares.md',
             collapsed: true,
             items: [
               {
-                text: "Quick Start",
-                link: "/Middlewares.md#quick-start",
+                text: 'Quick Start',
+                link: '/Middlewares.md#quick-start',
               },
               {
-                text: "Configuration Syntax",
-                link: "/Middlewares.md#configuration-syntax",
+                text: 'Configuration Syntax',
+                link: '/Middlewares.md#configuration-syntax',
               },
               {
-                text: "Common Examples",
-                link: "/Middlewares.md#common-examples",
+                text: 'Common Examples',
+                link: '/Middlewares.md#common-examples',
               },
               {
-                text: "Authentication & Security",
-                link: "/Middlewares.md#authentication-and-security",
+                text: 'Authentication & Security',
+                link: '/Middlewares.md#authentication-and-security',
                 items: [
                   {
-                    text: "OIDC (OpenID Connect)",
-                    link: "/Middlewares.md#oidc-openid-connect",
+                    text: 'OIDC (OpenID Connect)',
+                    link: '/Middlewares.md#oidc-openid-connect',
                   },
                   {
-                    text: "hCaptcha",
-                    link: "/Middlewares.md#hcaptcha",
+                    text: 'hCaptcha',
+                    link: '/Middlewares.md#hcaptcha',
                   },
                   {
-                    text: "Forward Auth",
-                    link: "/Middlewares.md#forward-auth",
+                    text: 'Forward Auth',
+                    link: '/Middlewares.md#forward-auth',
                   },
                 ],
               },
               {
-                text: "Traffic Control",
-                link: "/Middlewares.md#traffic-control",
+                text: 'Traffic Control',
+                link: '/Middlewares.md#traffic-control',
                 items: [
                   {
-                    text: "Redirect HTTP",
-                    link: "/Middlewares.md#redirect-http",
+                    text: 'Redirect HTTP',
+                    link: '/Middlewares.md#redirect-http',
                   },
                   {
-                    text: "Custom Error Pages",
-                    link: "/Middlewares.md#custom-error-pages",
+                    text: 'Custom Error Pages',
+                    link: '/Middlewares.md#custom-error-pages',
                   },
                 ],
               },
               {
-                text: "IP Resolution",
-                link: "/Middlewares.md#ip-resolution",
+                text: 'IP Resolution',
+                link: '/Middlewares.md#ip-resolution',
                 items: [
                   {
-                    text: "Real IP",
-                    link: "/Middlewares.md#real-ip",
+                    text: 'Real IP',
+                    link: '/Middlewares.md#real-ip',
                   },
                   {
-                    text: "Cloudflare Real IP",
-                    link: "/Middlewares.md#cloudflare-real-ip",
+                    text: 'Cloudflare Real IP',
+                    link: '/Middlewares.md#cloudflare-real-ip',
                   },
                 ],
               },
               {
-                text: "Access Control",
-                link: "/Middlewares.md#access-control",
+                text: 'Access Control',
+                link: '/Middlewares.md#access-control',
                 items: [
                   {
-                    text: "CIDR Whitelist",
-                    link: "/Middlewares.md#cidr-whitelist",
+                    text: 'CIDR Whitelist',
+                    link: '/Middlewares.md#cidr-whitelist',
                   },
                   {
-                    text: "Rate Limiter",
-                    link: "/Middlewares.md#rate-limiter",
+                    text: 'Rate Limiter',
+                    link: '/Middlewares.md#rate-limiter',
                   },
                 ],
               },
               {
-                text: "Request & Response Modification",
-                link: "/Middlewares.md#request-and-response-modification",
+                text: 'Request & Response Modification',
+                link: '/Middlewares.md#request-and-response-modification',
                 items: [
                   {
-                    text: "Modify Request/Response",
-                    link: "/Middlewares.md#modify-request-or-response",
+                    text: 'Modify Request/Response',
+                    link: '/Middlewares.md#modify-request-or-response',
                   },
                   {
-                    text: "Header Modification Examples",
-                    link: "/Middlewares.md#header-modification-examples",
+                    text: 'Header Modification Examples',
+                    link: '/Middlewares.md#header-modification-examples',
                   },
                   {
-                    text: "X-Forwarded Headers",
-                    link: "/Middlewares.md#x-forwarded-headers",
+                    text: 'X-Forwarded Headers',
+                    link: '/Middlewares.md#x-forwarded-headers',
                   },
                 ],
               },
               {
-                text: "Content Modification",
-                link: "/Middlewares.md#content-modification",
+                text: 'Content Modification',
+                link: '/Middlewares.md#content-modification',
                 items: [
                   {
-                    text: "Modify HTML",
-                    link: "/Middlewares.md#modify-html",
+                    text: 'Modify HTML',
+                    link: '/Middlewares.md#modify-html',
                   },
                   {
-                    text: "Themed",
-                    link: "/Middlewares.md#themed",
+                    text: 'Themed',
+                    link: '/Middlewares.md#themed',
                   },
                 ],
               },
             ],
           },
           {
-            text: "Notifications",
-            link: "/Notifications.md",
+            text: 'Notifications',
+            link: '/Notifications.md',
           },
           {
-            text: "Load Balancing",
-            link: "/Load-Balancing.md",
+            text: 'Load Balancing',
+            link: '/Load-Balancing.md',
           },
           {
-            text: "Rule Based Routing",
-            link: "/Rule-Based-Routing.md",
+            text: 'Rule Based Routing',
+            link: '/Rule-Based-Routing.md',
           },
         ],
       },
     ],
     socialLinks: [
-      { icon: "github", link: "https://github.com/yusing/godoxy" },
-      { icon: "discord", link: "https://discord.gg/invite/umReR62nRd" },
+      { icon: 'github', link: 'https://github.com/yusing/godoxy' },
+      { icon: 'discord', link: 'https://discord.gg/invite/umReR62nRd' },
     ],
     footer: {
-      message: "Released under the MIT License.",
-      copyright: "Copyright © 2024-present Yusing",
+      message: 'Released under the MIT License.',
+      copyright: 'Copyright © 2024-present Yusing',
     },
   },
-});
+})

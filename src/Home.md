@@ -21,14 +21,10 @@
 
 Lite image is a smaller image that runs a static build of WebUI with nginx.
 
-Pros:
-
-- Have smaller image size
-- Use less resources
-
-Cons:
-
-- Less responsive compared to the full image
+| Pros                | Cons                              |
+| ------------------- | --------------------------------- |
+| Smaller image size  | Slower compared to the full image |
+| Uses less resources |                                   |
 
 ## Secure your containers
 
@@ -56,14 +52,6 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 
 ### Authentication
 
-#### General
-
-> [!DANGER]
->
-> If you desire to use WebUI HTTP Only, set `GODOXY_API_JWT_SECURE` to `false`
->
-> **Not recommended**
-
 #### Common
 
 | Environment Variable       | Description                      | Default                                                           | Values                                            |
@@ -71,6 +59,12 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 | `GODOXY_API_JWT_SECURE`    | Secure flag for JWT cookie       | `true`                                                            | boolean                                           |
 | `GODOXY_API_JWT_SECRET`    | Base64 JWT secret for api server | random **(you will have to login again after restarting GoDoxy)** | string                                            |
 | `GODOXY_API_JWT_TOKEN_TTL` | JWT Time-to-live                 | `24h`                                                             | [duration](https://pkg.go.dev/time#ParseDuration) |
+
+> [!DANGER]
+>
+> If you desire to use WebUI without HTTPS, set `GODOXY_API_JWT_SECURE` to `false`
+>
+> **Not recommended**
 
 #### User Password Auth
 

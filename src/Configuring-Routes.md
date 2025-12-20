@@ -1,19 +1,16 @@
-# Docker Labels and Route Files
+# Configuring Routes
 
-## Why Use Labels?
+## TL;DR
 
-Using labels, you can:
-
-- Configure proxy settings (port, scheme, etc.)
-- Set aliases for your services
-- Specify middlewares, homepage config, etc.
+- For docker containers, use labels to configure routes
+- For non-docker apps, use route files
 
 ## What Are Route Files?
 
 - Route files are YAML files that are used to configure additional routes, typically for non-Docker apps.
 - They are under `config/` directory, with a meaningful name like `config/pve.yml` (means routes are from Proxmox VMs/LXCs)
-- They support hot-reloading (automatic reloading when file changes)
-- If you don't have that many services, you can simply put all of them in a single file
+- They will be reloaded automatically when file changes
+- **Remember to add the file to `providers.include` in `config.yml`**
 
 ## How to Use Them?
 
@@ -150,9 +147,9 @@ services:
 
 # route file
 app.domain.com:
-  ...
+  port: 80
 app-backend.domain.com:
-  ...
+  port: 8080
 ```
 
 ### Docker Troubleshooting
