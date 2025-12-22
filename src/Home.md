@@ -75,14 +75,16 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 
 #### OIDC
 
-| Environment Variable         | Description                                                | Default                       |
-| ---------------------------- | ---------------------------------------------------------- | ----------------------------- |
-| `GODOXY_OIDC_ISSUER_URL`     | OIDC issuer URL                                            | empty                         |
-| `GODOXY_OIDC_CLIENT_ID`      | OIDC client ID                                             | empty                         |
-| `GODOXY_OIDC_CLIENT_SECRET`  | OIDC client secret                                         | empty                         |
-| `GODOXY_OIDC_ALLOWED_USERS`  | OIDC allowed users (optional when `ALLOWED_GROUPS` is set) | empty                         |
-| `GODOXY_OIDC_ALLOWED_GROUPS` | OIDC allowed groups (optional when `ALLOWED_USERS` is set) | empty                         |
-| `GODOXY_OIDC_SCOPES`         | OIDC scopes                                                | `openid,profile,email,groups` |
+| Environment Variable            | Description                                                | Default                       |
+| ------------------------------- | ---------------------------------------------------------- | ----------------------------- |
+| `GODOXY_OIDC_ISSUER_URL`        | OIDC issuer URL                                            | empty                         |
+| `GODOXY_OIDC_CLIENT_ID`         | OIDC client ID                                             | empty                         |
+| `GODOXY_OIDC_CLIENT_SECRET`     | OIDC client secret                                         | empty                         |
+| `GODOXY_OIDC_ALLOWED_USERS`     | OIDC allowed users (optional when `ALLOWED_GROUPS` is set) | empty                         |
+| `GODOXY_OIDC_ALLOWED_GROUPS`    | OIDC allowed groups (optional when `ALLOWED_USERS` is set) | empty                         |
+| `GODOXY_OIDC_SCOPES`            | OIDC scopes                                                | `openid,profile,email,groups` |
+| `GODOXY_OIDC_RATE_LIMIT`        | OIDC rate limit                                            | `10`                          |
+| `GODOXY_OIDC_RATE_LIMIT_PERIOD` | OIDC rate limit period                                     | `1s`                          |
 
 ##### Scopes
 
