@@ -14,23 +14,23 @@ providers:
 
 The `config.yml` file is divided into several sections:
 
-| Section                      | Description                                                                              |
-| ---------------------------- | ---------------------------------------------------------------------------------------- |
-| `acl`                        | Handles access control                                                                   |
-| `autocert`                   | Handles SSL certificate settings                                                         |
-| `entrypoint`                 | Manages GoDoxy entrypoints (port 80 and 443)                                             |
-| &nbsp;&nbsp;↳ `middlewares`  | Defines middleware settings                                                              |
-| &nbsp;&nbsp;↳ `access_log`   | Configures access logs                                                                   |
-| `providers`                  | Sets up orchestrators (<span style="font-weight: bold; color: #e57373;">required</span>) |
-| &nbsp;&nbsp;↳ `include`      | Includes route configuration files                                                       |
-| &nbsp;&nbsp;↳ `docker`       | Configures Docker providers                                                              |
-| &nbsp;&nbsp;↳ `agents`       | GoDoxy agents                                                                            |
-| &nbsp;&nbsp;↳ `proxmox`      | Proxmox credentials                                                                      |
-| &nbsp;&nbsp;↳ `notification` | Configures notifications for health monitoring                                           |
-| &nbsp;&nbsp;↳ `maxmind`      | MaxMind credentials                                                                      |
-| `match_domains`              | List of domains to match                                                                 |
-| `defaults`                   | Default values                                                                           |
-| `homepage`                   | Configures homepage settings                                                             |
+| Section            | Description                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| `acl`              | Handles access control                                                                   |
+| `autocert`         | Handles SSL certificate settings                                                         |
+| `entrypoint`       | Manages GoDoxy entrypoints (port 80 and 443)                                             |
+|   ↳ `middlewares`  | Defines middleware settings                                                              |
+|   ↳ `access_log`   | Configures access logs                                                                   |
+| `providers`        | Sets up orchestrators (<span style="font-weight: bold; color: #e57373;">required</span>) |
+|   ↳ `include`      | Includes route configuration files                                                       |
+|   ↳ `docker`       | Configures Docker providers                                                              |
+|   ↳ `agents`       | GoDoxy agents                                                                            |
+|   ↳ `proxmox`      | Proxmox credentials                                                                      |
+|   ↳ `notification` | Configures notifications for health monitoring                                           |
+|   ↳ `maxmind`      | MaxMind credentials                                                                      |
+| `match_domains`    | List of domains to match                                                                 |
+| `defaults`         | Default values                                                                           |
+| `homepage`         | Configures homepage settings                                                             |
 
 ### Environment Variables substitution
 
@@ -114,6 +114,34 @@ providers:
     account_id: 123456
     license_key: your-license-key
     database: geolite # or geoip2 if you have subscription
+```
+
+### Docker Providers
+
+Instead of an URL string, you can use a structured object to configure tls / mTLS.
+
+| Property        | Description                             | Required                 | Default     |
+| --------------- | --------------------------------------- | ------------------------ | ----------- |
+| `scheme`        | The scheme to use for the connection.   | Yes                      | `https`     |
+| `host`          | The host to connect to.                 | Yes                      | `localhost` |
+| `port`          | The port to connect to.                 | Yes                      | `2375`      |
+| `tls`           | The TLS configuration.                  | No                       | `null`      |
+| `tls.ca_file`   | The path to the CA certificate.         | Yes with `tls`           | `null`      |
+| `tls.cert_file` | The path to the client certificate.     | Yes with `tls.key_file`  | `null`      |
+| `tls.key_file`  | The path to the client certificate key. | Yes with `tls.cert_file` | `null`      |
+
+```yaml
+providers:
+  docker:
+    local: ${DOCKER_HOST}
+    remote_secured:
+      scheme: https
+      host: 10.0.2.1
+      port: 2375
+      tls:
+        ca_file: /path/to/ca.pem
+        cert_file: /path/to/cert.pem
+        key_file: /path/to/key.pem
 ```
 
 ### Default Values
