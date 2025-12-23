@@ -2881,7 +2881,7 @@ Status: Internal Server Error
 | aliases | []string| `[]string` |  | |  |  |
 | container_id | string| `string` |  | |  |  |
 | container_name | string| `string` |  | |  |  |
-| docker_host | string| `string` |  | |  |  |
+| docker_cfg | [DockerProviderConfig](#docker-provider-config)| `DockerProviderConfig` |  | |  |  |
 | errors | string| `string` |  | |  |  |
 | idlewatcher_config | [IdlewatcherConfig](#idlewatcher-config)| `IdlewatcherConfig` |  | |  |  |
 | image | [ContainerImage](#container-image)| `ContainerImage` |  | |  |  |
@@ -2991,7 +2991,40 @@ Status: Internal Server Error
 |------|------|---------|:--------:| ------- |-------------|---------|
 | container_id | string| `string` | ✓ | |  |  |
 | container_name | string| `string` | ✓ | |  |  |
-| docker_host | string| `string` | ✓ | |  |  |
+| docker_cfg | [DockerProviderConfig](#docker-provider-config)| `DockerProviderConfig` | ✓ | |  |  |
+
+
+
+### <span id="docker-provider-config"></span> DockerProviderConfig
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| tls | [DockerTLSConfig](#docker-tls-config)| `DockerTLSConfig` |  | |  |  |
+| url | string| `string` |  | |  |  |
+
+
+
+### <span id="docker-tls-config"></span> DockerTLSConfig
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| ca_file | string| `string` | ✓ | |  |  |
+| cert_file | string| `string` |  | |  |  |
+| key_file | string| `string` |  | |  |  |
 
 
 
@@ -3407,6 +3440,7 @@ Status: Internal Server Error
 | depends_on | []string| `[]string` |  | |  |  |
 | docker | [DockerConfig](#docker-config)| `DockerConfig` |  | |  |  |
 | idle_timeout | [IdlewatcherConfig](#idlewatcher-config)| `IdlewatcherConfig` |  | | 0: no idle watcher.</br>Positive: idle watcher with idle timeout.</br>Negative: idle watcher as a dependency.	IdleTimeout time.Duration `json:"idle_timeout" json_ext:"duration"` |  |
+| no_loading_page | boolean| `bool` |  | |  |  |
 | proxmox | [ProxmoxConfig](#proxmox-config)| `ProxmoxConfig` |  | |  |  |
 | start_endpoint | string| `string` |  | | Optional path that must be hit to start container |  |
 | stop_method | [ContainerStopMethod](#container-stop-method)| `ContainerStopMethod` |  | |  |  |
@@ -3860,6 +3894,7 @@ Status: Internal Server Error
 | homepage | [HomepageItemConfig](#homepage-item-config)| `HomepageItemConfig` |  | |  |  |
 | host | string| `string` |  | |  |  |
 | idlewatcher | [Route](#route)| `Route` |  | |  |  |
+| index | string| `string` |  | | Index file to serve for single-page app mode |  |
 | load_balance | [Route](#route)| `Route` |  | |  |  |
 | lurl | string| `string` |  | | private fields |  |
 | middlewares | map of [TypesLabelMap](#types-label-map)| `map[string]TypesLabelMap` |  | |  |  |
@@ -3873,6 +3908,7 @@ Status: Internal Server Error
 | rule_file | string| `string` |  | |  |  |
 | rules | [][RulesRule](#rules-rule)| `[]*RulesRule` |  | |  |  |
 | scheme | string| `string` |  | |  |  |
+| spa | boolean| `bool` |  | | Single-page app mode: serves index for non-existent paths |  |
 | ssl_certificate | string| `string` |  | | Path to client certificate |  |
 | ssl_certificate_key | string| `string` |  | | Path to client certificate key |  |
 | ssl_protocols | []string| `[]string` |  | | Allowed TLS protocols |  |
@@ -4449,6 +4485,7 @@ Status: Internal Server Error
 | homepage | [HomepageItemConfig](#homepage-item-config)| `HomepageItemConfig` |  | |  |  |
 | host | string| `string` |  | |  |  |
 | idlewatcher | [RouteRoute](#route-route)| `RouteRoute` |  | |  |  |
+| index | string| `string` |  | | Index file to serve for single-page app mode |  |
 | load_balance | [RouteRoute](#route-route)| `RouteRoute` |  | |  |  |
 | lurl | string| `string` |  | | private fields |  |
 | middlewares | map of [TypesLabelMap](#types-label-map)| `map[string]TypesLabelMap` |  | |  |  |
@@ -4462,6 +4499,7 @@ Status: Internal Server Error
 | rule_file | string| `string` |  | |  |  |
 | rules | [][RulesRule](#rules-rule)| `[]*RulesRule` |  | |  |  |
 | scheme | string| `string` |  | |  |  |
+| spa | boolean| `bool` |  | | Single-page app mode: serves index for non-existent paths |  |
 | ssl_certificate | string| `string` |  | | Path to client certificate |  |
 | ssl_certificate_key | string| `string` |  | | Path to client certificate key |  |
 | ssl_protocols | []string| `[]string` |  | | Allowed TLS protocols |  |
