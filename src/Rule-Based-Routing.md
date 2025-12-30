@@ -330,6 +330,7 @@ do: |
 | `rewrite`            | `<from> <to>`                           | false       | Rewrite request path                                            | `rewrite /api /backend`      |
 | `serve`              | `<path>`                                | true        | Serve static files/directory                                    | `serve /static`              |
 | `proxy`              | `<url \| path>`                         | true        | Proxy request to absolute or relative path                      | `proxy http://backend:8080`  |
+| `route`              | `<route_name>`                          | true        | Route request to route name (including exclude routes)          | `route app-backend`          |
 | `redirect`           | `<url \| path>`                         | true        | Redirect to absolute or relative path                           | `redirect /login`            |
 | `error`              | `<status> <template>`                   | true        | Return error response                                           | `error 403 "Forbidden"`      |
 | `require_basic_auth` | `<realm>`                               | true        | Set `WWW-Authenticate` header and return 401                    | `require_basic_auth "Admin"` |
