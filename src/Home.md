@@ -1,5 +1,11 @@
 # Basic Setup
 
+> [!NOTE]
+>
+> The wiki on `https://docs.godoxy.dev` reflects the latest changes in the repository.
+>
+> Open the wiki on your WebUI instance to read docs of the version you're running.
+
 ## Docker Image
 
 | Tag            | Description                             |
