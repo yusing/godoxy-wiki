@@ -2,22 +2,29 @@
 
 ## TL;DR
 
-- **One certificate for all domains** in `autocert.domains`; not per-route.
+- **Main certificate** covers all domains in `autocert.domains`; **extra certificates** can be configured for additional domains.
+- Certificates are selected via **SNI (Server Name Indication)** with precedence: exact match > wildcard match, main cert > extra cert.
 - Certificates are managed by [`lego`](https://github.com/go-acme/lego) (ACME) with DNS-01; auto-issued and auto-renewed.
 - You can bring your own certificate by setting `provider: local`.
 - Short alias vs FQDN determines how domains match; `match_domains` restricts which base domains are valid.
 
 ## Certificates
 
-- GoDoxy **does not** create a certificate per route. It issues a single certificate that covers every domain listed in `autocert.domains` in `config.yml`. All HTTPS requests are served with this same certificate.
+- GoDoxy uses a **main certificate** that covers every domain listed in `autocert.domains` in `config.yml`. You can also configure **extra certificates** for additional domains via the `extra` field.
+
+- Certificate selection is based on **SNI (Server Name Indication)** from the client's TLS handshake:
+  - **Exact match** takes precedence over wildcard match (e.g., `app.example.com` exact beats `*.example.com` wildcard)
+  - **Main certificate** takes precedence over extra certificates when both match the same domain
+  - If no SNI match is found, the main certificate is used as fallback
 
 - Certificates are issued/managed by `lego` using [ACME](<https://en.wikipedia.org/wiki/ACME_(protocol)>) and typically [Let's Encrypt](https://letsencrypt.org) via the [DNS-01](https://en.wikipedia.org/wiki/DNS-01) challenge.
 
 - Auto-issue/renew behavior (with a 1-hour cooldown after failures). Renewal happens when:
-
   - `autocert` is enabled but no certs are present in `certs/`.
   - The set of `autocert.domains` no longer matches the loaded certificate.
   - The certificate will expire within 30 days.
+
+- Extra certificates participate in ACME obtain/renew cycles independently and inherit configuration from the main config (except `email` and `extra` fields).
 
 - You can also use an existing (including self-signed) certificate.
 
@@ -32,12 +39,24 @@
 | `resolvers`  | array  | -                | No                    | DNS resolvers to use                         |
 | `cert_path`  | string | `certs/cert.crt` | No                    | Path to the certificate file to load / store |
 | `key_path`   | string | `certs/priv.key` | No                    | Path to the private key file to load / store |
+| `extra`      | array  | -                | No                    | Additional certificates (see below)          |
 | `ca_dir_url` | string | -                | No                    | URL to the CA directory                      |
 | `ca_certs`   | array  | -                | No                    | CA certificates to use                       |
 | `eab_kid`    | string | -                | No                    | EAB¹ Key ID                                  |
 | `eab_hmac`   | string | -                | No                    | Base64 encoded EAB¹ HMAC                     |
 
 1. EAB refers to External Account Binding.
+
+#### Extra Certificates
+
+The `extra` field allows you to configure additional certificates for domains not covered by the main certificate. Each extra entry:
+
+- **Must** specify unique `cert_path` and `key_path` (no duplicates across extra entries)
+- **Inherits** all configuration from the main config (except `extra` fields)
+- **Participates** in ACME obtain/renew cycles independently
+- **Can override** any field from the main config (e.g., `domains`, `provider`, `options`)
+
+Extra certificates are selected via SNI when the client's requested domain matches the certificate's domains (exact or wildcard). The main certificate takes precedence when both match.
 
 ### Using Existing SSL Certificate
 
@@ -56,7 +75,7 @@ autocert:
   provider: cloudflare
   email: your-email@example.com
   domains:
-    - "*.yourdomain.com"
+    - '*.yourdomain.com'
   options:
     auth_token: your-zone-api-token
 ```
@@ -79,7 +98,7 @@ autocert:
   provider: custom
   email: your-email@example.com
   domains:
-    - "*.yourdomain.com"
+    - '*.yourdomain.com'
   ca_dir_url: https://acme.internal/acme/acme/directory
   ca_certs:
     - certs/roots.pem
@@ -94,10 +113,66 @@ autocert:
   provider: custom
   email: your-email@example.com
   domains:
-    - "*.yourdomain.com"
+    - '*.yourdomain.com'
   eab_kid: your-eab-kid
   eab_hmac: base64-encoded-hmac
 ```
+
+### Multiple Certificates with SNI
+
+You can configure multiple certificates to serve different domains. GoDoxy uses SNI to select the appropriate certificate during the TLS handshake.
+
+**Example: Multiple certificates with different providers**
+
+```yaml
+autocert:
+  provider: cloudflare
+  email: your-email@example.com
+  domains:
+    - '*.example.com'
+  options:
+    auth_token: your-zone-api-token
+  extra:
+    # Extra cert 1: Same provider, different domain
+    - cert_path: certs/other.crt
+      key_path: certs/other.key
+      domains:
+        - '*.other.com'
+      # Inherits provider, email, options from main config
+
+    # Extra cert 2: Different provider (custom CA)
+    - cert_path: certs/internal.crt
+      key_path: certs/internal.key
+      provider: custom
+      domains:
+        - '*.internal.local'
+      ca_dir_url: https://ca.internal/acme/directory
+
+    # Extra cert 3: Local/static certificate
+    - cert_path: certs/static.crt
+      key_path: certs/static.key
+      provider: local
+      domains:
+        - '*.services.internal'
+      # Static certificate, no ACME obtain/renew
+```
+
+**SNI Selection Behavior:**
+
+Based on the example above, certificate selection works as follows:
+
+- Request for `app.example.com` → Uses main cert (exact match on `*.example.com`)
+- Request for `sub.example.com` → Uses main cert (wildcard match on `*.example.com`)
+- Request for `api.other.com` → Uses extra cert 1 (wildcard match on `*.other.com`)
+- Request for `service.internal.local` → Uses extra cert 2 (wildcard match on `*.internal.local`)
+- Request for `db.services.internal` → Uses extra cert 3 (wildcard match on `*.services.internal`)
+- Request for `unknown.com` → Falls back to main cert (no match found)
+
+**Selection Precedence:**
+
+1. **Exact match** takes precedence over wildcard match (e.g., if main cert has exact `app.example.com` and extra cert has wildcard `*.example.com`, exact wins)
+2. **Main certificate** takes precedence over extra certificates when both match the same domain
+3. If no SNI match is found, the main certificate is used as fallback
 
 ### Other DNS providers
 
