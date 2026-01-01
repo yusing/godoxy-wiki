@@ -159,22 +159,34 @@ Add these to `.env`:
 
 **Default URL: `<container_name>.yourdomain.com`**
 
-> [!NOTE]
->
-> All containers are proxied by default, except any of the following is true:
->
-> - label `proxy.exclude` is set to **true**
-> - GoDoxy **IS NOT** explicit enabled for container, but it is either
->   - from a provider in **explicit only mode** (provider name with exclamation mark **`!`** suffix)
->   - **or** detected as a backend service (e.g. headless browsers, databases, etc.)
-> - container doesn't have any exposed port
-> - container name has prefix `buildx_`
-> - `alias` with prefix `x-` or suffix `-old`
+### Container Proxying
 
-To explicitly enable **GoDoxy** for a container:
+**ALL CONTAINERS** are proxied by default, **unless any of the following is true**:
+
+- The label `proxy.exclude` is set to **true**
+- The container is from a provider in **explicit only mode** (name with a trailing exclamation mark **`!`**)
+- The container is a backend service (e.g.: headless browsers, databases, etc.)
+- The container doesn't have any exposed port
+- The container name starts with `buildx_`
+- The alias starts with `x-` or ends with `-old`
+
+### Explicitly Enable Container Proxying
 
 - **GoDoxy < v0.9** - set label `proxy.aliases`
 - **GoDoxy >= v0.9** - set any label starting with `proxy.`
+
+### Health Monitoring
+
+Health monitoring is enabled by default for **ALL CONTAINERS**, including the excluded ones.
+
+It can be disabled by setting `healthcheck.disable: true` per route in the route file or in the docker labels.
+
+```yaml
+services:
+  app:
+    labels:
+      proxy.app.healthcheck.disable: true
+```
 
 ## Use JSON Schema in IDEs
 
