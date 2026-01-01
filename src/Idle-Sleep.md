@@ -72,15 +72,16 @@ services:
 
 ## Configuration
 
-| Label            | Description                                                   | Example  | Default                                     | Accepted values                                                           |
-| ---------------- | ------------------------------------------------------------- | -------- | ------------------------------------------- | ------------------------------------------------------------------------- |
-| `idle_timeout`   | inactivity timeout before put it into sleep<br/>**❌TCP/UDP** | `1h30s`  | empty **(disabled)**                        | `number[unit]...`                                                         |
-| `wake_timeout`   | time to wait for target site to be ready                      |          | `30s`                                       | `number[unit]...`                                                         |
-| `stop_method`    | method to stop after `idle_timeout`                           |          | `stop`                                      | `stop`, `pause`, `kill`                                                   |
-| `stop_timeout`   | time to wait for stop command                                 |          | `10s`                                       | `number[unit]...`                                                         |
-| `stop_signal`    | signal sent to container for `stop` and `kill` methods        |          | docker's default                            | `SIGINT`, `SIGTERM`, `SIGHUP`, `SIGQUIT` and those without **SIG** prefix |
-| `start_endpoint` | allow waking only from specific endpoint                      | `/start` | empty **(allow any)**                       | relative URI                                                              |
-| `depends_on`     | container to wait and wake/stop together                      |          | `depends_on` field from docker compose file | `alias or docker compose service[:condition]`                             |
+| Label             | Description                                                   | Example  | Default                                     | Accepted values                                                           |
+| ----------------- | ------------------------------------------------------------- | -------- | ------------------------------------------- | ------------------------------------------------------------------------- |
+| `idle_timeout`    | inactivity timeout before put it into sleep<br/>**❌TCP/UDP** | `1h30s`  | empty **(disabled)**                        | `number[unit]...`                                                         |
+| `wake_timeout`    | time to wait for target site to be ready                      |          | `30s`                                       | `number[unit]...`                                                         |
+| `stop_method`     | method to stop after `idle_timeout`                           |          | `stop`                                      | `stop`, `pause`, `kill`                                                   |
+| `stop_timeout`    | time to wait for stop command                                 |          | `10s`                                       | `number[unit]...`                                                         |
+| `stop_signal`     | signal sent to container for `stop` and `kill` methods        |          | docker's default                            | `SIGINT`, `SIGTERM`, `SIGHUP`, `SIGQUIT` and those without **SIG** prefix |
+| `start_endpoint`  | allow waking only from specific endpoint                      | `/start` | empty **(allow any)**                       | relative URI                                                              |
+| `depends_on`      | container to wait and wake/stop together                      |          | `depends_on` field from docker compose file | `alias or docker compose service[:condition]`                             |
+| `no_loading_page` | disable loading page when waking up from sleep                |          | `false`                                     | boolean                                                                   |
 
 ### Docker
 
@@ -99,6 +100,7 @@ services:
       proxy.stop_timeout: 10s       # optional
       proxy.stop_signal: SIGINT     # optional
       proxy.start_endpoint: /start  # optional
+      proxy.no_loading_page: true   # optional
     depends_on:
       redis:
         condition: service_healthy
