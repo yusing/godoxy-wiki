@@ -15,14 +15,14 @@ Connection level access control handles IP addresses before the request is even 
 
 ### ACL Configuration
 
-| Key           | Type        | Description                                                         | Required | Default |
-| ------------- | ----------- | ------------------------------------------------------------------- | -------- | ------- |
-| `default`     | string      | Default action                                                      | **Yes**  | `allow` |
-| `allow_local` | bool        | Allow local addresses                                               | No       | `true`  |
-| `allow`       | Filter List | Allow list                                                          | No       | `[]`    |
-| `deny`        | Filter List | Deny list                                                           | No       | `[]`    |
-| `log`         | object      | [Log configuration](#access-logging) with extra `log_allowed` field | No       | `{}`    |
-| `notify`      | object      | Periodically send access summary to notification provider           | No       | `{}`    |
+| Key           | Type              | Description                                                         | Default |
+| ------------- | ----------------- | ------------------------------------------------------------------- | ------- |
+| `default`     | `allow` or `deny` | Default action                                                      | `allow` |
+| `allow_local` | bool              | Allow local addresses                                               | `true`  |
+| `allow`       | Filter List       | Allow list                                                          | `[]`    |
+| `deny`        | Filter List       | Deny list                                                           | `[]`    |
+| `log`         | object            | [Log configuration](#access-logging) with extra `log_allowed` field | `{}`    |
+| `notify`      | object            | Periodically send access summary to notification provider           | `{}`    |
 
 ### ACL Notification Configuration
 
@@ -64,6 +64,11 @@ providers:
     account_id: 123456
     license_key: your-license-key
     database: geolite # or geoip2 if you have subscription
+  notification:
+    - name: discord
+      provider: discord
+      url: https://discord.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz
+      token: your-token
 ```
 
 ## Request Level
