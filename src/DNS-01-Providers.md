@@ -96,7 +96,7 @@ See [Certificates and domain matching](Certificates-and-domain-matching.md#auto-
 ## Others
 
 > [!NOTE]
-> A full list of provider names can be found in [autocert/providers.go](https://github.com/yusing/godoxy/blob/4410637f8b543e0042ee92efe63319fad35778a3/internal/autocert/providers.go#L153)
+> A full list of provider names can be found in [dnsproviders/providers.go](https://github.com/yusing/godoxy/blob/main/internal/dnsproviders/providers.go)
 >
 > Full documentation of [LEGO](https://go-acme.github.io/lego/index.html) supported providers can be found in [LEGO DNS documentation](https://go-acme.github.io/lego/dns).
 
