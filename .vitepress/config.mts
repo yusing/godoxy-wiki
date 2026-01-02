@@ -73,6 +73,10 @@ export default defineConfig({
         text: 'Advanced Topics',
         items: [
           {
+            text: 'Benchmarks and Resource Usage',
+            link: '/Benchmarks-and-Resource-Usage.md',
+          },
+          {
             text: 'Access Control',
             link: '/Access-Control.md',
             items: [
