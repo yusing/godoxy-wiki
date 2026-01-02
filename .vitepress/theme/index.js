@@ -1,5 +1,5 @@
-import DefaultTheme from "vitepress/theme";
+import DefaultTheme from 'vitepress/theme'
 
-import "@catppuccin/vitepress/theme/mocha/sky.css";
+import '@catppuccin/vitepress/theme/mocha/sky.css'
 
-export default DefaultTheme;
+export default DefaultTheme
