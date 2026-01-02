@@ -17,19 +17,19 @@ Run the benchmark with:
 
 `make benchmark` or `make TARGET={godoxy|traefik|nginx|caddy} benchmark`
 
-Results (Last updated: `2026-01-03 01:39 +0800`):
+Results (Last updated: `2026-01-03 02:10 +0800`):
 
 | Proxy   | HTTP/1.1 Req/sec | HTTP/2 Req/sec | HTTP/1.1 Latency (avg) | HTTP/2 Latency (avg) | Transfer/sec (HTTP/1.1) |
 | ------- | ---------------- | -------------- | ---------------------- | -------------------- | ----------------------- |
-| Nginx   | 122,797.73       | 88,854.90      | 1.01ms                 | 1.06ms               | 17.33MB                 |
-| Traefik | 87,066.96        | 65,411.50      | 1.35ms                 | 1.48ms               | 8.47MB                  |
-| GoDoxy  | 89,100.32        | 68,179.20      | 1.38ms                 | 1.40ms               | 8.67MB                  |
-| Caddy   | 14,048.61        | 1,518.10       | 79.92ms                | 65.06ms              | 1.58MB                  |
+| Nginx   | 122,376.70       | 78,290.20      | 1.13ms                 | 1.09ms               | 17.27MB                 |
+| Traefik | 92,976.36        | 67,898.40      | 1.39ms                 | 1.42ms               | 9.04MB                  |
+| GoDoxy  | 96,319.45        | 68,096.40      | 1.34ms                 | 1.41ms               | 9.37MB                  |
+| Caddy   | 12,890.27        | 1,520.50       | 72.51ms                | 65.57ms              | 1.45MB                  |
 
-- **Nginx** leads with the highest throughput on both HTTP/1.1 (~123k req/s) and HTTP/2 (~89k req/s)
-- **GoDoxy** performs comparably to Traefik, with similar throughput (~89k req/s HTTP/1.1, ~68k req/s HTTP/2) and good latency
-- **Traefik** is slightly behind GoDoxy but still maintains solid performance
-- **Caddy** significantly underperforms, likely a bug (also had errors in HTTP/2 test: 262 failed requests)
+- **Nginx** leads with the highest throughput on both HTTP/1.1 (~122k req/s) and HTTP/2 (~78k req/s)
+- **GoDoxy** performs comparably to Traefik, with slightly higher throughput (~96k req/s HTTP/1.1, ~68k req/s HTTP/2) and lower latency
+- **Traefik** is slightly behind GoDoxy but still maintains solid performance (~93k req/s HTTP/1.1, ~68k req/s HTTP/2)
+- **Caddy** significantly underperforms, likely a bug (also had errors in HTTP/2 test: 6855 failed requests)
 
 ## Resource Usage
 
