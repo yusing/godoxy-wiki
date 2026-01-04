@@ -67,6 +67,10 @@ export default defineConfig({
             text: 'CSS Injection',
             link: '/CSS-Injection.md',
           },
+          {
+            text: 'Short Links',
+            link: '/Short-Links.md',
+          },
         ],
       },
       {
