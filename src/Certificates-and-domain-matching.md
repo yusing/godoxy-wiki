@@ -122,6 +122,10 @@ autocert:
 
 You can configure multiple certificates to serve different domains. GoDoxy uses SNI to select the appropriate certificate during the TLS handshake.
 
+> [!NOTE]
+>
+> `domains` is ignored for `local` provider.
+
 **Example: Multiple certificates with different providers**
 
 ```yaml
