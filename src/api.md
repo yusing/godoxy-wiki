@@ -3144,24 +3144,6 @@ Status: Internal Server Error
 
 
 
-### <span id="health-info"></span> HealthInfo
-
-
-  
-
-
-
-**Properties**
-
-| Name | Type | Go type | Required | Default | Description | Example |
-|------|------|---------|:--------:| ------- |-------------|---------|
-| detail | string| `string` |  | |  |  |
-| latency | number| `float64` |  | | latency in microseconds |  |
-| status | string| `string` |  | |  |  |
-| uptime | number| `float64` |  | | uptime in milliseconds |  |
-
-
-
 ### <span id="health-info-without-detail"></span> HealthInfoWithoutDetail
 
 
@@ -3193,16 +3175,12 @@ Status: Internal Server Error
 | config | [HealthCheckConfig](#health-check-config)| `HealthCheckConfig` |  | |  |  |
 | detail | string| `string` |  | |  |  |
 | extra | [HealthJSON](#health-json)| `HealthJSON` |  | |  |  |
-| lastSeen | integer| `int64` |  | |  |  |
-| lastSeenStr | string| `string` |  | |  |  |
-| latency | number| `float64` |  | |  |  |
-| latencyStr | string| `string` |  | |  |  |
+| lastSeen | integer| `int64` |  | | unix timestamp in seconds |  |
+| latency | integer| `int64` |  | | latency in milliseconds |  |
 | name | string| `string` |  | |  |  |
-| started | integer| `int64` |  | |  |  |
-| startedStr | string| `string` |  | |  |  |
-| status | string| `string` |  | |  |  |
-| uptime | number| `float64` |  | |  |  |
-| uptimeStr | string| `string` |  | |  |  |
+| started | integer| `int64` |  | | unix timestamp in seconds |  |
+| status | [HealthStatusString](#health-status-string)| `HealthStatusString` |  | |  |  |
+| uptime | number| `float64` |  | | uptime in seconds |  |
 | url | string| `string` |  | |  |  |
 
 
@@ -3213,6 +3191,17 @@ Status: Internal Server Error
   
 
 [HealthMap](#health-map)
+
+### <span id="health-status-string"></span> HealthStatusString
+
+
+  
+
+| Name | Type | Go type | Default | Description | Example |
+|------|------|---------| ------- |-------------|---------|
+| HealthStatusString | string| string | |  |  |
+
+
 
 ### <span id="homepage-category"></span> HomepageCategory
 
@@ -4004,6 +3993,7 @@ Status: Internal Server Error
 | downtime | number| `float64` |  | |  |  |
 | idle | number| `float64` |  | |  |  |
 | is_docker | boolean| `bool` |  | |  |  |
+| is_excluded | boolean| `bool` |  | |  |  |
 | statuses | [][RouteStatus](#route-status)| `[]*RouteStatus` |  | |  |  |
 | uptime | number| `float64` |  | |  |  |
 
