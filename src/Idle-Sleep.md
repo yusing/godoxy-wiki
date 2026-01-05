@@ -2,35 +2,33 @@
 
 ## TL;DR
 
-Services consume resources even when they are idle. This can lead to unexpected costs, performance issues and eating up system memory.
+Set `idle_timeout` to automatically sleep idle containers and wake them on traffic. Saves resources for infrequently used services.
 
-For services you don't use frequently, you can set `idle_timeout` to put them to sleep when they are idle.
+- **Providers supported:** Docker and Proxmox LXCs
+- **Protocols supported:** HTTP, TCP, and UDP
 
 ## How?
 
-GoDoxy helps save resources by automatically putting your containers to sleep when they haven't been used for a while (no traffic). As soon as new traffic arrives, GoDoxy wakes the container back up.
+GoDoxy puts containers to sleep after inactivity and wakes them when traffic arrives.
 
 ### Dependencies
 
-If your container relies on other services (defined in your using `depends_on` in docker compose file or `proxy.depends_on` label), GoDoxy is smart about managing them too:
+Containers with `depends_on` are managed together:
 
-- Going to sleep: When the main container becomes idle, GoDoxy will first stop the main container and then stop its dependent services.
-- Waking up: When traffic comes in for the main container, GoDoxy will first start the dependent services and then start the main container.
-
-This ensures that your entire application stack is only running when it needs to be.
+- **Sleep**: Main container stops first, then dependencies
+- **Wake**: Dependencies start first, then main container
 
 > [!WARNING]
->
 > Do not set `idle_timeout` on dependencies.
 
 ### Condition
 
-You can specify `condition` to control when to wake up the dependent services, it is optional and can be one of:
+Control when dependencies are ready:
 
-- `service_started` _(default)_
-- `service_healthy`
+- `service_started` _(default)_ — dependency started
+- `service_healthy` — dependency healthy (requires healthcheck)
 
-It also respects to `condition` in `depends_on` field from docker compose file, see [Docker compose docs](https://docs.docker.com/compose/how-tos/startup-order/) for more details, e.g.
+Supports Docker Compose `depends_on` conditions (see [Docker compose docs](https://docs.docker.com/compose/how-tos/startup-order/) for more details):
 
 ```yaml
 # without conditions (implies `service_started`)
@@ -72,16 +70,16 @@ services:
 
 ## Configuration
 
-| Label             | Description                                                   | Example  | Default                                     | Accepted values                                                           |
-| ----------------- | ------------------------------------------------------------- | -------- | ------------------------------------------- | ------------------------------------------------------------------------- |
-| `idle_timeout`    | inactivity timeout before put it into sleep<br/>**❌TCP/UDP** | `1h30s`  | empty **(disabled)**                        | `number[unit]...`                                                         |
-| `wake_timeout`    | time to wait for target site to be ready                      |          | `30s`                                       | `number[unit]...`                                                         |
-| `stop_method`     | method to stop after `idle_timeout`                           |          | `stop`                                      | `stop`, `pause`, `kill`                                                   |
-| `stop_timeout`    | time to wait for stop command                                 |          | `10s`                                       | `number[unit]...`                                                         |
-| `stop_signal`     | signal sent to container for `stop` and `kill` methods        |          | docker's default                            | `SIGINT`, `SIGTERM`, `SIGHUP`, `SIGQUIT` and those without **SIG** prefix |
-| `start_endpoint`  | allow waking only from specific endpoint                      | `/start` | empty **(allow any)**                       | relative URI                                                              |
-| `depends_on`      | container to wait and wake/stop together                      |          | `depends_on` field from docker compose file | `alias or docker compose service[:condition]`                             |
-| `no_loading_page` | disable loading page when waking up from sleep                |          | `false`                                     | boolean                                                                   |
+| Label             | Description                                            | Example  | Default                                     | Accepted values                                                           |
+| ----------------- | ------------------------------------------------------ | -------- | ------------------------------------------- | ------------------------------------------------------------------------- |
+| `idle_timeout`    | inactivity timeout before put it into sleep<br/>       | `1h30s`  | empty **(disabled)**                        | `number[unit]...`                                                         |
+| `wake_timeout`    | time to wait for target site to be ready               |          | `30s`                                       | `number[unit]...`                                                         |
+| `stop_method`     | method to stop after `idle_timeout`                    |          | `stop`                                      | `stop`, `pause`, `kill`                                                   |
+| `stop_timeout`    | time to wait for stop command                          |          | `10s`                                       | `number[unit]...`                                                         |
+| `stop_signal`     | signal sent to container for `stop` and `kill` methods |          | docker's default                            | `SIGINT`, `SIGTERM`, `SIGHUP`, `SIGQUIT` and those without **SIG** prefix |
+| `start_endpoint`  | allow waking only from specific endpoint               | `/start` | empty **(allow any)**                       | relative URI                                                              |
+| `depends_on`      | container to wait and wake/stop together               |          | `depends_on` field from docker compose file | `alias or docker compose service[:condition]`                             |
+| `no_loading_page` | disable loading page when waking up from sleep         |          | `false`                                     | boolean                                                                   |
 
 ### Docker
 
