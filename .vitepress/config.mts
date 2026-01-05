@@ -85,12 +85,12 @@ export default defineConfig({
             link: '/Access-Control.md',
             items: [
               {
-                text: 'Connection Level',
-                link: '/Access-Control.md#connection-level',
+                text: 'Layer 4 - TCP/UDP',
+                link: '/Access-Control.md#layer-4',
               },
               {
-                text: 'Request Level',
-                link: '/Access-Control.md#request-level',
+                text: 'Layer 7 - HTTP',
+                link: '/Access-Control.md#layer-7',
               },
               {
                 text: 'Access Logging',

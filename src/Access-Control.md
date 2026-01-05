@@ -1,8 +1,15 @@
 # Access Control
 
-## Connection Level
+GoDoxy implements access control at two distinct network layers, each operating at different points in the request lifecycle:
 
-Connection level access control handles IP addresses before the request is even processed. If an IP is blocked, the connection will be dropped (and logged if configured).
+| Layer                 | Description                                         | Blocking Behavior              |
+| --------------------- | --------------------------------------------------- | ------------------------------ |
+| **Layer 4 (TCP/UDP)** | IP filtering when TCP/UDP connection is established | Connection dropped immediately |
+| **Layer 7 (HTTP)**    | IP filtering when HTTP request is fully received    | HTTP error response returned   |
+
+## Layer 4
+
+Transport-layer filtering before HTTP data exchange. Blocked IPs see immediate connection drop with no response. Best for blocking scanners early.
 
 ### Supported Filters
 
@@ -71,9 +78,9 @@ providers:
       token: your-token
 ```
 
-## Request Level
+## Layer 7
 
-Request level access control handles IP addresses after the request is processed. If an IP is blocked, GoProxy will respond with an HTTP error code with an error message (and logged if configured).
+HTTP-level filtering after request headers/body received. Blocked IPs see HTTP 403 with error message. Good for traffic that should get feedback.
 
 > [!NOTE]
 > HTTP Access loggers can be configured
