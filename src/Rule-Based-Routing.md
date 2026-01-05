@@ -143,7 +143,7 @@ The `on` field defines the conditions that must be met for a rule to execute. Co
 | `proto`       | `<http \| https \| h3>`        | Match when protocol equals value           | `proto http`                                                                         |
 | `method`      | `<method>`                     | Match when HTTP method equals value        | `method POST`                                                                        |
 | `host`        | `<pattern>`                    | Match when host matches pattern            | `host example.com`, `host glob(*.example.com)`, `host regex("^[a-z]+-prod\.com$")`   |
-| `path`        | `<pattern>`                    | Match when path matches pattern            | `path /api/*`, `path regex("^/api/v[0-9]+/.*)`                                       |
+| `path`        | `<pattern>`                    | Match when path matches pattern            | `path /version`, `path glob(/api/*)`, `path regex("^/api/v[0-9]+/.*)`                |
 | `remote`      | `<ip \| cidr>`                 | Match when client IP matches CIDR range    | `remote 192.168.1.0/24`                                                              |
 | `route`       | `<pattern>`                    | Match when route name matches pattern      | `route api`, `route glob(api-*)`                                                     |
 | `basic_auth`  | `<username> <hashed_password>` | Match when basic auth credentials match    | `basic_auth admin $2y$10$...`                                                        |
