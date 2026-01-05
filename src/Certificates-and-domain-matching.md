@@ -2,61 +2,58 @@
 
 ## TL;DR
 
-- **Main certificate** covers all domains in `autocert.domains`; **extra certificates** can be configured for additional domains.
-- Certificates are selected via **SNI (Server Name Indication)** with precedence: exact match > wildcard match, main cert > extra cert.
-- Certificates are managed by [`lego`](https://github.com/go-acme/lego) (ACME) with DNS-01; auto-issued and auto-renewed.
-- You can bring your own certificate by setting `provider: local`.
-- Short alias vs FQDN determines how domains match; `match_domains` restricts which base domains are valid.
+- **Main certificate** covers all domains in `autocert.domains`
+- **Extra certificates** can be configured for additional domains
+- SNI selection: exact match > wildcard match, main cert > extra cert
+- Managed by [`lego`](https://github.com/go-acme/lego) (ACME) with DNS-01; auto-issued and auto-renewed
+- Bring your own certificate with `provider: local`
+- Short alias vs FQDN determines how domains match
+- `match_domains` restricts which base domains are valid
 
 ## Certificates
 
-- GoDoxy uses a **main certificate** that covers every domain listed in `autocert.domains` in `config.yml`. You can also configure **extra certificates** for additional domains via the `extra` field.
+- Main certificate covers every domain in `autocert.domains`
+- Extra certificates can be added via the `extra` field for additional domains
 
-- Certificate selection is based on **SNI (Server Name Indication)** from the client's TLS handshake:
-  - **Exact match** takes precedence over wildcard match (e.g., `app.example.com` exact beats `*.example.com` wildcard)
-  - **Main certificate** takes precedence over extra certificates when both match the same domain
-  - If no SNI match is found, the main certificate is used as fallback
+- Based on **SNI (Server Name Indication)** from the client's TLS handshake
+  - Exact match > wildcard match (e.g., `app.example.com` exact beats `*.example.com` wildcard)
+  - Main cert > extra certificates when both match
+  - Falls back to main cert if no match
 
-- Certificates are issued/managed by `lego` using [ACME](<https://en.wikipedia.org/wiki/ACME_(protocol)>) and typically [Let's Encrypt](https://letsencrypt.org) via the [DNS-01](https://en.wikipedia.org/wiki/DNS-01) challenge.
+- Issued/managed by `lego` using ACME, typically Let's Encrypt via DNS-01
 
-- Auto-issue/renew behavior (with a 1-hour cooldown after failures). Renewal happens when:
-  - `autocert` is enabled but no certs are present in `certs/`.
-  - The set of `autocert.domains` no longer matches the loaded certificate.
-  - The certificate will expire within 30 days.
-
-- Extra certificates participate in ACME obtain/renew cycles independently and inherit configuration from the main config (except `email` and `extra` fields).
-
-- You can also use an existing (including self-signed) certificate.
-
-### Autocert Configuration
-
-| Field        | Type   | Default          | Required              | Description                                  |
-| ------------ | ------ | ---------------- | --------------------- | -------------------------------------------- |
-| `provider`   | string | local            | Yes                   | Certificate / DNS-01 provider                |
-| `email`      | string | -                | Yes                   | ACME Email                                   |
-| `domains`    | array  | -                | Yes                   | Certificate domains                          |
-| `options`    | object | -                | `provider` != `local` | Provider-specific options                    |
-| `resolvers`  | array  | -                | No                    | DNS resolvers to use                         |
-| `cert_path`  | string | `certs/cert.crt` | No                    | Path to the certificate file to load / store |
-| `key_path`   | string | `certs/priv.key` | No                    | Path to the private key file to load / store |
-| `extra`      | array  | -                | No                    | Additional certificates (see below)          |
-| `ca_dir_url` | string | -                | No                    | URL to the CA directory                      |
-| `ca_certs`   | array  | -                | No                    | CA certificates to use                       |
-| `eab_kid`    | string | -                | No                    | EAB¹ Key ID                                  |
-| `eab_hmac`   | string | -                | No                    | Base64 encoded EAB¹ HMAC                     |
-
-1. EAB refers to External Account Binding.
+- Auto-issue/renew with 1-hour cooldown after failures. Renewal happens when:
+  - `autocert` is enabled but no certs are present
+  - The set of `autocert.domains` no longer matches the loaded certificate
+  - The certificate will expire within 30 days
 
 #### Extra Certificates
 
-The `extra` field allows you to configure additional certificates for domains not covered by the main certificate. Each extra entry:
+- Must specify unique `cert_path` and `key_path` (no duplicates)
+- Inherit all configuration from the main config (except `extra`)
+- Participate in ACME cycles independently
 
-- **Must** specify unique `cert_path` and `key_path` (no duplicates across extra entries)
-- **Inherits** all configuration from the main config (except `extra` fields)
-- **Participates** in ACME obtain/renew cycles independently
-- **Can override** any field from the main config (e.g., `domains`, `provider`, `options`)
+- Selected via SNI when the client's requested domain matches (exact or wildcard)
+- Main certificate takes precedence when both match
 
-Extra certificates are selected via SNI when the client's requested domain matches the certificate's domains (exact or wildcard). The main certificate takes precedence when both match.
+### Autocert Configuration
+
+| Field        | Type   | Default          | Required              | Description                   |
+| ------------ | ------ | ---------------- | --------------------- | ----------------------------- |
+| `provider`   | string | local            | Yes                   | Certificate / DNS-01 provider |
+| `email`      | string | -                | Yes                   | ACME email                    |
+| `domains`    | array  | -                | Yes                   | Certificate domains           |
+| `options`    | object | -                | `provider` != `local` | Provider-specific options     |
+| `resolvers`  | array  | -                | No                    | DNS resolvers                 |
+| `cert_path`  | string | `certs/cert.crt` | No                    | Certificate file path         |
+| `key_path`   | string | `certs/priv.key` | No                    | Private key file path         |
+| `extra`      | array  | -                | No                    | Additional certificates       |
+| `ca_dir_url` | string | -                | No                    | CA directory URL              |
+| `ca_certs`   | array  | -                | No                    | CA certificates to use        |
+| `eab_kid`    | string | -                | No                    | EAB Key ID                    |
+| `eab_hmac`   | string | -                | No                    | Base64 encoded EAB¹ HMAC      |
+
+1. EAB refers to External Account Binding.
 
 ### Using Existing SSL Certificate
 
@@ -106,7 +103,7 @@ autocert:
 
 #### EAB
 
-If you are using EAB (External Account Binding), set `eab_kid` and `eab_hmac` in `autocert`. This also works with custom ACME CAs.
+If using EAB (External Account Binding), set `eab_kid` and `eab_hmac` in `autocert`. Also works with custom ACME CAs.
 
 ```yaml
 autocert:
@@ -120,7 +117,7 @@ autocert:
 
 ### Multiple Certificates with SNI
 
-You can configure multiple certificates to serve different domains. GoDoxy uses SNI to select the appropriate certificate during the TLS handshake.
+Configure multiple certificates for different domains. GoDoxy uses SNI to select the appropriate certificate during TLS handshake.
 
 > [!NOTE]
 >
@@ -165,18 +162,20 @@ autocert:
 
 Based on the example above, certificate selection works as follows:
 
-- Request for `app.example.com` → Uses main cert (exact match on `*.example.com`)
-- Request for `sub.example.com` → Uses main cert (wildcard match on `*.example.com`)
-- Request for `api.other.com` → Uses extra cert 1 (wildcard match on `*.other.com`)
-- Request for `service.internal.local` → Uses extra cert 2 (wildcard match on `*.internal.local`)
-- Request for `db.services.internal` → Uses extra cert 3 (wildcard match on `*.services.internal`)
-- Request for `unknown.com` → Falls back to main cert (no match found)
+| Hostname                 | Selected Certificate | Match Type                             |
+| ------------------------ | -------------------- | -------------------------------------- |
+| `app.example.com`        | Main cert            | Exact match (`*.example.com`)          |
+| `sub.example.com`        | Main cert            | Wildcard match (`*.example.com`)       |
+| `api.other.com`          | Extra cert 1         | Wildcard match (`*.other.com`)         |
+| `service.internal.local` | Extra cert 2         | Wildcard match (`*.internal.local`)    |
+| `db.services.internal`   | Extra cert 3         | Wildcard match (`*.services.internal`) |
+| `unknown.com`            | Main cert (fallback) | No match                               |
 
 **Selection Precedence:**
 
-1. **Exact match** takes precedence over wildcard match (e.g., if main cert has exact `app.example.com` and extra cert has wildcard `*.example.com`, exact wins)
-2. **Main certificate** takes precedence over extra certificates when both match the same domain
-3. If no SNI match is found, the main certificate is used as fallback
+1. Exact match > wildcard match
+2. Main cert > extra certificates when both match
+3. Falls back to main cert if no match
 
 ### Other DNS providers
 
@@ -186,8 +185,8 @@ Check [DNS-01 Providers](DNS-01-Providers.md)
 
 If you encounter issues:
 
-- Set `LEGO_DISABLE_CNAME_SUPPORT=1` if your domain has a CNAME record.
-- Try different DNS resolvers via `autocert.resolvers`.
+- Set `LEGO_DISABLE_CNAME_SUPPORT=1` if your domain has a CNAME record
+- Try different DNS resolvers via `autocert.resolvers`
 
 ## Domain matching
 
