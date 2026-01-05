@@ -130,20 +130,38 @@ export default defineConfig({
                 link: '/Middlewares.md#quick-start',
               },
               {
-                text: 'Configuration Syntax',
-                link: '/Middlewares.md#configuration-syntax',
-              },
-              {
-                text: 'Common Examples',
-                link: '/Middlewares.md#common-examples',
+                text: 'Applying Middlewares',
+                link: '/Middlewares.md#applying-middlewares',
+                items: [
+                  {
+                    text: 'Entrypoint & Compose',
+                    link: '/Middlewares.md#entrypoint--middleware-compose',
+                  },
+                  {
+                    text: 'Docker Labels',
+                    link: '/Middlewares.md#docker-labels',
+                  },
+                  {
+                    text: 'Route Files',
+                    link: '/Middlewares.md#route-files',
+                  },
+                  {
+                    text: 'Reusing Compositions',
+                    link: '/Middlewares.md#reusing-compositions',
+                  },
+                  {
+                    text: 'Bypass Rules',
+                    link: '/Middlewares.md#bypass-rules',
+                  },
+                ],
               },
               {
                 text: 'Authentication & Security',
-                link: '/Middlewares.md#authentication-and-security',
+                link: '/Middlewares.md#authentication--security',
                 items: [
                   {
-                    text: 'OIDC (OpenID Connect)',
-                    link: '/Middlewares.md#oidc-openid-connect',
+                    text: 'OIDC',
+                    link: '/Middlewares.md#oidc',
                   },
                   {
                     text: 'hCaptcha',
@@ -152,20 +170,6 @@ export default defineConfig({
                   {
                     text: 'Forward Auth',
                     link: '/Middlewares.md#forward-auth',
-                  },
-                ],
-              },
-              {
-                text: 'Traffic Control',
-                link: '/Middlewares.md#traffic-control',
-                items: [
-                  {
-                    text: 'Redirect HTTP',
-                    link: '/Middlewares.md#redirect-http',
-                  },
-                  {
-                    text: 'Custom Error Pages',
-                    link: '/Middlewares.md#custom-error-pages',
                   },
                 ],
               },
@@ -198,16 +202,34 @@ export default defineConfig({
                 ],
               },
               {
-                text: 'Request & Response Modification',
-                link: '/Middlewares.md#request-and-response-modification',
+                text: 'Traffic Control',
+                link: '/Middlewares.md#traffic-control',
+                items: [
+                  {
+                    text: 'Redirect HTTP',
+                    link: '/Middlewares.md#redirect-http',
+                  },
+                  {
+                    text: 'Custom Error Pages',
+                    link: '/Middlewares.md#custom-error-pages',
+                  },
+                ],
+              },
+              {
+                text: 'Request/Response Modification',
+                link: '/Middlewares.md#request-response-modification',
                 items: [
                   {
                     text: 'Modify Request/Response',
-                    link: '/Middlewares.md#modify-request-or-response',
+                    link: '/Middlewares.md#modify-request-response',
                   },
                   {
-                    text: 'Header Modification Examples',
-                    link: '/Middlewares.md#header-modification-examples',
+                    text: 'Supported Variables',
+                    link: '/Middlewares.md#supported-variables',
+                  },
+                  {
+                    text: 'Header Modification',
+                    link: '/Middlewares.md#header-modification',
                   },
                   {
                     text: 'X-Forwarded Headers',
@@ -228,6 +250,14 @@ export default defineConfig({
                     link: '/Middlewares.md#themed',
                   },
                 ],
+              },
+              {
+                text: 'Variables Reference',
+                link: '/Middlewares.md#variables-reference',
+              },
+              {
+                text: 'Examples',
+                link: '/Middlewares.md#examples',
               },
             ],
           },
