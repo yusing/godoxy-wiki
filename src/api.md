@@ -2826,6 +2826,7 @@ Status: Internal Server Error
 | addr | string| `string` |  | |  |  |
 | name | string| `string` |  | |  |  |
 | runtime | [AgentContainerRuntime](#agent-container-runtime)| `AgentContainerRuntime` |  | |  |  |
+| stream_port | integer| `int64` |  | |  |  |
 | version | string| `string` |  | |  |  |
 
 
