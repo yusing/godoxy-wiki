@@ -3667,6 +3667,7 @@ Status: Internal Server Error
 | name | string| `string` | ✓ | |  |  |
 | nightly | boolean| `bool` |  | |  |  |
 | port | integer| `int64` | ✓ | |  |  |
+| stream_port | integer| `int64` |  | |  |  |
 | type | string| `string` | ✓ | |  |  |
 
 
