@@ -1,0 +1,14 @@
+# Introduction
+
+This section contains the implementation details of the GoDoxy project.
+
+## Docs Generation
+
+Docs are generated with AI, and then edited by human. Synced into `godoxy-wiki` repository by running `make update-wiki` in `godoxy` repository.
+
+## Docs Structure
+
+Docs are structured in the following way:
+
+- Each package has a separate markdown file.
+- Each file contains the implementation details of the package.
