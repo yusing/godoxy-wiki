@@ -1,7 +1,9 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withMermaid(
+  defineConfig({
   title: 'GoDoxy',
   description: 'Documentations',
   srcDir: 'src',
@@ -286,3 +288,4 @@ export default defineConfig({
     },
   },
 })
+)
