@@ -239,9 +239,9 @@ Get cert info
 | Code | Status | Description | Has headers | Schema |
 |------|--------|-------------|:-----------:|--------|
 | [200](#get-cert-info-200) | OK | OK |  | [schema](#get-cert-info-200-schema) |
-| [403](#get-cert-info-403) | Forbidden | Forbidden |  | [schema](#get-cert-info-403-schema) |
-| [404](#get-cert-info-404) | Not Found | Not Found |  | [schema](#get-cert-info-404-schema) |
-| [500](#get-cert-info-500) | Internal Server Error | Internal Server Error |  | [schema](#get-cert-info-500-schema) |
+| [403](#get-cert-info-403) | Forbidden | Unauthorized |  | [schema](#get-cert-info-403-schema) |
+| [404](#get-cert-info-404) | Not Found | No certificates found or autocert is not enabled |  | [schema](#get-cert-info-404-schema) |
+| [500](#get-cert-info-500) | Internal Server Error | Internal server error |  | [schema](#get-cert-info-500-schema) |
 
 #### Responses
 
@@ -253,9 +253,9 @@ Status: OK
    
   
 
-[CertInfo](#cert-info)
+[][CertInfo](#cert-info)
 
-##### <span id="get-cert-info-403"></span> 403 - Forbidden
+##### <span id="get-cert-info-403"></span> 403 - Unauthorized
 Status: Forbidden
 
 ###### <span id="get-cert-info-403-schema"></span> Schema
@@ -264,7 +264,7 @@ Status: Forbidden
 
 [ErrorResponse](#error-response)
 
-##### <span id="get-cert-info-404"></span> 404 - Not Found
+##### <span id="get-cert-info-404"></span> 404 - No certificates found or autocert is not enabled
 Status: Not Found
 
 ###### <span id="get-cert-info-404-schema"></span> Schema
@@ -273,7 +273,7 @@ Status: Not Found
 
 [ErrorResponse](#error-response)
 
-##### <span id="get-cert-info-500"></span> 500 - Internal Server Error
+##### <span id="get-cert-info-500"></span> 500 - Internal server error
 Status: Internal Server Error
 
 ###### <span id="get-cert-info-500-schema"></span> Schema
@@ -2826,7 +2826,8 @@ Status: Internal Server Error
 | addr | string| `string` |  | |  |  |
 | name | string| `string` |  | |  |  |
 | runtime | [AgentContainerRuntime](#agent-container-runtime)| `AgentContainerRuntime` |  | |  |  |
-| stream_port | integer| `int64` |  | |  |  |
+| supports_tcp_stream | boolean| `bool` |  | |  |  |
+| supports_udp_stream | boolean| `bool` |  | |  |  |
 | version | string| `string` |  | |  |  |
 
 
@@ -3667,7 +3668,6 @@ Status: Internal Server Error
 | name | string| `string` | ✓ | |  |  |
 | nightly | boolean| `bool` |  | |  |  |
 | port | integer| `int64` | ✓ | |  |  |
-| stream_port | integer| `int64` |  | |  |  |
 | type | string| `string` | ✓ | |  |  |
 
 
@@ -3876,6 +3876,7 @@ Status: Internal Server Error
 | access_log | [Route](#route)| `Route` |  | |  |  |
 | agent | string| `string` |  | |  |  |
 | alias | string| `string` |  | |  |  |
+| bind | string| `string` |  | | for TCP and UDP routes, bind address to listen on |  |
 | container | [Route](#route)| `Route` |  | | Docker only |  |
 | disable_compression | boolean| `bool` |  | |  |  |
 | excluded | boolean| `bool` |  | |  |  |
@@ -4468,6 +4469,7 @@ Status: Internal Server Error
 | access_log | [RouteRoute](#route-route)| `RouteRoute` |  | |  |  |
 | agent | string| `string` |  | |  |  |
 | alias | string| `string` |  | |  |  |
+| bind | string| `string` |  | | for TCP and UDP routes, bind address to listen on |  |
 | container | [RouteRoute](#route-route)| `RouteRoute` |  | | Docker only |  |
 | disable_compression | boolean| `bool` |  | |  |  |
 | excluded | boolean| `bool` |  | |  |  |
