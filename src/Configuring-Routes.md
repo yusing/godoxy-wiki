@@ -255,6 +255,13 @@ These properties are only available for HTTP/HTTPS routes.
 | `spa`    | SPA mode       | boolean | `false`       | boolean                 |
 | `index`  | Index file     | string  | `/index.html` | string                  |
 
+### Stream Properties
+
+| Property | Description              | Type   | Default         | Allowed Values / Syntax                                                                                                      |
+| -------- | ------------------------ | ------ | --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `port`   | Listening and Proxy port | number | `0:lowest_port` | `from:to` <br/><ul><li>**from**: port for GoDoxy to listen on (`0` for random).</li><li>**to**: port to proxy from</li></ul> |
+| `bind`   | Bind host                | string | `0.0.0.0`       | IP address                                                                                                                   |
+
 ### Route Files
 
 Like in docker compose, you can use x-properties for YAML anchors in route files
