@@ -2879,7 +2879,7 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
-| agent | [Agent](#agent)| `Agent` |  | |  |  |
+| agent | [AgentpoolAgent](#agentpool-agent)| `AgentpoolAgent` |  | |  |  |
 | aliases | []string| `[]string` |  | |  |  |
 | container_id | string| `string` |  | |  |  |
 | container_name | string| `string` |  | |  |  |
@@ -4223,6 +4223,26 @@ Status: Internal Server Error
 | Name | Type | Go type | Default | Description | Example |
 |------|------|---------| ------- |-------------|---------|
 | agent.ContainerRuntime | string| string | |  |  |
+
+
+
+### <span id="agentpool-agent"></span> agentpool.Agent
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| addr | string| `string` |  | |  |  |
+| name | string| `string` |  | |  |  |
+| runtime | [AgentContainerRuntime](#agent-container-runtime)| `AgentContainerRuntime` |  | |  |  |
+| supports_tcp_stream | boolean| `bool` |  | |  |  |
+| supports_udp_stream | boolean| `bool` |  | |  |  |
+| version | string| `string` |  | |  |  |
 
 
 
