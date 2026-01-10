@@ -32,13 +32,13 @@ Internal package with stable APIs. Exported interfaces (`AccessLogger`, `MemLogg
 
 HTTP request/response logging with configurable formats, filters, and destinations.
 
-See [accesslog/README.md](./accesslog/README.md) for full documentation.
+See [accesslog/README.md](/impl/internal-logging-accesslog) for full documentation.
 
 ### `memlogger/`
 
 In-memory circular buffer with WebSocket streaming for real-time log viewing.
 
-See [memlogger/README.md](./memlogger/README.md) for full documentation.
+See [memlogger/README.md](/impl/internal-logging-memlogger) for full documentation.
 
 ## Architecture
 
@@ -71,11 +71,11 @@ graph TB
 
 ### Access Log Configuration
 
-See [accesslog/README.md](./accesslog/README.md) for configuration options.
+See [accesslog/README.md](/impl/internal-logging-accesslog) for configuration options.
 
 ### In-Memory Logger
 
-See [memlogger/README.md](./memlogger/README.md) for configuration options.
+See [memlogger/README.md](/impl/internal-logging-memlogger) for configuration options.
 
 ## Dependency and Integration Map
 

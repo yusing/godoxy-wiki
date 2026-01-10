@@ -152,6 +152,6 @@ rewriteFunc := func(pr *reverseproxy.ProxyRequest) {
 
 ## Related Packages
 
-- [accesslog](../accesslog/README.md) - Access logging interface
-- [httpheaders](../httpheaders/README.md) - Header manipulation utilities
-- [websocket](../websocket/README.md) - WebSocket utilities
+- [accesslog](/impl/goutils-http-accesslog) - Access logging interface
+- [httpheaders](/impl/goutils-http-httpheaders) - Header manipulation utilities
+- [websocket](/impl/goutils-http-websocket) - WebSocket utilities

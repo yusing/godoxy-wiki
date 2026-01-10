@@ -81,4 +81,4 @@ This package is used by:
 
 ## Related Packages
 
-- [reverseproxy](../reverseproxy/README.md) - Uses AccessLogger for logging
+- [reverseproxy](/impl/goutils-http-reverseproxy) - Uses AccessLogger for logging

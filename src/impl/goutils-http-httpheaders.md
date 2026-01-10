@@ -221,5 +221,5 @@ This package is used by:
 
 ## Related Packages
 
-- [reverseproxy](../reverseproxy/README.md) - Uses httpheaders for header manipulation
-- [websocket](../websocket/README.md) - Uses IsWebsocket for upgrade detection
+- [reverseproxy](/impl/goutils-http-reverseproxy) - Uses httpheaders for header manipulation
+- [websocket](/impl/goutils-http-websocket) - Uses IsWebsocket for upgrade detection

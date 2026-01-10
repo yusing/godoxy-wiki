@@ -36,7 +36,7 @@ Generic time-bucketed metrics storage framework with:
 - `Poller[T, A]` - Background data collector
 - `Entries[T]` - Circular buffer for time-series data
 
-See [period/README.md](./period/README.md) for full documentation.
+See [period/README.md](/impl/internal-metrics-period) for full documentation.
 
 ### `uptime/`
 

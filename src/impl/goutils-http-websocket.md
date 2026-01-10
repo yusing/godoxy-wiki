@@ -330,5 +330,5 @@ Default timeouts:
 
 ## Related Packages
 
-- [httpheaders](../httpheaders/README.md) - WebSocket detection via IsWebsocket
-- [reverseproxy](../reverseproxy/README.md) - WebSocket upgrade handling in reverse proxy
+- [httpheaders](/impl/goutils-http-httpheaders) - WebSocket detection via IsWebsocket
+- [reverseproxy](/impl/goutils-http-reverseproxy) - WebSocket upgrade handling in reverse proxy
