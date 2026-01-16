@@ -8,16 +8,18 @@
 
 ## Docker Image
 
-| Tag            | Description                             |
-| -------------- | --------------------------------------- |
-| `latest`       | Stable release                          |
-| `latest-lite`  | Stable release (lite, WebUI only)       |
-| `nightly`      | Experimental release                    |
-| `nightly-lite` | Experimental release (lite, WebUI only) |
-| `vx.y.z`       | Stable release                          |
+| Tag             | Description                                       |
+| --------------- | ------------------------------------------------- |
+| `latest`        | Stable release                                    |
+| `latest-compat` | Stable release (`godoxy` and `godoxy-agent` only) |
+| `latest-lite`   | Stable release (lite, WebUI only)                 |
+| `nightly`       | Experimental release                              |
+| `nightly-lite`  | Experimental release (lite, WebUI only)           |
+| `vx.y.z`        | Stable release                                    |
 
 - Proxy `ghcr.io/yusing/godoxy:<tag>`
 - Frontend `ghcr.io/yusing/godoxy-frontend:<tag>`
+- Agent `ghcr.io/yusing/godoxy-agent:<tag>`
 
 **Current version**
 
@@ -31,6 +33,15 @@ Lite image is a smaller image that runs a static build of WebUI with nginx.
 | ------------------- | --------------------------------- |
 | Smaller image size  | Slower compared to the full image |
 | Uses less resources |                                   |
+
+### Compat Image
+
+Compat image is a compatible image for old CPUs / docker version, `godoxy` and `godoxy-agent` only.
+
+If you see errors like these, you should use the `latest-compat` image:
+
+- `SIGILL: illegal instruction`
+- `Error response from daemon: client version 1.52 is too new. Maximum supported API version is 1.47`
 
 ## Secure your containers
 
