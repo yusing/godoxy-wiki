@@ -118,7 +118,10 @@ providers:
 
 ### Docker Providers
 
-Instead of an URL string, you can use a structured object to configure tls / mTLS.
+A docker provider can be either:
+
+- An URL string (e.g. `tcp://10.0.2.1:2375`)
+- A structured object
 
 | Property        | Description                             | Required                 | Default     |
 | --------------- | --------------------------------------- | ------------------------ | ----------- |

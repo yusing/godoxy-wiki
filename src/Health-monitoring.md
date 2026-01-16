@@ -42,29 +42,11 @@
 
 ## Implementations
 
-### HTTP healthcheck
-
-GoDoxy uses `HEAD` or `GET` to send a request to the specified `path` (default to `/`).
-
-**Healthy**: When server reply non 5xx HTTP response
-
-**Unhealthy**: Connection failure / Error, 5xx HTTP response
-
-### TCP/UDP healthcheck
-
-GoDoxy uses dials a TCP/UDP connection to upstream server.
-
-**Healthy**: When connection is established
-
-**Unhealthy**: Otherwise
-
-### File server healthcheck
-
-GoDoxy checks if the root directory exists and is accessible by GoDoxy with `os.Stat`.
-
-**Healthy**: When root directory exists and is accessible
-
-**Unhealthy**: Otherwise
+| Healthcheck Type | Method                                                                  | Healthy Condition                           | Unhealthy Condition                 |
+| ---------------- | ----------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------- |
+| HTTP             | Sends `HEAD` or `GET` request to specified `path` (default: `/`)        | Server replies with a non-5xx HTTP response | Connection failure/error, 5xx reply |
+| TCP/UDP          | Dials a TCP or UDP connection to upstream server                        | Connection is established                   | Connection cannot be established    |
+| File Server      | Checks if root directory exists and is accessible by GoDoxy (`os.Stat`) | Root directory exists and is accessible     | Otherwise                           |
 
 ## Properties
 
@@ -76,27 +58,3 @@ GoDoxy checks if the root directory exists and is accessible by GoDoxy with `os.
 | interval | Health check interval                           | 5s                        | duration                    |
 | timeout  | Health check timeout                            | 5s                        | duration                    |
 | retries  | Health check retries before notifying unhealthy | 15s divided by `interval` | integer                     |
-
-## Examples
-
-### Docker compose
-
-```yaml
-services:
-  qbittorrent:
-    container_name: qbt
-    image: nginx
-    labels:
-      proxy.qbt.healthcheck.use_get: true
-    restart: unless-stopped
-```
-
-### Route file
-
-```yaml
-qbt:
-  host: 10.0.0.1
-  port: 8080
-  healthcheck:
-    use_get: true
-```

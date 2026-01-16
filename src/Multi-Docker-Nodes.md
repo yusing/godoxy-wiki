@@ -21,8 +21,13 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/yusing/godoxy/refs/heads
 
 ### Why?
 
-- `godoxy-agent` is a light-weight agent that handles docker, metrics and health checks
-- Secure by default, with HTTPS and mTLS
+- `godoxy-agent` is a light-weight agent that handles
+  - Reverse proxy (http, h2c and https routes)
+  - Port forwarding (tcp and udp routes)
+  - Docker API
+  - System metrics (CPU, memory, disk, network)
+  - Health checks
+- Secure by default, with [mTLS](https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/) (for HTTP, TCP) and [DTLS](https://developer.mozilla.org/en-US/docs/Glossary/DTLS)+[mTLS](https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/) (for UDP)
 
 ## Using `docker-socket-proxy`
 

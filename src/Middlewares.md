@@ -409,7 +409,7 @@ entrypoint:
     - use: oidc
       bypass:
         - route pocket-id
-        - route immich & glob(path /api/*)
+        - route immich & path glob(/api/*)
         - remote 127.0.0.1
         - remote 192.168.0.0/16
 ```

@@ -1,42 +1,63 @@
-# WebUI
+# WebUI Configuration
+
+Customize how applications appear on the GoDoxy dashboard. Configure display names, icons, categories, and descriptions.
+
+## Overview
+
+The WebUI configuration determines how routes are displayed on the dashboard. You can configure these settings via Docker labels, route files, or directly in the WebUI.
 
 > [!NOTE]
 >
-> Starting from v0.9, you can **edit, hide/unhide apps directly from WebUI by a right click.**
+> Starting from v0.9, you can edit and hide/unhide apps directly from the WebUI by right-clicking.
 >
-> Editing from WebUI will override labels and route files settings.
+> WebUI edits override labels and route file settings.
 
-Please contribute to the [category preset](https://github.com/yusing/godoxy/blob/main/internal/homepage/categories.go) if you have the time.
+## Configuration Methods
 
-## Guide
+| Method        | Description                                     |
+| ------------- | ----------------------------------------------- |
+| Docker Labels | Configure per-container in `docker-compose.yml` |
+| Route Files   | Configure for non-Docker apps in `config/*.yml` |
+| WebUI         | Right-click menu for quick edits                |
 
-### Editing / Hiding apps
+## Property Reference
 
-Right click on the app you want to edit, and select `Edit App` or `Hide App`.
+| Property      | Description          | Default         | Values         |
+| ------------- | -------------------- | --------------- | -------------- |
+| `show`        | Display on dashboard | `true`          | boolean        |
+| `name`        | Display name         | Sanitized alias | string         |
+| `icon`        | Dashboard icon       | Auto-detected   | icon reference |
+| `url`         | Override app URL     | Dynamic         | absolute URL   |
+| `category`    | Dashboard category   | Auto-detected   | string         |
+| `description` | Short description    | Empty           | string         |
 
-### Changing category name
+## Icon Reference
 
-Double click on the category name, edit it and hit `Enter`.
+Icons can be sourced from preset libraries or custom locations:
 
-### Reordering apps
+| Source            | Format                      | Example                        |
+| ----------------- | --------------------------- | ------------------------------ |
+| Walkxcode presets | `@walkxcode/<filename>.png` | `@walkxcode/nginx.png`         |
+| Selfhst presets   | `@selfhst/<filename>.svg`   | `@selfhst/adguard-home.png`    |
+| Absolute URL      | `https://...`               | `https://example.com/icon.png` |
+| Relative path     | `/path/to/icon.png`         | `/-/pwa-icons/logo-192.png`    |
 
-Drag and drop the app to the desired position. Drag to another category to also change the category.
+## Category Configuration
 
-## Configurations
+Categories are automatically detected from:
 
-| Property      | Description                                                                                                                                                                                 | Default                                                                                                                                                                                                                                    | Allowed Values / Syntax                                                                                                                                |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| show          | Whether to show the app                                                                                                                                                                     | `true`                                                                                                                                                                                                                                     | boolean                                                                                                                                                |
-| name          | Display name on dashboard                                                                                                                                                                   | Sanitized _alias_                                                                                                                                                                                                                          | string                                                                                                                                                 |
-| icon          | <ul><li>Icon from [walkxcode](https://github.com/walkxcode/dashboard-icons) or [selfh.st](https://selfh.st/icons)</li><li>Absolute Icon URL</li><li>Relative path to proxy target</li></ul> | Automatic detected                                                                                                                                                                                                                         | <ul><li>`"@walkxcode/<filename>.png"`<br/>`"@selfhst/<filename>.svg"`</li><li>`"https://example.com/icon.png"`</li><li>`"/path/to/icon.png"`</li></ul> |
-| url           | Override app URL                                                                                                                                                                            | Dynamic                                                                                                                                                                                                                                    | Absolute URL                                                                                                                                           |
-| category      | Category on dashboard                                                                                                                                                                       | <ul><li>Preset value if container image or `alias` matched [selfh.st's list](https://cdn.selfh.st/directory/icons.json) or [godoxy's list](https://github.com/yusing/godoxy/blob/main/internal/homepage/categories.go)</li><li>`Docker` for a docker containers</li><li>`Others` otherwise</li></ul> | string                                                                                                                                                 |
-| description   | A short description shown under app name                                                                                                                                                    | empty                                                                                                                                                                                                                                      | string                                                                                                                                                 |
-| widget_config | _Reserved, may support widgets in the future_                                                                                                                                               | null                                                                                                                                                                                                                                       | widget specific                                                                                                                                        |
+- Container image names
+- Alias matches against [selfh.st directory](https://cdn.jsdelivr.net/gh/selfhst/icons/index.json)
+- GoDoxy's [preset categories](https://github.com/yusing/godoxy/blob/main/internal/homepage/categories.go)
+
+Fallback categories:
+
+- `Docker` for Docker containers without matches
+- `Others` for unmatched routes
 
 ## Examples
 
-### Docker compose
+### Docker Compose
 
 ```yaml
 services:
@@ -45,29 +66,76 @@ services:
     container_name: gitlab
     restart: always
     labels:
-      proxy.aliases: gitlab,gitlab-reg,gitlab-ssh
+      proxy.aliases: gitlab, gitlab-reg, gitlab-ssh
+      # Main GitLab instance
       proxy.gitlab: |
         port: 80
         homepage:
           name: GitLab
           icon: "/-/pwa-icons/logo-192.png"
+          description: GitLab CE instance
+          category: dev
+      # Registry (hidden from dashboard)
       proxy.gitlab-reg: |
         port: 5050
         homepage:
           show: false
+      # SSH gateway (hidden from dashboard)
       proxy.gitlab-ssh: |
-        port: 22223:22
+        port: "22223:22"
         homepage:
           show: false
     shm_size: 256m
 ```
 
-### Route file
+### Route File
 
 ```yaml
+# config/services.yml
 adgh:
   host: 10.0.2.1
   homepage:
     name: AdGuard Home
-    icon: "@selfhst/adguard-home.png"
+    icon: '@selfhst/adguard-home.png'
+    description: DNS filtering and ad blocking
+    category: network
+
+pihole:
+  host: 10.0.2.2
+  homepage:
+    name: Pi-hole
+    icon: '@selfhst/pihole.png'
+    description: Network-wide ad blocking
+    category: network
 ```
+
+## WebUI Interaction Guide
+
+### Editing Applications
+
+1. Right-click on any application card
+2. Select `Edit App` from the context menu
+3. Modify display settings as needed
+4. Changes apply immediately
+
+### Hiding Applications
+
+1. Right-click on the application
+2. Select `Hide App`
+3. To unhide, right-click again and select `Show App`
+
+### Renaming Categories
+
+1. Double-click the category header
+2. Enter the new name
+3. Press `Enter` to save
+
+## Contributing Categories
+
+To add new category presets, contribute to the [GoDoxy categories repository](https://github.com/yusing/godoxy/blob/main/internal/homepage/categories.go).
+
+## Related Documentation
+
+- [Configuring Routes](Configuring-Routes.md) - Route setup guide
+- [Middlewares](Middlewares.md) - Request processing
+- [Health Monitoring](Health-monitoring.md) - Route health checks

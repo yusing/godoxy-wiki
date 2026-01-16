@@ -2,14 +2,18 @@
 
 GoDoxy implements access control at two distinct network layers, each operating at different points in the request lifecycle:
 
-| Layer                 | Description                                         | Blocking Behavior              |
-| --------------------- | --------------------------------------------------- | ------------------------------ |
-| **Layer 4 (TCP/UDP)** | IP filtering when TCP/UDP connection is established | Connection dropped immediately |
-| **Layer 7 (HTTP)**    | IP filtering when HTTP request is fully received    | HTTP error response returned   |
+| Layer                 | Description                                      | Blocking Behavior              |
+| --------------------- | ------------------------------------------------ | ------------------------------ |
+| **Layer 4 (TCP/UDP)** | IP filtering when connection is established      | Connection dropped immediately |
+| **Layer 7 (HTTP)**    | IP filtering when HTTP request is fully received | HTTP error response returned   |
 
 ## Layer 4
 
-Transport-layer filtering before HTTP data exchange. Blocked IPs see immediate connection drop with no response. Best for blocking scanners early.
+Transport-layer filtering before HTTP data exchange. Blocked IPs see immediate connection drop with no response.
+
+| Use Case                |
+| ----------------------- |
+| Blocking scanners early |
 
 ### Supported Filters
 
@@ -80,7 +84,11 @@ providers:
 
 ## Layer 7
 
-HTTP-level filtering after request headers/body received. Blocked IPs see HTTP 403 with error message. Good for traffic that should get feedback.
+HTTP-level filtering after request headers/body received. Blocked IPs see HTTP 403 error response.
+
+| Use Case                       |
+| ------------------------------ |
+| Traffic that requires feedback |
 
 > [!NOTE]
 > HTTP Access loggers can be configured
@@ -182,19 +190,24 @@ Format:
 | `fields.query.config.*`       | string                                          | query fields                    | `query: field_mode`                 |                                 |
 | `fields.cookies.config.*`     | string                                          | cookies fields                  | `cookie: field_mode`                |                                 |
 
-#### Explanation
+#### Field Behavior
+
+| Setting  | Behavior                             |
+| -------- | ------------------------------------ |
+| `keep`   | Field is logged as-is                |
+| `drop`   | Field is excluded from logs          |
+| `redact` | Field value replaced with `REDACTED` |
+
+**Notes:**
 
 - Multiple access loggers can share the same log file
-- When `filters.*.negative` is set to `true`, requests that match any of the negative filters will not be logged
-- When `fields.*.default` is set to `keep`, that field will be logged
-- When `fields.*.default` is set to `redact`, that field will be redacted as `REDACTED`
-  - `fields.query.default` = `redact` will replace the query string with a format like `?key=REDACTED`
-  - This redaction configuration for other fields (besides query) only takes effect when `access_log.format` is set to `json`
-- When `fields.*.default` is set to `drop`, that field will be dropped
-- Default field config:
-  - `query.default` = `keep`
-  - `cookies.default` = `drop`
-  - `headers.default` = `drop`
+- Negative filters (`filters.*.negative: true`) exclude matching requests from logging
+- Query redaction format: `?key=REDACTED`
+- Redaction for non-query fields requires `format: json`
+- **Default field config:**
+  - `query.default`: `keep`
+  - `cookies.default`: `drop`
+  - `headers.default`: `drop`
 
 ### ACL Log
 

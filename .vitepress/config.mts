@@ -52,6 +52,10 @@ export default withMermaid(
               text: 'DNS-01 Providers',
               link: '/DNS-01-Providers.md',
             },
+            {
+              text: 'OpenID Connect',
+              link: '/OIDC.md',
+            },
           ],
         },
         {

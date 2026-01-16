@@ -90,71 +90,11 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 | `GODOXY_API_USER`     | WebUI login username | `admin`    | string |
 | `GODOXY_API_PASSWORD` | WebUI login password | `password` | string |
 
-#### OIDC
+#### OpenID Connect (OIDC)
 
-| Environment Variable            | Description                                                | Default                       |
-| ------------------------------- | ---------------------------------------------------------- | ----------------------------- |
-| `GODOXY_OIDC_ISSUER_URL`        | OIDC issuer URL                                            | empty                         |
-| `GODOXY_OIDC_CLIENT_ID`         | OIDC client ID                                             | empty                         |
-| `GODOXY_OIDC_CLIENT_SECRET`     | OIDC client secret                                         | empty                         |
-| `GODOXY_OIDC_ALLOWED_USERS`     | OIDC allowed users (optional when `ALLOWED_GROUPS` is set) | empty                         |
-| `GODOXY_OIDC_ALLOWED_GROUPS`    | OIDC allowed groups (optional when `ALLOWED_USERS` is set) | empty                         |
-| `GODOXY_OIDC_SCOPES`            | OIDC scopes                                                | `openid,profile,email,groups` |
-| `GODOXY_OIDC_RATE_LIMIT`        | OIDC rate limit                                            | `10`                          |
-| `GODOXY_OIDC_RATE_LIMIT_PERIOD` | OIDC rate limit period                                     | `1s`                          |
+OIDC provides enterprise authentication via external identity providers.
 
-##### Scopes
-
-| Scope            | Description                            | Optional? |
-| ---------------- | -------------------------------------- | --------- |
-| `openid`         | OpenID Connect scope                   | No        |
-| `profile`        | User profile scope                     | No        |
-| `email`          | User email scope                       | Yes       |
-| `groups`         | User groups scope                      | Yes       |
-| `offline_access` | Offline access scope for refresh token | Yes       |
-
-> [!NOTE]
->
-> You will have to add this "Allowed Callback URL" in your OIDC provider
->
-> `https://*.yourdomain.com/auth/callback` (wildcard) or `https:\/\/([^\.]+)\.yourdomain\.com\/auth\/callback` (regex)
-
-###### Authentik specific
-
-- Set Signing Key to "authentik Self-signed Certificate"
-- Set Encryption Key to None
-- Set Issuer mode to "Each provider has a different issuer, based on the application slug" if not already
-- Add scope `authentik default OAuth Mapping: OpenID 'offline_access'`
-
-##### Example
-
-![Image](images/oidc/pocket-id-1.png)
-
-![Image](images/oidc/pocket-id-2.png)
-
-Add these to `.env`:
-
-- `GODOXY_OIDC_ISSUER_URL` IdP's base URL
-  - `https://id.domain.com` (Pocket ID)
-  - `https://auth.domain.com/application/o/<slug>/` (Authentik)
-- `GODOXY_OIDC_CLIENT_ID` Client ID
-- `GODOXY_OIDC_CLIENT_SECRET` Client secret
-- `GODOXY_OIDC_ALLOWED_USERS` Comma separated list of allowed users
-- `GODOXY_OIDC_ALLOWED_GROUPS` Comma separated list of allowed groups
-
-> [!NOTE]
->
-> To enable OIDC for specific app, it's just two lines in docker compose:
->
-> ```yaml
-> services:
->   your_app:
->     ...
->     labels:
->       proxy.#1.middlewares.oidc:
-> ```
->
-> Checkout [OIDC Middleware](Middlewares#OIDC) for customizing OIDC per app.
+See [OIDC Configuration](OIDC.md) for setup instructions.
 
 ### Metrics
 

@@ -1,113 +1,153 @@
 # Notifications
 
-## Usage
+Receive alerts about service health, certificate renewals, and configuration errors.
 
-Notifications are sent to users to inform them about an event, update, or action.
+## Overview
 
-Currently used for:
+GoDoxy sends notifications to configured providers when significant events occur. Configure one or more providers to receive alerts.
 
-- Notifying service health status changes
-- Notifying when certificate renewal is successful or failed
-- Notifying when errors occur on config file reload
+### Notification Events
 
-## Enabling Notifications
+| Event | Description |
+|-------|-------------|
+| Service Health | Route health status changes |
+| Certificate Renewal | Success or failure of TLS certificate renewal |
+| Configuration | Errors during config file reload |
 
-To enable notifications, you need to configure it on WebUI or in your `config.yml` file. Follow these steps:
+## Configuration Methods
 
-1. **Open `config/config.yml`** with WebUI config editor or a text editor.
+| Method | Description |
+|--------|-------------|
+| WebUI | Configure via WebUI config editor |
+| config.yml | Edit `config/config.yml` directly |
 
-2. **Add Gotify Notification Configuration:**
+## Providers
 
-   ```yaml
-   notification:
-     - name: gotify
-       provider: gotify
-       url: https://gotify.my.site
-       token: abcdef.12345
-   ```
+### Gotify
 
-3. **Add Ntfy Notification Configuration:**
+A simple self-hosted notification service.
 
-   ```yaml
-   notification:
-     - name: ntfy
-       provider: ntfy
-       url: https://ntfy.domain.com
-       topic: some-topic
-       # token: xxx # if your Ntfy is configured with access tokens
-   ```
+```yaml
+notification:
+  - name: gotify
+    provider: gotify
+    url: https://gotify.my.site
+    token: abcdef.12345
+```
 
-4. **Add Discord Notification Configuration:**
+| Field | Description | Required |
+|-------|-------------|----------|
+| `name` | Provider identifier | Yes |
+| `provider` | Provider type | Yes (`gotify`) |
+| `url` | Gotify server address | Yes |
+| `token` | Authentication token | Yes |
 
-   ```yaml
-   notification:
-     - name: discord
-       provider: webhook
-       url: https://discord.com/api/webhooks/...
-       template: discord
-   ```
+### Ntfy
 
-### Gotify Provider
+A flexible notification service with topic-based messaging.
 
-- Set a `name` for your provider (e.g., `gotify`).
-- Set the `provider` to `gotify`.
-- Set the `url` to the address where Gotify is hosted.
-- Set the `token` which is used to authenticate.
+```yaml
+notification:
+  - name: ntfy
+    provider: ntfy
+    url: https://ntfy.domain.com
+    topic: some-topic
+    # token: xxx  # Optional: if access tokens are configured
+```
 
-### Ntfy Provider
+| Field | Description | Required |
+|-------|-------------|----------|
+| `name` | Provider identifier | Yes |
+| `provider` | Provider type | Yes (`ntfy`) |
+| `url` | Ntfy server address (without topic) | Yes |
+| `topic` | Target topic for messages | Yes |
+| `token` | Access token (if required) | No |
 
-- Set a `name` for your provider (e.g., `ntfy`).
-- Set the `provider` to `ntfy`.
-- Set the `url` to the address (without topic) where Ntfy is hosted.
-- Set the `topic` which is the message will be sent to.
-- Set the `token` if your server is configured with access tokens.
+### Discord Webhook
 
-### Discord Provider
+Send notifications to a Discord channel.
 
-- Set a `name` for your provider (e.g., `discord`).
-- Set the `provider` to `webhook`.
-- Set the `url` which is the webhook address for your Discord channel.
-- Set the `template` to `discord` to use Discord formatting.
+```yaml
+notification:
+  - name: discord
+    provider: webhook
+    url: https://discord.com/api/webhooks/...
+    template: discord
+```
 
-### Other webhook providers
+| Field | Description | Required |
+|-------|-------------|----------|
+| `name` | Provider identifier | Yes |
+| `provider` | Provider type | Yes (`webhook`) |
+| `url` | Discord webhook URL | Yes |
+| `template` | Message template | No (`discord` for Discord format) |
 
-- Set a `name` for your provider (e.g., `slack`).
-- Set the `provider` to `webhook`.
-- Set the `url` which is the webhook address for your Slack channel.
-- Set the `payload` to appropriate JSON body for your webhook provider.
-- Set the `token` if your provider requires authentication.
+### Custom Webhooks
 
-## Full documentation
+Integrate with Slack, Matrix, or any service supporting webhooks.
 
-### Common Field
+```yaml
+notification:
+  - name: slack
+    provider: webhook
+    url: https://hooks.slack.com/services/...
+    payload: |
+      {
+        "text": "$message",
+        "username": "GoDoxy"
+      }
+    mime_type: application/json
+```
 
-| Field    | Description          | Required                 | Allowed values            |
-| -------- | -------------------- | ------------------------ | ------------------------- |
-| name     | Name of the provider | Yes                      |                           |
-| provider |                      | Yes                      | `gotify` `ntfy` `webhook` |
-| url      | Provider URL         | Yes                      | Full URL                  |
-| format   | Message Format       | No (default: `markdown`) | `markdown` `plain`        |
+| Field | Description | Required |
+|-------|-------------|----------|
+| `name` | Provider identifier | Yes |
+| `provider` | Provider type | Yes (`webhook`) |
+| `url` | Webhook URL | Yes |
+| `payload` | JSON body template | See note |
+| `method` | HTTP method | No (`POST`) |
+| `mime_type` | Content type | No |
+| `token` | Bearer token (if required) | No |
+| `color_mode` | Color format | No (`hex`) |
 
-### Webhook
+> [!NOTE]
+>
+> `payload` is required unless using a template like `discord`.
 
-| Field      | Description            | Required                       | Allowed values   |
-| ---------- | ---------------------- | ------------------------------ | ---------------- |
-| provider   |                        | Yes                            | `webhook`        |
-| template   | Webhook template       | No                             | empty, `discord` |
-| token      | Webhook token          | No                             |                  |
-| payload    | Webhook payload        | No **(if `template` is used)** | valid json       |
-| method     | Webhook request method | No                             | `GET POST PUT`   |
-| mime_type  | MIME type              | No                             |                  |
-| color_mode | Color mode             | No                             | `hex` `dec`      |
+## Property Reference
 
-### Available Payload Variables
+### Common Fields
 
-- **$title:** Title of the message **(JSON escaped)**.
-- **$message:** Message in Markdown format **(JSON escaped)**.
-- **$fields:** Message in JSON format **(JSON escaped)**.
-- **$color:** Color of the message in `hex` (e.g., `#ff0000`) or `dec` (e.g., `16711680`).
+| Field | Description | Default | Values |
+|-------|-------------|---------|--------|
+| `name` | Provider identifier | Required | string |
+| `provider` | Provider type | Required | `gotify`, `ntfy`, `webhook` |
+| `url` | Server/webhook URL | Required | full URL |
+| `format` | Message format | `markdown` | `markdown`, `plain` |
 
-Example
+### Webhook Fields
+
+| Field | Description | Default | Values |
+|-------|-------------|---------|--------|
+| `template` | Predefined template | none | `discord` |
+| `payload` | Custom JSON payload | none | JSON string |
+| `method` | HTTP request method | `POST` | `GET`, `POST`, `PUT` |
+| `mime_type` | Content-Type header | auto | MIME type |
+| `token` | Bearer authentication | none | string |
+| `color_mode` | Color value format | `hex` | `hex`, `dec` |
+
+## Payload Variables
+
+Use these variables in custom webhook payloads:
+
+| Variable | Description | Format |
+|----------|-------------|--------|
+| `$title` | Message title | JSON-escaped string |
+| `$message` | Message body (Markdown) | JSON-escaped string |
+| `$fields` | Structured message data | JSON object |
+| `$color` | Message color | hex (`#ff0000`) or decimal |
+
+### Example: Discord Embed
 
 ```json
 {
@@ -120,3 +160,9 @@ Example
     ]
 }
 ```
+
+## Related Documentation
+
+- [Configuring Routes](Configuring-Routes.md) - Route setup guide
+- [Health Monitoring](Health-monitoring.md) - Health check configuration
+- [Access Control](Access-Control.md) - Logging and access rules
