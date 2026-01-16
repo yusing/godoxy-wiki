@@ -621,7 +621,7 @@ Status: OK
    
   
 
-[][HomepageFetchResult](#homepage-fetch-result)
+[][IconFetchResult](#icon-fetch-result)
 
 ##### <span id="get-favicon-400"></span> 400 - Bad Request: alias is empty or route is not HTTPRoute
 Status: Bad Request
@@ -969,7 +969,7 @@ Status: OK
    
   
 
-[][HomepageIconMetaSearch](#homepage-icon-meta-search)
+[][IconMetaSearch](#icon-meta-search)
 
 ##### <span id="get-icons-400"></span> 400 - Bad Request
 Status: Bad Request
@@ -3417,6 +3417,43 @@ Status: Internal Server Error
 
 
 
+### <span id="icon-fetch-result"></span> IconFetchResult
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| icon | []int32 (formatted integer)| `[]int32` |  | |  |  |
+| statusCode | integer| `int64` |  | |  |  |
+
+
+
+### <span id="icon-meta-search"></span> IconMetaSearch
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| Dark | boolean| `bool` |  | |  |  |
+| Light | boolean| `bool` |  | |  |  |
+| PNG | boolean| `bool` |  | |  |  |
+| Ref | string| `string` |  | |  |  |
+| SVG | boolean| `bool` |  | |  |  |
+| Source | [IconsSource](#icons-source)| `IconsSource` |  | |  |  |
+| WebP | boolean| `bool` |  | |  |  |
+
+
+
 ### <span id="idlewatcher-config"></span> IdlewatcherConfig
 
 
@@ -3430,7 +3467,7 @@ Status: Internal Server Error
 |------|------|---------|:--------:| ------- |-------------|---------|
 | depends_on | []string| `[]string` |  | |  |  |
 | docker | [DockerConfig](#docker-config)| `DockerConfig` |  | |  |  |
-| idle_timeout | [IdlewatcherConfig](#idlewatcher-config)| `IdlewatcherConfig` |  | | 0: no idle watcher.</br>Positive: idle watcher with idle timeout.</br>Negative: idle watcher as a dependency.	IdleTimeout time.Duration `json:"idle_timeout" json_ext:"duration"` |  |
+| idle_timeout | [IdlewatcherConfig](#idlewatcher-config)| `IdlewatcherConfig` |  | | 0: no idle watcher.</br>Positive: idle watcher with idle timeout.</br>Negative: idle watcher as a dependency. |  |
 | no_loading_page | boolean| `bool` |  | |  |  |
 | proxmox | [ProxmoxConfig](#proxmox-config)| `ProxmoxConfig` |  | |  |  |
 | start_endpoint | string| `string` |  | | Optional path that must be hit to start container |  |
@@ -4384,51 +4421,14 @@ Status: Internal Server Error
 
 
 
-### <span id="homepage-fetch-result"></span> homepage.FetchResult
-
-
-  
-
-
-
-**Properties**
-
-| Name | Type | Go type | Required | Default | Description | Example |
-|------|------|---------|:--------:| ------- |-------------|---------|
-| icon | []int32 (formatted integer)| `[]int32` |  | |  |  |
-| statusCode | integer| `int64` |  | |  |  |
-
-
-
-### <span id="homepage-icon-meta-search"></span> homepage.IconMetaSearch
-
-
-  
-
-
-
-**Properties**
-
-| Name | Type | Go type | Required | Default | Description | Example |
-|------|------|---------|:--------:| ------- |-------------|---------|
-| Dark | boolean| `bool` |  | |  |  |
-| Light | boolean| `bool` |  | |  |  |
-| PNG | boolean| `bool` |  | |  |  |
-| Ref | string| `string` |  | |  |  |
-| SVG | boolean| `bool` |  | |  |  |
-| Source | [HomepageIconSource](#homepage-icon-source)| `HomepageIconSource` |  | |  |  |
-| WebP | boolean| `bool` |  | |  |  |
-
-
-
-### <span id="homepage-icon-source"></span> homepage.IconSource
+### <span id="icons-source"></span> icons.Source
 
 
   
 
 | Name | Type | Go type | Default | Description | Example |
 |------|------|---------| ------- |-------------|---------|
-| homepage.IconSource | string| string | |  |  |
+| icons.Source | string| string | |  |  |
 
 
 
