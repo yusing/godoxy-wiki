@@ -325,7 +325,12 @@ export default withMermaid(
             { text: 'internal/health/check', link: '/impl/internal-health-check' },
             { text: 'internal/health/monitor', link: '/impl/internal-health-monitor' },
             { text: 'internal/homepage', link: '/impl/internal-homepage' },
-            { text: 'internal/homepage/integrations/qbittorrent', link: '/impl/internal-homepage-integrations-qbittorrent' },
+            { text: 'internal/homepage/icons', link: '/impl/internal-homepage-icons' },
+            {
+              text: 'internal/homepage/integrations/qbittorrent',
+              link: '/impl/internal-homepage-integrations-qbittorrent',
+            },
+            { text: 'internal/homepage/types', link: '/impl/internal-homepage-types' },
             { text: 'internal/homepage/widgets', link: '/impl/internal-homepage-widgets' },
             { text: 'internal/idlewatcher', link: '/impl/internal-idlewatcher' },
             { text: 'internal/idlewatcher/provider', link: '/impl/internal-idlewatcher-provider' },
