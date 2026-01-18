@@ -177,6 +177,10 @@ export default withMermaid(
                       text: 'Forward Auth',
                       link: '/Middlewares.md#forward-auth',
                     },
+                    {
+                      text: 'Crowdsec AppSec',
+                      link: '/Middlewares.md#crowdsec-appsec',
+                    },
                   ],
                 },
                 {

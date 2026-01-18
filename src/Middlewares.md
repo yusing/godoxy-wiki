@@ -150,7 +150,7 @@ Users solve captcha once per session.
 **Behavior:**
 
 1. Sends GET request to `route origin + auth_endpoint`
-2. Populates X-Forwarded-\* headers
+2. Populates `X-Forwarded-*` headers
 3. **Non-2xx/3xx:** Returns auth response to client
 4. **2xx:** Copies headers and forwards upstream
 
@@ -160,6 +160,45 @@ proxy.myapp.middlewares.forward_auth: |
   route: tinyauth
   auth_endpoint: /api/auth/traefik
   headers: Remote-User, Remote-Name, Remote-Email, Remote-Groups
+```
+
+#### Crowdsec AppSec
+
+| Option        | Description                                | Default | Required |
+| ------------- | ------------------------------------------ | ------- | -------- |
+| `route`       | Crowdsec AppSec route or IP address        | -       | Yes      |
+| `port`        | Crowdsec AppSec port (route is IP address) | `7422`  | No       |
+| `api_key`     | Crowdsec AppSec API key                    | -       | Yes      |
+| `endpoint`    | Crowdsec AppSec endpoint path              | `/`     | No       |
+| `log_blocked` | Log blocked requests                       | `false` | No       |
+| `timeout`     | Timeout for request to Crowdsec AppSec     | `5s`    | No       |
+
+**Behavior:**
+
+1. Populates `X-Crowdsec-Appsec-*` headers
+2. Sends `GET`/`POST` request to `route origin + auth_endpoint`
+3. **200:** Copies headers and forwards upstream
+4. **403:** Return 403 Forbidden response without body
+5. **500:** Log Crowdsec response and return 500 Internal Server Error
+6. **Other:** Log Crowdsec response status code and return 500 Internal Server Error
+
+```yaml
+# global
+entrypoint:
+  middlewares:
+    - use: real_ip # add this or `cloudflare_real_ip` if you need to resolve client IP from proxy headers
+      header: X-Real-IP
+      from: [127.0.0.1, 192.168.0.0/16, 10.0.0.0/8]
+    - use: crowdsec
+      route: crowdsec
+      api_key: 1234567890
+      log_blocked: true
+
+# per route
+proxy.myapp.middlewares.crowdsec: |
+  route: crowdsec
+  api_key: 1234567890
+  log_blocked: true
 ```
 
 ### IP Resolution
