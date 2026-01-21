@@ -190,6 +190,10 @@ Format:
 | `fields.query.config.*`       | string                                          | query fields                    | `query: field_mode`                 |                                 |
 | `fields.cookies.config.*`     | string                                          | cookies fields                  | `cookie: field_mode`                |                                 |
 
+> [!NOTE]
+>
+> `format` affects file logging only.
+
 #### Field Behavior
 
 | Setting  | Behavior                             |

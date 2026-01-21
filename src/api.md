@@ -3888,7 +3888,6 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
-| buffer_size | integer| `int64` |  | | Deprecated: buffer size is adjusted dynamically |  |
 | fields | [AccesslogFields](#accesslog-fields)| `AccesslogFields` |  | |  |  |
 | filters | [AccesslogFilters](#accesslog-filters)| `AccesslogFilters` |  | |  |  |
 | format | string| `string` |  | |  |  |
