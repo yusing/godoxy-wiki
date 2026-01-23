@@ -83,6 +83,7 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 | GET | /api/v1/docker/containers | [get docker containers](#get-docker-containers) | Get containers |
 | GET | /api/v1/docker/info | [get docker info](#get-docker-info) | Get docker info |
 | GET | /api/v1/docker/logs/{id} | [get docker logs ID](#get-docker-logs-id) | Get docker container logs |
+| GET | /api/v1/docker/stats/{id} | [get docker stats ID](#get-docker-stats-id) | Get container stats |
 | POST | /api/v1/docker/restart | [post docker restart](#post-docker-restart) | Restart container |
 | POST | /api/v1/docker/start | [post docker start](#post-docker-start) | Start container |
 | POST | /api/v1/docker/stop | [post docker stop](#post-docker-stop) | Stop container |
@@ -573,6 +574,80 @@ Status: Not Found
 Status: Internal Server Error
 
 ###### <span id="get-docker-logs-id-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="get-docker-stats-id"></span> Get container stats (*GetDockerStatsID*)
+
+```
+GET /api/v1/docker/stats/{id}
+```
+
+Get container stats by container id
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| id | `path` | string | `string` |  | ✓ |  | Container ID or route alias |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-docker-stats-id-200) | OK | OK |  | [schema](#get-docker-stats-id-200-schema) |
+| [400](#get-docker-stats-id-400) | Bad Request | Invalid request: id is required or route is not a docker container |  | [schema](#get-docker-stats-id-400-schema) |
+| [403](#get-docker-stats-id-403) | Forbidden | Forbidden |  | [schema](#get-docker-stats-id-403-schema) |
+| [404](#get-docker-stats-id-404) | Not Found | Container not found |  | [schema](#get-docker-stats-id-404-schema) |
+| [500](#get-docker-stats-id-500) | Internal Server Error | Internal Server Error |  | [schema](#get-docker-stats-id-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-docker-stats-id-200"></span> 200 - OK
+Status: OK
+
+###### <span id="get-docker-stats-id-200-schema"></span> Schema
+   
+  
+
+[ContainerStatsResponse](#container-stats-response)
+
+##### <span id="get-docker-stats-id-400"></span> 400 - Invalid request: id is required or route is not a docker container
+Status: Bad Request
+
+###### <span id="get-docker-stats-id-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-docker-stats-id-403"></span> 403 - Forbidden
+Status: Forbidden
+
+###### <span id="get-docker-stats-id-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-docker-stats-id-404"></span> 404 - Container not found
+Status: Not Found
+
+###### <span id="get-docker-stats-id-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-docker-stats-id-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="get-docker-stats-id-500-schema"></span> Schema
    
   
 
@@ -2969,6 +3044,33 @@ Status: Internal Server Error
 
 
 
+### <span id="container-stats-response"></span> ContainerStatsResponse
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| blkio_stats | [ContainerStatsResponse](#container-stats-response)| `ContainerStatsResponse` |  | | BlkioStats stores all IO service stats for data read and write.</br></br>This type is Linux-specific and holds many fields that are specific</br>to cgroups v1.</br></br>On a cgroup v2 host, all fields other than "io_service_bytes_recursive"</br>are omitted or "null".</br></br>This type is only populated on Linux and omitted for Windows containers. |  |
+| cpu_stats | [ContainerStatsResponse](#container-stats-response)| `ContainerStatsResponse` |  | | CPUStats contains CPU related info of the container. |  |
+| id | string| `string` |  | | ID is the ID of the container for which the stats were collected. |  |
+| memory_stats | [ContainerStatsResponse](#container-stats-response)| `ContainerStatsResponse` |  | | MemoryStats aggregates all memory stats since container inception on Linux.</br>Windows returns stats for commit and private working set only. |  |
+| name | string| `string` |  | | Name is the name of the container for which the stats were collected. |  |
+| networks | map of [ContainerNetworkStats](#container-network-stats)| `map[string]ContainerNetworkStats` |  | | Networks contains Nntwork statistics for the container per interface.</br></br>This field is omitted if the container has no networking enabled. |  |
+| num_procs | integer| `int64` |  | | NumProcs is the number of processors on the system.</br></br>This field is Windows-specific and always zero for Linux containers. |  |
+| os_type | string| `string` |  | | OSType is the OS of the container ("linux" or "windows") to allow</br>platform-specific handling of stats. |  |
+| pids_stats | [ContainerStatsResponse](#container-stats-response)| `ContainerStatsResponse` |  | | PidsStats contains Linux-specific stats of a container's process-IDs (PIDs).</br></br>This field is Linux-specific and omitted for Windows containers. |  |
+| precpu_stats | [ContainerStatsResponse](#container-stats-response)| `ContainerStatsResponse` |  | | PreCPUStats contains the CPUStats of the previous sample. |  |
+| preread | string| `string` |  | | PreRead is the date and time at which this first sample was collected.</br>This field is not propagated if the "one-shot" option is set. If the</br>"one-shot" option is set, this field may be omitted, empty, or set</br>to a default date (`0001-01-01T00:00:00Z`). |  |
+| read | string| `string` |  | | Read is the date and time at which this sample was collected. |  |
+| storage_stats | [ContainerStatsResponse](#container-stats-response)| `ContainerStatsResponse` |  | | StorageStats is the disk I/O stats for read/write on Windows.</br></br>This type is Windows-specific and omitted for Linux containers. |  |
+
+
+
 ### <span id="container-stop-method"></span> ContainerStopMethod
 
 
@@ -4298,6 +4400,82 @@ Status: Internal Server Error
 
 
 
+### <span id="container-blkio-stat-entry"></span> container.BlkioStatEntry
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| major | integer| `int64` |  | |  |  |
+| minor | integer| `int64` |  | |  |  |
+| op | string| `string` |  | |  |  |
+| value | integer| `int64` |  | |  |  |
+
+
+
+### <span id="container-blkio-stats"></span> container.BlkioStats
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| io_merged_recursive | [][ContainerBlkioStatEntry](#container-blkio-stat-entry)| `[]*ContainerBlkioStatEntry` |  | |  |  |
+| io_queue_recursive | [][ContainerBlkioStatEntry](#container-blkio-stat-entry)| `[]*ContainerBlkioStatEntry` |  | |  |  |
+| io_service_bytes_recursive | [][ContainerBlkioStatEntry](#container-blkio-stat-entry)| `[]*ContainerBlkioStatEntry` |  | | number of bytes transferred to and from the block device |  |
+| io_service_time_recursive | [][ContainerBlkioStatEntry](#container-blkio-stat-entry)| `[]*ContainerBlkioStatEntry` |  | |  |  |
+| io_serviced_recursive | [][ContainerBlkioStatEntry](#container-blkio-stat-entry)| `[]*ContainerBlkioStatEntry` |  | |  |  |
+| io_time_recursive | [][ContainerBlkioStatEntry](#container-blkio-stat-entry)| `[]*ContainerBlkioStatEntry` |  | |  |  |
+| io_wait_time_recursive | [][ContainerBlkioStatEntry](#container-blkio-stat-entry)| `[]*ContainerBlkioStatEntry` |  | |  |  |
+| sectors_recursive | [][ContainerBlkioStatEntry](#container-blkio-stat-entry)| `[]*ContainerBlkioStatEntry` |  | |  |  |
+
+
+
+### <span id="container-cpu-stats"></span> container.CPUStats
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| cpu_usage | [ContainerCPUStats](#container-cpu-stats)| `ContainerCPUStats` |  | | CPU Usage. Linux and Windows. |  |
+| online_cpus | integer| `int64` |  | | Online CPUs. Linux only. |  |
+| system_cpu_usage | integer| `int64` |  | | System Usage. Linux only. |  |
+| throttling_data | [ContainerCPUStats](#container-cpu-stats)| `ContainerCPUStats` |  | | Throttling Data. Linux only. |  |
+
+
+
+### <span id="container-cpu-usage"></span> container.CPUUsage
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| percpu_usage | []integer| `[]int64` |  | | Total CPU time consumed per core (Linux). Not used on Windows.</br>Units: nanoseconds. |  |
+| total_usage | integer| `int64` |  | | Total CPU time consumed.</br>Units: nanoseconds (Linux)</br>Units: 100's of nanoseconds (Windows) |  |
+| usage_in_kernelmode | integer| `int64` |  | | Time spent by tasks of the cgroup in kernel mode (Linux).</br>Time spent by all container processes in kernel mode (Windows).</br>Units: nanoseconds (Linux).</br>Units: 100's of nanoseconds (Windows). Not populated for Hyper-V Containers. |  |
+| usage_in_usermode | integer| `int64` |  | | Time spent by tasks of the cgroup in user mode (Linux).</br>Time spent by all container processes in user mode (Windows).</br>Units: nanoseconds (Linux).</br>Units: 100's of nanoseconds (Windows). Not populated for Hyper-V Containers |  |
+
+
+
 ### <span id="container-container-state"></span> container.ContainerState
 
 
@@ -4306,6 +4484,68 @@ Status: Internal Server Error
 | Name | Type | Go type | Default | Description | Example |
 |------|------|---------| ------- |-------------|---------|
 | container.ContainerState | string| string | |  |  |
+
+
+
+### <span id="container-memory-stats"></span> container.MemoryStats
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| commitbytes | integer| `int64` |  | | committed bytes |  |
+| commitpeakbytes | integer| `int64` |  | | peak committed bytes |  |
+| failcnt | integer| `int64` |  | | number of times memory usage hits limits. |  |
+| limit | integer| `int64` |  | |  |  |
+| max_usage | integer| `int64` |  | | maximum usage ever recorded. |  |
+| privateworkingset | integer| `int64` |  | | private working set |  |
+| stats | map of int64 (formatted integer)| `map[string]int64` |  | | TODO(vishh): Export these as stronger types.</br>all the stats exported via memory.stat. |  |
+| usage | integer| `int64` |  | | current res_counter usage for memory |  |
+
+
+
+### <span id="container-network-stats"></span> container.NetworkStats
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| endpoint_id | string| `string` |  | | Endpoint ID. Not used on Linux. |  |
+| instance_id | string| `string` |  | | Instance ID. Not used on Linux. |  |
+| rx_bytes | integer| `int64` |  | | Bytes received. Windows and Linux. |  |
+| rx_dropped | integer| `int64` |  | | Incoming packets dropped. Windows and Linux. |  |
+| rx_errors | integer| `int64` |  | | Received errors. Not used on Windows. Note that we don't `omitempty` this</br>field as it is expected in the >=v1.21 API stats structure. |  |
+| rx_packets | integer| `int64` |  | | Packets received. Windows and Linux. |  |
+| tx_bytes | integer| `int64` |  | | Bytes sent. Windows and Linux. |  |
+| tx_dropped | integer| `int64` |  | | Outgoing packets dropped. Windows and Linux. |  |
+| tx_errors | integer| `int64` |  | | Sent errors. Not used on Windows. Note that we don't `omitempty` this</br>field as it is expected in the >=v1.21 API stats structure. |  |
+| tx_packets | integer| `int64` |  | | Packets sent. Windows and Linux. |  |
+
+
+
+### <span id="container-pids-stats"></span> container.PidsStats
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| current | integer| `int64` |  | | Current is the number of pids in the cgroup |  |
+| limit | integer| `int64` |  | | Limit is the hard limit on the number of pids in the cgroup.</br>A "Limit" of 0 means that there is no limit. |  |
 
 
 
@@ -4324,6 +4564,41 @@ Status: Internal Server Error
 | PrivatePort | integer| `int64` |  | | Port on the container</br>Required: true |  |
 | PublicPort | integer| `int64` |  | | Port exposed on the host |  |
 | Type | string| `string` |  | | type</br>Required: true</br>Enum: ["tcp","udp","sctp"] |  |
+
+
+
+### <span id="container-storage-stats"></span> container.StorageStats
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| read_count_normalized | integer| `int64` |  | |  |  |
+| read_size_bytes | integer| `int64` |  | |  |  |
+| write_count_normalized | integer| `int64` |  | |  |  |
+| write_size_bytes | integer| `int64` |  | |  |  |
+
+
+
+### <span id="container-throttling-data"></span> container.ThrottlingData
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| periods | integer| `int64` |  | | Number of periods with throttling active |  |
+| throttled_periods | integer| `int64` |  | | Number of periods when the container hits its throttling limit. |  |
+| throttled_time | integer| `int64` |  | | Aggregate time the container was throttled for in nanoseconds. |  |
 
 
 
