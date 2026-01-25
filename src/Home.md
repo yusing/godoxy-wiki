@@ -59,13 +59,14 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 > [!NOTE]
 > Also works with old prefix `GOPROXY_` or without prefix like `API_USER`
 
-| Environment Variable   | Description                                 | Default          | Values        |
-| ---------------------- | ------------------------------------------- | ---------------- | ------------- |
-| `GODOXY_HTTP_ADDR`     | HTTP server listening address               | `:80`            | `[host]:port` |
-| `GODOXY_HTTPS_ADDR`    | HTTPS server listening address (if enabled) | `:443`           | `[host]:port` |
-| `GODOXY_API_ADDR`      | API server listening address                | `127.0.0.1:8888` | `[host]:port` |
-| `GODOXY_HTTP3_ENABLED` | Enable HTTP/3                               | `true`           | boolean       |
-| `GODOXY_DEBUG`         | Enable debug behaviors and logging          | `false`          | boolean       |
+| Environment Variable    | Description                                                   | Default          | Values        |
+| ----------------------- | ------------------------------------------------------------- | ---------------- | ------------- |
+| `GODOXY_HTTP_ADDR`      | HTTP server listening address                                 | `:80`            | `[host]:port` |
+| `GODOXY_HTTPS_ADDR`     | HTTPS server listening address (if enabled)                   | `:443`           | `[host]:port` |
+| `GODOXY_API_ADDR`       | API server listening address                                  | `127.0.0.1:8888` | `[host]:port` |
+| `GODOXY_LOCAL_API_ADDR` | Local API server listening address for unauthenticated access | -                | `[host]:port` |
+| `GODOXY_HTTP3_ENABLED`  | Enable HTTP/3                                                 | `true`           | boolean       |
+| `GODOXY_DEBUG`          | Enable debug behaviors and logging                            | `false`          | boolean       |
 
 ### Authentication
 
