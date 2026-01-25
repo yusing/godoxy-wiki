@@ -129,6 +129,20 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
   
 
 
+###  proxmox
+
+| Method  | URI     | Name   | Summary |
+|---------|---------|--------|---------|
+| GET | /api/v1/proxmox/journalctl/{node} | [get proxmox journalctl node](#get-proxmox-journalctl-node) | Get journalctl output |
+| GET | /api/v1/proxmox/journalctl/{node}/{vmid} | [get proxmox journalctl node vmid](#get-proxmox-journalctl-node-vmid) | Get journalctl output |
+| GET | /api/v1/proxmox/journalctl/{node}/{vmid}/{service} | [get proxmox journalctl node vmid service](#get-proxmox-journalctl-node-vmid-service) | Get journalctl output |
+| GET | /api/v1/proxmox/stats/{node}/{vmid} | [get proxmox stats node vmid](#get-proxmox-stats-node-vmid) | Get proxmox stats |
+| POST | /api/v1/proxmox/lxc/:node/:vmid/restart | [post proxmox lxc node vmid restart](#post-proxmox-lxc-node-vmid-restart) | Restart LXC container |
+| POST | /api/v1/proxmox/lxc/:node/:vmid/start | [post proxmox lxc node vmid start](#post-proxmox-lxc-node-vmid-start) | Start LXC container |
+| POST | /api/v1/proxmox/lxc/:node/:vmid/stop | [post proxmox lxc node vmid stop](#post-proxmox-lxc-node-vmid-stop) | Stop LXC container |
+  
+
+
 ###  route
 
 | Method  | URI     | Name   | Summary |
@@ -522,6 +536,7 @@ Get docker container logs by container id
 | id | `path` | string | `string` |  | ✓ |  | container id |
 | from | `query` | string | `string` |  |  |  | from timestamp |
 | levels | `query` | string | `string` |  |  |  | levels |
+| limit | `query` | integer | `int64` |  |  |  | limit |
 | stderr | `query` | boolean | `bool` |  |  |  | show stderr |
 | stdout | `query` | boolean | `bool` |  |  |  | show stdout |
 | to | `query` | string | `string` |  |  |  | to timestamp |
@@ -1279,6 +1294,321 @@ Status: Forbidden
 Status: Internal Server Error
 
 ###### <span id="get-metrics-uptime-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="get-proxmox-journalctl-node"></span> Get journalctl output (*GetProxmoxJournalctlNode*)
+
+```
+GET /api/v1/proxmox/journalctl/{node}
+```
+
+Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| node | `path` | string | `string` |  | ✓ |  | Node name |
+| limit | `query` | integer | `int64` |  |  |  | Limit output lines (1-1000) |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-proxmox-journalctl-node-200) | OK | Journalctl output |  | [schema](#get-proxmox-journalctl-node-200-schema) |
+| [400](#get-proxmox-journalctl-node-400) | Bad Request | Invalid request |  | [schema](#get-proxmox-journalctl-node-400-schema) |
+| [403](#get-proxmox-journalctl-node-403) | Forbidden | Unauthorized |  | [schema](#get-proxmox-journalctl-node-403-schema) |
+| [404](#get-proxmox-journalctl-node-404) | Not Found | Node not found |  | [schema](#get-proxmox-journalctl-node-404-schema) |
+| [500](#get-proxmox-journalctl-node-500) | Internal Server Error | Internal server error |  | [schema](#get-proxmox-journalctl-node-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-proxmox-journalctl-node-200"></span> 200 - Journalctl output
+Status: OK
+
+###### <span id="get-proxmox-journalctl-node-200-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="get-proxmox-journalctl-node-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="get-proxmox-journalctl-node-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-journalctl-node-403"></span> 403 - Unauthorized
+Status: Forbidden
+
+###### <span id="get-proxmox-journalctl-node-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-journalctl-node-404"></span> 404 - Node not found
+Status: Not Found
+
+###### <span id="get-proxmox-journalctl-node-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-journalctl-node-500"></span> 500 - Internal server error
+Status: Internal Server Error
+
+###### <span id="get-proxmox-journalctl-node-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="get-proxmox-journalctl-node-vmid"></span> Get journalctl output (*GetProxmoxJournalctlNodeVmid*)
+
+```
+GET /api/v1/proxmox/journalctl/{node}/{vmid}
+```
+
+Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| node | `path` | string | `string` |  | ✓ |  | Node name |
+| vmid | `path` | integer | `int64` |  |  |  | Container VMID (optional - if not provided, streams node journalctl) |
+| limit | `query` | integer | `int64` |  |  |  | Limit output lines (1-1000) |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-proxmox-journalctl-node-vmid-200) | OK | Journalctl output |  | [schema](#get-proxmox-journalctl-node-vmid-200-schema) |
+| [400](#get-proxmox-journalctl-node-vmid-400) | Bad Request | Invalid request |  | [schema](#get-proxmox-journalctl-node-vmid-400-schema) |
+| [403](#get-proxmox-journalctl-node-vmid-403) | Forbidden | Unauthorized |  | [schema](#get-proxmox-journalctl-node-vmid-403-schema) |
+| [404](#get-proxmox-journalctl-node-vmid-404) | Not Found | Node not found |  | [schema](#get-proxmox-journalctl-node-vmid-404-schema) |
+| [500](#get-proxmox-journalctl-node-vmid-500) | Internal Server Error | Internal server error |  | [schema](#get-proxmox-journalctl-node-vmid-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-proxmox-journalctl-node-vmid-200"></span> 200 - Journalctl output
+Status: OK
+
+###### <span id="get-proxmox-journalctl-node-vmid-200-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="get-proxmox-journalctl-node-vmid-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="get-proxmox-journalctl-node-vmid-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-journalctl-node-vmid-403"></span> 403 - Unauthorized
+Status: Forbidden
+
+###### <span id="get-proxmox-journalctl-node-vmid-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-journalctl-node-vmid-404"></span> 404 - Node not found
+Status: Not Found
+
+###### <span id="get-proxmox-journalctl-node-vmid-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-journalctl-node-vmid-500"></span> 500 - Internal server error
+Status: Internal Server Error
+
+###### <span id="get-proxmox-journalctl-node-vmid-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="get-proxmox-journalctl-node-vmid-service"></span> Get journalctl output (*GetProxmoxJournalctlNodeVmidService*)
+
+```
+GET /api/v1/proxmox/journalctl/{node}/{vmid}/{service}
+```
+
+Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| node | `path` | string | `string` |  | ✓ |  | Node name |
+| service | `path` | string | `string` |  |  |  | Service name (e.g., 'pveproxy' for node, 'container@.service' format for LXC) |
+| vmid | `path` | integer | `int64` |  |  |  | Container VMID (optional - if not provided, streams node journalctl) |
+| limit | `query` | integer | `int64` |  |  |  | Limit output lines (1-1000) |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-proxmox-journalctl-node-vmid-service-200) | OK | Journalctl output |  | [schema](#get-proxmox-journalctl-node-vmid-service-200-schema) |
+| [400](#get-proxmox-journalctl-node-vmid-service-400) | Bad Request | Invalid request |  | [schema](#get-proxmox-journalctl-node-vmid-service-400-schema) |
+| [403](#get-proxmox-journalctl-node-vmid-service-403) | Forbidden | Unauthorized |  | [schema](#get-proxmox-journalctl-node-vmid-service-403-schema) |
+| [404](#get-proxmox-journalctl-node-vmid-service-404) | Not Found | Node not found |  | [schema](#get-proxmox-journalctl-node-vmid-service-404-schema) |
+| [500](#get-proxmox-journalctl-node-vmid-service-500) | Internal Server Error | Internal server error |  | [schema](#get-proxmox-journalctl-node-vmid-service-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-proxmox-journalctl-node-vmid-service-200"></span> 200 - Journalctl output
+Status: OK
+
+###### <span id="get-proxmox-journalctl-node-vmid-service-200-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="get-proxmox-journalctl-node-vmid-service-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="get-proxmox-journalctl-node-vmid-service-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-journalctl-node-vmid-service-403"></span> 403 - Unauthorized
+Status: Forbidden
+
+###### <span id="get-proxmox-journalctl-node-vmid-service-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-journalctl-node-vmid-service-404"></span> 404 - Node not found
+Status: Not Found
+
+###### <span id="get-proxmox-journalctl-node-vmid-service-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-journalctl-node-vmid-service-500"></span> 500 - Internal server error
+Status: Internal Server Error
+
+###### <span id="get-proxmox-journalctl-node-vmid-service-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="get-proxmox-stats-node-vmid"></span> Get proxmox stats (*GetProxmoxStatsNodeVmid*)
+
+```
+GET /api/v1/proxmox/stats/{node}/{vmid}
+```
+
+Get proxmox stats in format of "STATUS|CPU%%|MEM USAGE/LIMIT|MEM%%|NET I/O|BLOCK I/O"
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| node | `path` | string | `string` |  | ✓ |  |  |
+| vmid | `path` | integer | `int64` |  | ✓ |  |  |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-proxmox-stats-node-vmid-200) | OK | Stats output |  | [schema](#get-proxmox-stats-node-vmid-200-schema) |
+| [400](#get-proxmox-stats-node-vmid-400) | Bad Request | Invalid request |  | [schema](#get-proxmox-stats-node-vmid-400-schema) |
+| [403](#get-proxmox-stats-node-vmid-403) | Forbidden | Unauthorized |  | [schema](#get-proxmox-stats-node-vmid-403-schema) |
+| [404](#get-proxmox-stats-node-vmid-404) | Not Found | Node not found |  | [schema](#get-proxmox-stats-node-vmid-404-schema) |
+| [500](#get-proxmox-stats-node-vmid-500) | Internal Server Error | Internal server error |  | [schema](#get-proxmox-stats-node-vmid-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-proxmox-stats-node-vmid-200"></span> 200 - Stats output
+Status: OK
+
+###### <span id="get-proxmox-stats-node-vmid-200-schema"></span> Schema
+   
+  
+
+
+
+##### <span id="get-proxmox-stats-node-vmid-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="get-proxmox-stats-node-vmid-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-stats-node-vmid-403"></span> 403 - Unauthorized
+Status: Forbidden
+
+###### <span id="get-proxmox-stats-node-vmid-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-stats-node-vmid-404"></span> 404 - Node not found
+Status: Not Found
+
+###### <span id="get-proxmox-stats-node-vmid-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-stats-node-vmid-500"></span> 500 - Internal server error
+Status: Internal Server Error
+
+###### <span id="get-proxmox-stats-node-vmid-500-schema"></span> Schema
    
   
 
@@ -2708,6 +3038,201 @@ Status: Internal Server Error
 
 [ErrorResponse](#error-response)
 
+### <span id="post-proxmox-lxc-node-vmid-restart"></span> Restart LXC container (*PostProxmoxLxcNodeVmidRestart*)
+
+```
+POST /api/v1/proxmox/lxc/:node/:vmid/restart
+```
+
+Restart LXC container by node and vmid
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| node | `path` | string | `string` |  | ✓ |  |  |
+| vmid | `path` | integer | `int64` |  | ✓ |  |  |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-proxmox-lxc-node-vmid-restart-200) | OK | OK |  | [schema](#post-proxmox-lxc-node-vmid-restart-200-schema) |
+| [400](#post-proxmox-lxc-node-vmid-restart-400) | Bad Request | Invalid request |  | [schema](#post-proxmox-lxc-node-vmid-restart-400-schema) |
+| [404](#post-proxmox-lxc-node-vmid-restart-404) | Not Found | Node not found |  | [schema](#post-proxmox-lxc-node-vmid-restart-404-schema) |
+| [500](#post-proxmox-lxc-node-vmid-restart-500) | Internal Server Error | Internal Server Error |  | [schema](#post-proxmox-lxc-node-vmid-restart-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-proxmox-lxc-node-vmid-restart-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-proxmox-lxc-node-vmid-restart-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-proxmox-lxc-node-vmid-restart-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="post-proxmox-lxc-node-vmid-restart-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-proxmox-lxc-node-vmid-restart-404"></span> 404 - Node not found
+Status: Not Found
+
+###### <span id="post-proxmox-lxc-node-vmid-restart-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-proxmox-lxc-node-vmid-restart-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-proxmox-lxc-node-vmid-restart-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-proxmox-lxc-node-vmid-start"></span> Start LXC container (*PostProxmoxLxcNodeVmidStart*)
+
+```
+POST /api/v1/proxmox/lxc/:node/:vmid/start
+```
+
+Start LXC container by node and vmid
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| node | `path` | string | `string` |  | ✓ |  |  |
+| vmid | `path` | integer | `int64` |  | ✓ |  |  |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-proxmox-lxc-node-vmid-start-200) | OK | OK |  | [schema](#post-proxmox-lxc-node-vmid-start-200-schema) |
+| [400](#post-proxmox-lxc-node-vmid-start-400) | Bad Request | Invalid request |  | [schema](#post-proxmox-lxc-node-vmid-start-400-schema) |
+| [404](#post-proxmox-lxc-node-vmid-start-404) | Not Found | Node not found |  | [schema](#post-proxmox-lxc-node-vmid-start-404-schema) |
+| [500](#post-proxmox-lxc-node-vmid-start-500) | Internal Server Error | Internal Server Error |  | [schema](#post-proxmox-lxc-node-vmid-start-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-proxmox-lxc-node-vmid-start-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-proxmox-lxc-node-vmid-start-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-proxmox-lxc-node-vmid-start-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="post-proxmox-lxc-node-vmid-start-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-proxmox-lxc-node-vmid-start-404"></span> 404 - Node not found
+Status: Not Found
+
+###### <span id="post-proxmox-lxc-node-vmid-start-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-proxmox-lxc-node-vmid-start-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-proxmox-lxc-node-vmid-start-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-proxmox-lxc-node-vmid-stop"></span> Stop LXC container (*PostProxmoxLxcNodeVmidStop*)
+
+```
+POST /api/v1/proxmox/lxc/:node/:vmid/stop
+```
+
+Stop LXC container by node and vmid
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| node | `path` | string | `string` |  | ✓ |  |  |
+| vmid | `path` | integer | `int64` |  | ✓ |  |  |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-proxmox-lxc-node-vmid-stop-200) | OK | OK |  | [schema](#post-proxmox-lxc-node-vmid-stop-200-schema) |
+| [400](#post-proxmox-lxc-node-vmid-stop-400) | Bad Request | Invalid request |  | [schema](#post-proxmox-lxc-node-vmid-stop-400-schema) |
+| [404](#post-proxmox-lxc-node-vmid-stop-404) | Not Found | Node not found |  | [schema](#post-proxmox-lxc-node-vmid-stop-404-schema) |
+| [500](#post-proxmox-lxc-node-vmid-stop-500) | Internal Server Error | Internal Server Error |  | [schema](#post-proxmox-lxc-node-vmid-stop-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-proxmox-lxc-node-vmid-stop-200"></span> 200 - OK
+Status: OK
+
+###### <span id="post-proxmox-lxc-node-vmid-stop-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-proxmox-lxc-node-vmid-stop-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="post-proxmox-lxc-node-vmid-stop-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-proxmox-lxc-node-vmid-stop-404"></span> 404 - Node not found
+Status: Not Found
+
+###### <span id="post-proxmox-lxc-node-vmid-stop-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-proxmox-lxc-node-vmid-stop-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="post-proxmox-lxc-node-vmid-stop-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
 ### <span id="post-reload"></span> Reload config (*PostReload*)
 
 ```
@@ -3571,7 +4096,7 @@ Status: Internal Server Error
 | docker | [DockerConfig](#docker-config)| `DockerConfig` |  | |  |  |
 | idle_timeout | [IdlewatcherConfig](#idlewatcher-config)| `IdlewatcherConfig` |  | | 0: no idle watcher.</br>Positive: idle watcher with idle timeout.</br>Negative: idle watcher as a dependency. |  |
 | no_loading_page | boolean| `bool` |  | |  |  |
-| proxmox | [ProxmoxConfig](#proxmox-config)| `ProxmoxConfig` |  | |  |  |
+| proxmox | [ProxmoxNodeConfig](#proxmox-node-config)| `ProxmoxNodeConfig` |  | |  |  |
 | start_endpoint | string| `string` |  | | Optional path that must be hit to start container |  |
 | stop_method | [ContainerStopMethod](#container-stop-method)| `ContainerStopMethod` |  | |  |  |
 | stop_signal | string| `string` |  | |  |  |
@@ -3945,7 +4470,7 @@ Status: Internal Server Error
 
 
 
-### <span id="proxmox-config"></span> ProxmoxConfig
+### <span id="proxmox-node-config"></span> ProxmoxNodeConfig
 
 
   
@@ -3957,7 +4482,9 @@ Status: Internal Server Error
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
 | node | string| `string` | ✓ | |  |  |
+| service | string| `string` |  | |  |  |
 | vmid | integer| `int64` | ✓ | |  |  |
+| vmname | string| `string` |  | |  |  |
 
 
 
@@ -4032,6 +4559,7 @@ Status: Internal Server Error
 | path_patterns | []string| `[]string` |  | |  |  |
 | port | [Port](#port)| `Port` |  | |  |  |
 | provider | string| `string` |  | | for backward compatibility |  |
+| proxmox | [Route](#route)| `Route` |  | |  |  |
 | purl | string| `string` |  | |  |  |
 | response_header_timeout | integer| `int64` |  | |  |  |
 | root | string| `string` |  | |  |  |
@@ -4130,11 +4658,8 @@ Status: Internal Server Error
 | alias | string| `string` |  | |  |  |
 | avg_latency | number| `float64` |  | |  |  |
 | current_status | string| `string` |  | |  |  |
-| display_name | string| `string` |  | |  |  |
 | downtime | number| `float64` |  | |  |  |
 | idle | number| `float64` |  | |  |  |
-| is_docker | boolean| `bool` |  | |  |  |
-| is_excluded | boolean| `bool` |  | |  |  |
 | statuses | [][RouteStatus](#route-status)| `[]*RouteStatus` |  | |  |  |
 | uptime | number| `float64` |  | |  |  |
 
@@ -4781,6 +5306,7 @@ Status: Internal Server Error
 | path_patterns | []string| `[]string` |  | |  |  |
 | port | [Port](#port)| `Port` |  | |  |  |
 | provider | string| `string` |  | | for backward compatibility |  |
+| proxmox | [RouteRoute](#route-route)| `RouteRoute` |  | |  |  |
 | purl | string| `string` |  | |  |  |
 | response_header_timeout | integer| `int64` |  | |  |  |
 | root | string| `string` |  | |  |  |
