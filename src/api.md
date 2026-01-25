@@ -136,7 +136,8 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 | GET | /api/v1/proxmox/journalctl/{node} | [get proxmox journalctl node](#get-proxmox-journalctl-node) | Get journalctl output |
 | GET | /api/v1/proxmox/journalctl/{node}/{vmid} | [get proxmox journalctl node vmid](#get-proxmox-journalctl-node-vmid) | Get journalctl output |
 | GET | /api/v1/proxmox/journalctl/{node}/{vmid}/{service} | [get proxmox journalctl node vmid service](#get-proxmox-journalctl-node-vmid-service) | Get journalctl output |
-| GET | /api/v1/proxmox/stats/{node}/{vmid} | [get proxmox stats node vmid](#get-proxmox-stats-node-vmid) | Get proxmox stats |
+| GET | /api/v1/proxmox/stats/{node} | [get proxmox stats node](#get-proxmox-stats-node) | Get proxmox node stats |
+| GET | /api/v1/proxmox/stats/{node}/{vmid} | [get proxmox stats node vmid](#get-proxmox-stats-node-vmid) | Get proxmox VM stats |
 | POST | /api/v1/proxmox/lxc/:node/:vmid/restart | [post proxmox lxc node vmid restart](#post-proxmox-lxc-node-vmid-restart) | Restart LXC container |
 | POST | /api/v1/proxmox/lxc/:node/:vmid/start | [post proxmox lxc node vmid start](#post-proxmox-lxc-node-vmid-start) | Start LXC container |
 | POST | /api/v1/proxmox/lxc/:node/:vmid/stop | [post proxmox lxc node vmid stop](#post-proxmox-lxc-node-vmid-stop) | Stop LXC container |
@@ -1536,19 +1537,90 @@ Status: Internal Server Error
 
 [ErrorResponse](#error-response)
 
-### <span id="get-proxmox-stats-node-vmid"></span> Get proxmox stats (*GetProxmoxStatsNodeVmid*)
+### <span id="get-proxmox-stats-node"></span> Get proxmox node stats (*GetProxmoxStatsNode*)
+
+```
+GET /api/v1/proxmox/stats/{node}
+```
+
+Get proxmox node stats in json
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| node | `path` | string | `string` |  | ✓ |  | Node name |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-proxmox-stats-node-200) | OK | Stats output |  | [schema](#get-proxmox-stats-node-200-schema) |
+| [400](#get-proxmox-stats-node-400) | Bad Request | Invalid request |  | [schema](#get-proxmox-stats-node-400-schema) |
+| [403](#get-proxmox-stats-node-403) | Forbidden | Unauthorized |  | [schema](#get-proxmox-stats-node-403-schema) |
+| [404](#get-proxmox-stats-node-404) | Not Found | Node not found |  | [schema](#get-proxmox-stats-node-404-schema) |
+| [500](#get-proxmox-stats-node-500) | Internal Server Error | Internal server error |  | [schema](#get-proxmox-stats-node-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-proxmox-stats-node-200"></span> 200 - Stats output
+Status: OK
+
+###### <span id="get-proxmox-stats-node-200-schema"></span> Schema
+   
+  
+
+[ProxmoxNodeStats](#proxmox-node-stats)
+
+##### <span id="get-proxmox-stats-node-400"></span> 400 - Invalid request
+Status: Bad Request
+
+###### <span id="get-proxmox-stats-node-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-stats-node-403"></span> 403 - Unauthorized
+Status: Forbidden
+
+###### <span id="get-proxmox-stats-node-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-stats-node-404"></span> 404 - Node not found
+Status: Not Found
+
+###### <span id="get-proxmox-stats-node-404-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-proxmox-stats-node-500"></span> 500 - Internal server error
+Status: Internal Server Error
+
+###### <span id="get-proxmox-stats-node-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="get-proxmox-stats-node-vmid"></span> Get proxmox VM stats (*GetProxmoxStatsNodeVmid*)
 
 ```
 GET /api/v1/proxmox/stats/{node}/{vmid}
 ```
 
-Get proxmox stats in format of "STATUS|CPU%%|MEM USAGE/LIMIT|MEM%%|NET I/O|BLOCK I/O"
-
-#### Consumes
-  * application/json
+Get proxmox VM stats in format of "STATUS|CPU%%|MEM USAGE/LIMIT|MEM%%|NET I/O|BLOCK I/O"
 
 #### Produces
-  * application/json
+  * text/plain
 
 #### Parameters
 
@@ -5273,6 +5345,34 @@ Status: Internal Server Error
   
 
 [interface{}](#interface)
+
+### <span id="proxmox-node-stats"></span> proxmox.NodeStats
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| cpu_model | string| `string` |  | |  |  |
+| cpu_usage | string| `string` |  | |  |  |
+| kernel_version | string| `string` |  | |  |  |
+| load_avg_15m | string| `string` |  | |  |  |
+| load_avg_1m | string| `string` |  | |  |  |
+| load_avg_5m | string| `string` |  | |  |  |
+| mem_pct | string| `string` |  | |  |  |
+| mem_total | string| `string` |  | |  |  |
+| mem_usage | string| `string` |  | |  |  |
+| pve_version | string| `string` |  | |  |  |
+| rootfs_pct | string| `string` |  | |  |  |
+| rootfs_total | string| `string` |  | |  |  |
+| rootfs_usage | string| `string` |  | |  |  |
+| uptime | string| `string` |  | |  |  |
+
+
 
 ### <span id="route-route"></span> route.Route
 
