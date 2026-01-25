@@ -130,67 +130,7 @@ services:
 
 ## Proxmox LXC Configuration
 
-Configure GoDoxy to manage Proxmox container lifecycle.
-
-### Step 1: Add Credentials
-
-```yaml
-# config.yml
-providers:
-  proxmox:
-    - url: https://pve.domain.com:8006/api2/json
-      token_id: root@pam!abcdef
-      secret: aaaa-bbbb-cccc-dddd
-      no_tls_verify: true
-```
-
-### Step 2: Create API Token
-
-Create an API token in Proxmox with appropriate permissions.
-
-![Proxmox API Token](images/proxmox-api-token.png)
-
-### Step 3: Configure Permissions
-
-Grant the following permissions to the API token:
-
-![Proxmox Permissions](images/proxmox-permissions.png)
-
-### Step 4: Add LXCs to Route Files
-
-```yaml
-# config/lxc-services.yml
-lxc-test:
-  host: 10.0.9.50
-  port: 3000
-  idlewatcher:
-    idle_timeout: 15s
-    proxmox:
-      node: pve
-      vmid: 119
-    depends_on:
-      - lxc-db
-  homepage:
-    name: LXC App
-    category: dev
-
-lxc-db:
-  host: 10.0.9.51
-  port: 5432
-  proxmox:
-    node: pve
-    vmid: 120
-```
-
-### Finding Node Name and VMID
-
-**Node Name:** Locate the node hosting your LXC in the Proxmox UI.
-
-![Proxmox Node Name](images/proxmox-node.png)
-
-**VMID:** Find the container ID in the Proxmox node summary.
-
-![Proxmox LXC VMID](images/proxmox-lxc-vmid.png)
+See [Proxmox Integration](Proxmox.md) for detailed configuration options.
 
 ## Property Reference
 
