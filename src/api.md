@@ -32,6 +32,7 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 ### Consumes
   * application/json
   * text/plain
+  * application/yaml
 
 ### Produces
   * image/png
@@ -153,8 +154,10 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 | GET | /api/v1/route/by_provider | [get route by provider](#get-route-by-provider) | List routes by provider |
 | GET | /api/v1/route/list | [get route list](#get-route-list) | List routes |
 | GET | /api/v1/route/providers | [get route providers](#get-route-providers) | List route providers |
+| GET | /api/v1/route/validate | [get route validate](#get-route-validate) | Validate route |
 | GET | /api/v1/route/{which} | [get route which](#get-route-which) | List route |
 | POST | /api/v1/route/playground | [post route playground](#post-route-playground) | Rule Playground |
+| POST | /api/v1/route/validate | [post route validate](#post-route-validate) | Validate route |
   
 
 
@@ -1322,7 +1325,7 @@ Get journalctl output for node or LXC container. If vmid is not provided, stream
 |------|--------|------|---------|-----------| :------: |---------|-------------|
 | limit | `query` | integer | `int64` |  |  | `100` | Limit output lines (1-1000) |
 | node | `query` | string | `string` |  | ✓ |  | Node name |
-| service | `query` | []string | `[]string` | `csv` | ✓ |  | Service names |
+| service | `query` | []string | `[]string` | `csv` |  |  | Service names |
 | vmid | `query` | integer | `int64` |  |  |  | Container VMID (optional - if not provided, streams node journalctl) |
 
 #### All responses
@@ -1403,7 +1406,7 @@ Get journalctl output for node or LXC container. If vmid is not provided, stream
 | node | `path` | string | `string` |  | ✓ |  | Node name |
 | limit | `query` | integer | `int64` |  |  | `100` | Limit output lines (1-1000) |
 | node | `query` | string | `string` |  | ✓ |  | Node name |
-| service | `query` | []string | `[]string` | `csv` | ✓ |  | Service names |
+| service | `query` | []string | `[]string` | `csv` |  |  | Service names |
 | vmid | `query` | integer | `int64` |  |  |  | Container VMID (optional - if not provided, streams node journalctl) |
 
 #### All responses
@@ -1485,7 +1488,7 @@ Get journalctl output for node or LXC container. If vmid is not provided, stream
 | vmid | `path` | integer | `int64` |  |  |  | Container VMID (optional - if not provided, streams node journalctl) |
 | limit | `query` | integer | `int64` |  |  | `100` | Limit output lines (1-1000) |
 | node | `query` | string | `string` |  | ✓ |  | Node name |
-| service | `query` | []string | `[]string` | `csv` | ✓ |  | Service names |
+| service | `query` | []string | `[]string` | `csv` |  |  | Service names |
 | vmid | `query` | integer | `int64` |  |  |  | Container VMID (optional - if not provided, streams node journalctl) |
 
 #### All responses
@@ -1564,11 +1567,11 @@ Get journalctl output for node or LXC container. If vmid is not provided, stream
 | Name | Source | Type | Go type | Separator | Required | Default | Description |
 |------|--------|------|---------|-----------| :------: |---------|-------------|
 | node | `path` | string | `string` |  | ✓ |  | Node name |
-| service | `path` | []string | `[]string` | `csv` | ✓ |  | Service names |
+| service | `path` | []string | `[]string` | `csv` |  |  | Service names |
 | vmid | `path` | integer | `int64` |  |  |  | Container VMID (optional - if not provided, streams node journalctl) |
 | limit | `query` | integer | `int64` |  |  | `100` | Limit output lines (1-1000) |
 | node | `query` | string | `string` |  | ✓ |  | Node name |
-| service | `query` | []string | `[]string` | `csv` | ✓ |  | Service names |
+| service | `query` | []string | `[]string` | `csv` |  |  | Service names |
 | vmid | `query` | integer | `int64` |  |  |  | Container VMID (optional - if not provided, streams node journalctl) |
 
 #### All responses
@@ -2001,6 +2004,83 @@ Status: Forbidden
 Status: Internal Server Error
 
 ###### <span id="get-route-providers-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="get-route-validate"></span> Validate route (*GetRouteValidate*)
+
+```
+GET /api/v1/route/validate
+```
+
+Validate route,
+
+#### Consumes
+  * application/yaml
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| route | `body` | [Route](#route) | `models.Route` | | ✓ | | Route |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-route-validate-200) | OK | Route validated |  | [schema](#get-route-validate-200-schema) |
+| [400](#get-route-validate-400) | Bad Request | Bad request |  | [schema](#get-route-validate-400-schema) |
+| [403](#get-route-validate-403) | Forbidden | Forbidden |  | [schema](#get-route-validate-403-schema) |
+| [417](#get-route-validate-417) | Expectation Failed | Validation failed |  | [schema](#get-route-validate-417-schema) |
+| [500](#get-route-validate-500) | Internal Server Error | Internal server error |  | [schema](#get-route-validate-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-route-validate-200"></span> 200 - Route validated
+Status: OK
+
+###### <span id="get-route-validate-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="get-route-validate-400"></span> 400 - Bad request
+Status: Bad Request
+
+###### <span id="get-route-validate-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-route-validate-403"></span> 403 - Forbidden
+Status: Forbidden
+
+###### <span id="get-route-validate-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-route-validate-417"></span> 417 - Validation failed
+Status: Expectation Failed
+
+###### <span id="get-route-validate-417-schema"></span> Schema
+   
+  
+
+any
+
+##### <span id="get-route-validate-500"></span> 500 - Internal server error
+Status: Internal Server Error
+
+###### <span id="get-route-validate-500-schema"></span> Schema
    
   
 
@@ -2699,7 +2779,7 @@ POST /api/v1/file/validate
 Validate file
 
 #### Consumes
-  * text/plain
+  * application/yaml
 
 #### Produces
   * application/json
@@ -3579,6 +3659,83 @@ Status: Bad Request
 Status: Forbidden
 
 ###### <span id="post-route-playground-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+### <span id="post-route-validate"></span> Validate route (*PostRouteValidate*)
+
+```
+POST /api/v1/route/validate
+```
+
+Validate route,
+
+#### Consumes
+  * application/yaml
+
+#### Produces
+  * application/json
+
+#### Parameters
+
+| Name | Source | Type | Go type | Separator | Required | Default | Description |
+|------|--------|------|---------|-----------| :------: |---------|-------------|
+| route | `body` | [Route](#route) | `models.Route` | | ✓ | | Route |
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#post-route-validate-200) | OK | Route validated |  | [schema](#post-route-validate-200-schema) |
+| [400](#post-route-validate-400) | Bad Request | Bad request |  | [schema](#post-route-validate-400-schema) |
+| [403](#post-route-validate-403) | Forbidden | Forbidden |  | [schema](#post-route-validate-403-schema) |
+| [417](#post-route-validate-417) | Expectation Failed | Validation failed |  | [schema](#post-route-validate-417-schema) |
+| [500](#post-route-validate-500) | Internal Server Error | Internal server error |  | [schema](#post-route-validate-500-schema) |
+
+#### Responses
+
+
+##### <span id="post-route-validate-200"></span> 200 - Route validated
+Status: OK
+
+###### <span id="post-route-validate-200-schema"></span> Schema
+   
+  
+
+[SuccessResponse](#success-response)
+
+##### <span id="post-route-validate-400"></span> 400 - Bad request
+Status: Bad Request
+
+###### <span id="post-route-validate-400-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-route-validate-403"></span> 403 - Forbidden
+Status: Forbidden
+
+###### <span id="post-route-validate-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="post-route-validate-417"></span> 417 - Validation failed
+Status: Expectation Failed
+
+###### <span id="post-route-validate-417-schema"></span> Schema
+   
+  
+
+any
+
+##### <span id="post-route-validate-500"></span> 500 - Internal server error
+Status: Internal Server Error
+
+###### <span id="post-route-validate-500-schema"></span> Schema
    
   
 
@@ -4741,9 +4898,9 @@ Status: Internal Server Error
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
 | files | []string| `[]string` |  | |  |  |
-| node | string| `string` | ✓ | |  |  |
+| node | string| `string` |  | |  |  |
 | services | []string| `[]string` |  | |  |  |
-| vmid | integer| `int64` | ✓ | |  |  |
+| vmid | integer| `int64` |  | | unset: auto discover; explicit 0: node-level route; >0: lxc/qemu resource route |  |
 | vmname | string| `string` |  | |  |  |
 
 
@@ -5562,54 +5719,6 @@ Status: Internal Server Error
 
 
 
-### <span id="route-route"></span> route.Route
-
-
-  
-
-
-
-**Properties**
-
-| Name | Type | Go type | Required | Default | Description | Example |
-|------|------|---------|:--------:| ------- |-------------|---------|
-| access_log | [RouteRoute](#route-route)| `RouteRoute` |  | |  |  |
-| agent | string| `string` |  | |  |  |
-| alias | string| `string` |  | |  |  |
-| bind | string| `string` |  | | for TCP and UDP routes, bind address to listen on |  |
-| container | [RouteRoute](#route-route)| `RouteRoute` |  | | Docker only |  |
-| disable_compression | boolean| `bool` |  | |  |  |
-| excluded | boolean| `bool` |  | |  |  |
-| excluded_reason | string| `string` |  | |  |  |
-| health | [RouteRoute](#route-route)| `RouteRoute` |  | | for swagger |  |
-| healthcheck | [RouteRoute](#route-route)| `RouteRoute` |  | | null on load-balancer routes |  |
-| homepage | [HomepageItemConfig](#homepage-item-config)| `HomepageItemConfig` |  | |  |  |
-| host | string| `string` |  | |  |  |
-| idlewatcher | [RouteRoute](#route-route)| `RouteRoute` |  | |  |  |
-| index | string| `string` |  | | Index file to serve for single-page app mode |  |
-| load_balance | [RouteRoute](#route-route)| `RouteRoute` |  | |  |  |
-| lurl | string| `string` |  | | private fields |  |
-| middlewares | map of [TypesLabelMap](#types-label-map)| `map[string]TypesLabelMap` |  | |  |  |
-| no_tls_verify | boolean| `bool` |  | |  |  |
-| path_patterns | []string| `[]string` |  | |  |  |
-| port | [Port](#port)| `Port` |  | |  |  |
-| provider | string| `string` |  | | for backward compatibility |  |
-| proxmox | [RouteRoute](#route-route)| `RouteRoute` |  | |  |  |
-| purl | string| `string` |  | |  |  |
-| response_header_timeout | integer| `int64` |  | |  |  |
-| root | string| `string` |  | |  |  |
-| rule_file | string| `string` |  | |  |  |
-| rules | [][RulesRule](#rules-rule)| `[]*RulesRule` |  | |  |  |
-| scheme | string| `string` |  | |  |  |
-| spa | boolean| `bool` |  | | Single-page app mode: serves index for non-existent paths |  |
-| ssl_certificate | string| `string` |  | | Path to client certificate |  |
-| ssl_certificate_key | string| `string` |  | | Path to client certificate key |  |
-| ssl_protocols | []string| `[]string` |  | | Allowed TLS protocols |  |
-| ssl_server_name | string| `string` |  | | SSL/TLS proxy options (nginx-like) |  |
-| ssl_trusted_certificate | string| `string` |  | | Path to trusted CA certificates |  |
-
-
-
 ### <span id="route-api-raw-rule"></span> routeApi.RawRule
 
 
@@ -5632,7 +5741,7 @@ Status: Internal Server Error
 
   
 
-[RouteRoute](#route-route)
+[Route](#route)
 
 ### <span id="rules-rule"></span> rules.Rule
 
