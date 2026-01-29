@@ -56,6 +56,10 @@ export default withMermaid(
               text: 'OpenID Connect',
               link: '/OIDC.md',
             },
+            {
+              text: 'Proxmox',
+              link: '/Proxmox.md',
+            },
           ],
         },
         {
