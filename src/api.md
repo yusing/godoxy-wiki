@@ -165,12 +165,12 @@ https://github.com/yusing/godoxy/blob/main/LICENSE
 
 | Method  | URI     | Name   | Summary |
 |---------|---------|--------|---------|
+| GET | /api/v1/events | [get events](#get-events) | Get events history |
 | GET | /api/v1/favicon | [get favicon](#get-favicon) | Get favicon |
 | GET | /api/v1/health | [get health](#get-health) | Get routes health info |
 | GET | /api/v1/icons | [get icons](#get-icons) | List icons |
 | GET | /api/v1/stats | [get stats](#get-stats) | Get GoDoxy stats |
 | GET | /api/v1/version | [get version](#get-version) | Get version |
-| POST | /api/v1/reload | [post reload](#post-reload) | Reload config |
   
 
 
@@ -674,6 +674,55 @@ Status: Internal Server Error
 
 [ErrorResponse](#error-response)
 
+### <span id="get-events"></span> Get events history (*GetEvents*)
+
+```
+GET /api/v1/events
+```
+
+#### Consumes
+  * application/json
+
+#### Produces
+  * application/json
+
+#### All responses
+| Code | Status | Description | Has headers | Schema |
+|------|--------|-------------|:-----------:|--------|
+| [200](#get-events-200) | OK | OK |  | [schema](#get-events-200-schema) |
+| [403](#get-events-403) | Forbidden | Forbidden: unauthorized |  | [schema](#get-events-403-schema) |
+| [500](#get-events-500) | Internal Server Error | Internal Server Error: internal error |  | [schema](#get-events-500-schema) |
+
+#### Responses
+
+
+##### <span id="get-events-200"></span> 200 - OK
+Status: OK
+
+###### <span id="get-events-200-schema"></span> Schema
+   
+  
+
+[][Event](#event)
+
+##### <span id="get-events-403"></span> 403 - Forbidden: unauthorized
+Status: Forbidden
+
+###### <span id="get-events-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-events-500"></span> 500 - Internal Server Error: internal error
+Status: Internal Server Error
+
+###### <span id="get-events-500-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
 ### <span id="get-favicon"></span> Get favicon (*GetFavicon*)
 
 ```
@@ -945,6 +994,7 @@ List homepage categories
 |------|--------|-------------|:-----------:|--------|
 | [200](#get-homepage-categories-200) | OK | OK |  | [schema](#get-homepage-categories-200-schema) |
 | [403](#get-homepage-categories-403) | Forbidden | Forbidden |  | [schema](#get-homepage-categories-403-schema) |
+| [500](#get-homepage-categories-500) | Internal Server Error | Internal Server Error |  | [schema](#get-homepage-categories-500-schema) |
 
 #### Responses
 
@@ -962,6 +1012,15 @@ Status: OK
 Status: Forbidden
 
 ###### <span id="get-homepage-categories-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-homepage-categories-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="get-homepage-categories-500-schema"></span> Schema
    
   
 
@@ -996,6 +1055,7 @@ Homepage items
 | [200](#get-homepage-items-200) | OK | OK |  | [schema](#get-homepage-items-200-schema) |
 | [400](#get-homepage-items-400) | Bad Request | Bad Request |  | [schema](#get-homepage-items-400-schema) |
 | [403](#get-homepage-items-403) | Forbidden | Forbidden |  | [schema](#get-homepage-items-403-schema) |
+| [500](#get-homepage-items-500) | Internal Server Error | Internal Server Error |  | [schema](#get-homepage-items-500-schema) |
 
 #### Responses
 
@@ -1022,6 +1082,15 @@ Status: Bad Request
 Status: Forbidden
 
 ###### <span id="get-homepage-items-403-schema"></span> Schema
+   
+  
+
+[ErrorResponse](#error-response)
+
+##### <span id="get-homepage-items-500"></span> 500 - Internal Server Error
+Status: Internal Server Error
+
+###### <span id="get-homepage-items-500-schema"></span> Schema
    
   
 
@@ -3556,57 +3625,6 @@ Status: Internal Server Error
 
 [ErrorResponse](#error-response)
 
-### <span id="post-reload"></span> Reload config (*PostReload*)
-
-```
-POST /api/v1/reload
-```
-
-Reload config
-
-#### Consumes
-  * application/json
-
-#### Produces
-  * application/json
-
-#### All responses
-| Code | Status | Description | Has headers | Schema |
-|------|--------|-------------|:-----------:|--------|
-| [200](#post-reload-200) | OK | OK |  | [schema](#post-reload-200-schema) |
-| [403](#post-reload-403) | Forbidden | Forbidden |  | [schema](#post-reload-403-schema) |
-| [500](#post-reload-500) | Internal Server Error | Internal Server Error |  | [schema](#post-reload-500-schema) |
-
-#### Responses
-
-
-##### <span id="post-reload-200"></span> 200 - OK
-Status: OK
-
-###### <span id="post-reload-200-schema"></span> Schema
-   
-  
-
-[SuccessResponse](#success-response)
-
-##### <span id="post-reload-403"></span> 403 - Forbidden
-Status: Forbidden
-
-###### <span id="post-reload-403-schema"></span> Schema
-   
-  
-
-[ErrorResponse](#error-response)
-
-##### <span id="post-reload-500"></span> 500 - Internal Server Error
-Status: Internal Server Error
-
-###### <span id="post-reload-500-schema"></span> Schema
-   
-  
-
-[ErrorResponse](#error-response)
-
 ### <span id="post-route-playground"></span> Rule Playground (*PostRoutePlayground*)
 
 ```
@@ -4056,6 +4074,26 @@ Status: Internal Server Error
 
 
 
+### <span id="event"></span> Event
+
+
+  
+
+
+
+**Properties**
+
+| Name | Type | Go type | Required | Default | Description | Example |
+|------|------|---------|:--------:| ------- |-------------|---------|
+| action | string| `string` |  | |  |  |
+| category | string| `string` |  | |  |  |
+| data | [interface{}](#interface)| `interface{}` |  | |  |  |
+| level | [EventsLevel](#events-level)| `EventsLevel` |  | |  |  |
+| timestamp | string| `string` |  | |  |  |
+| uuid | string| `string` |  | |  |  |
+
+
+
 ### <span id="file-type"></span> FileType
 
 
@@ -4167,9 +4205,9 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
-| latency | number| `float64` |  | | latency in microseconds |  |
+| latency | number| `float64` |  | |  |  |
 | status | string| `string` |  | |  |  |
-| uptime | number| `float64` |  | | uptime in milliseconds |  |
+| uptime | number| `float64` |  | |  |  |
 
 
 
@@ -4800,7 +4838,7 @@ Status: Internal Server Error
 | isResponseRule | boolean| `bool` |  | |  |  |
 | name | string| `string` |  | |  |  |
 | on | string| `string` |  | |  |  |
-| validationError | [interface{}](#interface)| `interface{}` |  | |  |  |
+| validationError | [interface{}](#interface)| `interface{}` |  | | we need the structured error, not the plain string |  |
 
 
 
@@ -4832,7 +4870,7 @@ Status: Internal Server Error
 
 | Name | Type | Go type | Required | Default | Description | Example |
 |------|------|---------|:--------:| ------- |-------------|---------|
-| executionError | [interface{}](#interface)| `interface{}` |  | |  |  |
+| executionError | [interface{}](#interface)| `interface{}` |  | | we need the structured error, not the plain string |  |
 | finalRequest | [FinalRequest](#final-request)| `FinalRequest` |  | |  |  |
 | finalResponse | [FinalResponse](#final-response)| `FinalResponse` |  | |  |  |
 | matchedRules | []string| `[]string` |  | |  |  |
@@ -4958,7 +4996,7 @@ Status: Internal Server Error
 | access_log | [Route](#route)| `Route` |  | |  |  |
 | agent | string| `string` |  | |  |  |
 | alias | string| `string` |  | |  |  |
-| bind | string| `string` |  | | for TCP and UDP routes, bind address to listen on |  |
+| bind | string| `string` |  | |  |  |
 | container | [Route](#route)| `Route` |  | | Docker only |  |
 | disable_compression | boolean| `bool` |  | |  |  |
 | excluded | boolean| `bool` |  | |  |  |
@@ -5634,6 +5672,17 @@ Status: Internal Server Error
 | id | string| `string` | ✓ | |  |  |
 | signal | string| `string` |  | | Signal (optional) is the signal to send to the container to (gracefully)</br>stop it before forcibly terminating the container with SIGKILL after the</br>timeout expires. If no value is set, the default (SIGTERM) is used. |  |
 | timeout | integer| `int64` |  | | Timeout (optional) is the timeout (in seconds) to wait for the container</br>to stop gracefully before forcibly terminating it with SIGKILL.</br></br>- Use nil to use the default timeout (10 seconds).</br>- Use '-1' to wait indefinitely.</br>- Use '0' to not wait for the container to exit gracefully, and</br>  immediately proceeds to forcibly terminating the container.</br>- Other positive values are used as timeout (in seconds). |  |
+
+
+
+### <span id="events-level"></span> events.Level
+
+
+  
+
+| Name | Type | Go type | Default | Description | Example |
+|------|------|---------| ------- |-------------|---------|
+| events.Level | string| string | |  |  |
 
 
 
