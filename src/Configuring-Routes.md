@@ -112,7 +112,7 @@ app:
   port: 80
   homepage:
     name: Application
-    icon: '@selfhst/app.svg'
+    icon: "@selfhst/app.svg"
     description: My application
     category: app
 
@@ -208,33 +208,34 @@ labels:
 
 ### Core Proxy Properties
 
-| Property        | Description           | Default                                | Values                                      |
-| --------------- | --------------------- | -------------------------------------- | ------------------------------------------- |
-| `scheme`        | Route protocol        | Auto-detected                          | `http`, `https`, `tcp`, `udp`, `fileserver` |
-| `host`          | Target hostname/IP    | Docker: client IP<br>File: `localhost` | IP or hostname                              |
-| `port`          | Target port           | Auto-detected                          | `1-65535`                                   |
-| `agent`         | Upstream agent        | None                                   | Agent name or URL                           |
-| `no_tls_verify` | Skip TLS verification | `false`                                | `true`, `false`                             |
+| Property        | Description              | Default                                                     | Values                                      |
+| --------------- | ------------------------ | ----------------------------------------------------------- | ------------------------------------------- |
+| `scheme`        | Route protocol           | Auto-detected                                               | `http`, `https`, `tcp`, `udp`, `fileserver` |
+| `host`          | Target hostname/IP       | Docker: client IP<br>File: `localhost`                      | IP or hostname                              |
+| `port`          | Listening and proxy port | `80:proxy_port`+`443:proxy_port` (proxy port auto-detected) | `1-65535` or `1-65535:1-65535`              |
+| `agent`         | Upstream agent           | None                                                        | Agent name or URL                           |
+| `no_tls_verify` | Skip TLS verification    | `false`                                                     | `true`, `false`                             |
 
 ### Stream Properties (TCP/UDP)
 
-| Property | Description              | Default         | Values           |
-| -------- | ------------------------ | --------------- | ---------------- |
-| `port`   | Listening and proxy port | `0:lowest_port` | `from:to` format |
-| `bind`   | Bind address             | `0.0.0.0`       | IP address       |
+| Property | Description              | Default                                 | Values           |
+| -------- | ------------------------ | --------------------------------------- | ---------------- |
+| `port`   | Listening and proxy port | `0:lowest_port` (random listening port) | `from:to` format |
+| `bind`   | Bind address             | `0.0.0.0`                               | IP address       |
 
 ### HTTP-Specific Properties
 
-| Property                  | Description              | Default       | Values              |
-| ------------------------- | ------------------------ | ------------- | ------------------- |
-| `no_tls_verify`           | Skip TLS verification    | `false`       | boolean             |
-| `response_header_timeout` | Response header timeout  | `60s`         | duration            |
-| `disable_compression`     | Disable gzip compression | `false`       | boolean             |
-| `ssl_server_name`         | SNI server name          | Auto          | string              |
-| `ssl_trusted_certificate` | CA certificate path      | None          | file path           |
-| `ssl_certificate`         | Client certificate path  | None          | file path           |
-| `ssl_certificate_key`     | Client key path          | None          | file path           |
-| `ssl_protocols`           | Allowed TLS versions     | All supported | `TLSv1.0`–`TLSv1.3` |
+| Property                  | Description                 | Default       | Values              |
+| ------------------------- | --------------------------- | ------------- | ------------------- |
+| `bind`                    | Bind to specific IP address | `0.0.0.0`     | IP address          |
+| `no_tls_verify`           | Skip TLS verification       | `false`       | boolean             |
+| `response_header_timeout` | Response header timeout     | `60s`         | duration            |
+| `disable_compression`     | Disable gzip compression    | `false`       | boolean             |
+| `ssl_server_name`         | SNI server name             | Auto          | string              |
+| `ssl_trusted_certificate` | CA certificate path         | None          | file path           |
+| `ssl_certificate`         | Client certificate path     | None          | file path           |
+| `ssl_certificate_key`     | Client key path             | None          | file path           |
+| `ssl_protocols`           | Allowed TLS versions        | All supported | `TLSv1.0`–`TLSv1.3` |
 
 ### File Server Properties
 
@@ -274,7 +275,7 @@ Ensure containers expose their ports:
 services:
   nginx:
     expose:
-      - '80'
+      - "80"
 ```
 
 ### Common Issues

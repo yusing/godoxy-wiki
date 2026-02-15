@@ -118,7 +118,7 @@ services:
   redis:
     image: redis:alpine
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -144,11 +144,11 @@ See [Proxmox Integration](Proxmox.md) for detailed configuration options.
 
 ### Stop Control
 
-| Property       | Description            | Default        | Accepted Values                                                         |
-| -------------- | ---------------------- | -------------- | ----------------------------------------------------------------------- |
-| `stop_method`  | Container stop action  | `stop`         | `stop`, `pause`, `kill`                                                 |
-| `stop_timeout` | Stop command wait time | `10s`          | Duration                                                                |
-| `stop_signal`  | Signal for stop/kill   | Docker default | `SIGINT`, `SIGTERM`, `SIGHUP`, `SIGQUIT` (with or without `SIG` prefix) |
+| Property       | Description            | Default        | Accepted Values                                                          |
+| -------------- | ---------------------- | -------------- | ------------------------------------------------------------------------ |
+| `stop_method`  | Container stop action  | `stop`         | `stop`, `pause`, `kill`                                                  |
+| `stop_timeout` | Stop command wait time | `10s`          | Duration                                                                 |
+| `stop_signal`  | Signal for stop/kill   | Docker default | `SIGINT`, `SIGTERM`, `SIGQUIT`, `SIGKILL` (with or without `SIG` prefix) |
 
 ### UI Options
 
@@ -186,7 +186,7 @@ services:
   dev-db:
     image: postgres:16
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 3s
 ```

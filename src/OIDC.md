@@ -75,6 +75,9 @@ Add these to `.env`:
 
 Protect individual routes with OIDC authentication using Docker labels:
 
+> [!NOTE]
+> The OIDC middleware only processes GET requests. Non-GET requests and WebSocket connections are blocked with a 403 Forbidden response.
+
 ```yaml
 services:
   app:
