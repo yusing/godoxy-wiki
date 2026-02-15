@@ -36,7 +36,7 @@ type Provider interface {
 
     // Status and monitoring
     ContainerStatus(ctx context.Context) (ContainerStatus, error)
-    Watch(ctx context.Context) (eventCh <-chan events.Event, errCh <-chan gperr.Error)
+    Watch(ctx context.Context) (eventCh <-chan events.Event, errCh <-chan error)
 
     // Cleanup
     Close()

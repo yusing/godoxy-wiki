@@ -40,14 +40,14 @@ Alias to `events.Event` for convenience.
 type Watcher interface {
     // Events returns channels for receiving events and errors.
     // The channels are closed when the context is cancelled.
-    Events(ctx context.Context) (<-chan Event, <-chan gperr.Error)
+    Events(ctx context.Context) (<-chan Event, <-chan error)
 }
 ```
 
 Core interface that all watchers implement. Callers receive:
 
 - `<-chan Event` - Events as they occur
-- `<-chan gperr.Error` - Errors during event watching
+- `<-chan error` - Errors during event watching
 
 ### Docker Watcher
 
@@ -62,8 +62,8 @@ Creates a Docker watcher for the given Docker configuration.
 #### Event Streaming
 
 ```go
-func (w DockerWatcher) Events(ctx context.Context) (<-chan Event, <-chan gperr.Error)
-func (w DockerWatcher) EventsWithOptions(ctx context.Context, options DockerListOptions) (<-chan Event, <-chan gperr.Error)
+func (w DockerWatcher) Events(ctx context.Context) (<-chan Event, <-chan error)
+func (w DockerWatcher) EventsWithOptions(ctx context.Context, options DockerListOptions) (<-chan Event, <-chan error)
 ```
 
 Returns event and error channels. `Events` uses default filters; `EventsWithOptions` allows custom filters.
@@ -107,7 +107,8 @@ graph TD
     A --> E[DirectoryWatcher]
 
     B --> F[Docker Client]
-    G[events.EventQueue] --> H[Event Consumers]
+    G[events.Event] --> H[Event Consumers]
+    H --> I[goutils/eventqueue]
 ```
 
 | Component           | Responsibility                                         |
@@ -186,23 +187,24 @@ Docker watcher is configured via `types.DockerProviderConfig`:
 
 ### Internal Dependencies
 
-| Package                          | Purpose                          |
-| -------------------------------- | -------------------------------- |
-| `internal/docker`                | Docker client management         |
-| `internal/watcher/events`        | Event type definitions and queue |
-| `internal/types`                 | Configuration types              |
-| `github.com/yusing/goutils/task` | Lifetime management              |
+| Package                          | Purpose                                |
+| -------------------------------- | -------------------------------------- |
+| `internal/docker`                | Docker client management               |
+| `internal/watcher/events`        | Event type definitions (Event, Action) |
+| `internal/types`                 | Configuration types                    |
+| `github.com/yusing/goutils/task` | Lifetime management                    |
 
 ### External Dependencies
 
-| Dependency              | Purpose                     |
-| ----------------------- | --------------------------- |
-| `github.com/moby/moby`  | Docker API types and client |
-| `github.com/rs/zerolog` | Structured logging          |
+| Dependency                       | Purpose                     |
+| -------------------------------- | --------------------------- |
+| `github.com/moby/moby`           | Docker API types and client |
+| `github.com/rs/zerolog`          | Structured logging          |
+| `github.com/yusing/goutils/errs` | Error handling              |
 
 ### Integration Points
 
-- Events channel feeds into `EventQueue` for buffering
+- Events channel feeds into `goutils/eventqueue.EventQueue` for buffering
 - Route provider subscribes to events for configuration reloads
 
 ## Observability
@@ -288,37 +290,6 @@ dw := watcher.NewDockerWatcher(cfg)
 eventCh, errCh := dw.EventsWithOptions(ctx, options)
 ```
 
-### Integration with Event Queue
-
-```go
-import (
-    "github.com/yusing/godoxy/internal/watcher"
-    "github.com/yusing/godoxy/internal/watcher/events"
-    "github.com/yusing/goutils/task"
-)
-
-func watchWithQueue(ctx context.Context) {
-    dw := watcher.NewDockerWatcher(cfg)
-    eventCh, errCh := dw.Events(ctx)
-
-    queue := events.NewEventQueue(
-        task.Subtask("event-flush"),
-        5*time.Second,
-        func(batch []events.Event) {
-            // Process batch of events
-            for _, e := range batch {
-                log.Info().Str("event", e.String()).Msg("event batch")
-            }
-        },
-        func(err gperr.Error) {
-            log.Error().Err(err).Msg("event error")
-        },
-    )
-
-    queue.Start(eventCh, errCh)
-}
-```
-
 ## Testing Notes
 
 - Mock Docker client via `internal/docker` package
@@ -327,6 +298,7 @@ func watchWithQueue(ctx context.Context) {
 
 ## Related Packages
 
-- `internal/watcher/events` - Event definitions and queuing
+- `internal/watcher/events` - Event type definitions (Event, Action, EventType)
+- `goutils/eventqueue` - Generic buffered event queue
 - `internal/docker` - Docker client management
 - `internal/route/routes` - Route management

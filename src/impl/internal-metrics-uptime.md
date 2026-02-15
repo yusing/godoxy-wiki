@@ -303,7 +303,7 @@ curl "http://localhost:8080/api/uptime?period=1d&limit=20&offset=0&keyword=docke
 
 ```javascript
 const ws = new WebSocket(
-  "ws://localhost:8080/api/uptime?period=1m&interval=5s"
+  "ws://localhost:8080/api/uptime?period=1m&interval=5s",
 );
 
 ws.onmessage = (event) => {

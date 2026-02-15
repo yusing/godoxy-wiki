@@ -87,6 +87,7 @@ type Task struct {
 ```
 
 **Invariants:**
+
 - A task can only be finished once (idempotent Finish calls)
 - All subtasks finish before parent OnFinished callbacks execute
 - OnCancel callbacks execute immediately when context is done
@@ -128,7 +129,7 @@ Interface for objects that need to be started with a parent task.
 ```go
 type TaskStarter interface {
     // Start initializes the object and returns an error if it fails
-    Start(parent Parent) gperr.Error
+    Start(parent Parent) error
 
     // Task returns the task associated with this object
     Task() *Task
@@ -399,7 +400,6 @@ This package does not accept external configuration. All behavior is controlled 
 | Package                            | Purpose                              |
 | ---------------------------------- | ------------------------------------ |
 | `github.com/puzpuzpuz/xsync/v4`    | Concurrent-safe map for dependencies |
-| `github.com/yusing/goutils/errs`   | Error handling with gperr            |
 | `github.com/yusing/goutils/intern` | String interning for task names      |
 
 ## Observability
@@ -462,11 +462,13 @@ No metrics are currently exported.
 ### Stuck Task Detection
 
 When `FinishAndWait` or `WaitExit` exceeds the 3-second timeout, the package logs a warning containing:
+
 - Task name and hierarchy
 - Names of all stuck callbacks
 - Names of all stuck child tasks
 
 Example log output:
+
 ```
 WARN | my-app stucked callbacks: 2, stucked children: 1
 ```
@@ -515,14 +517,14 @@ type Database struct {
     conn *sql.DB
 }
 
-func (d *Database) Start(parent task.Parent) gperr.Error {
+func (d *Database) Start(parent task.Parent) error {
     d.task = parent.Subtask("database", true)
 
     var err error
     d.conn, err = sql.Open("postgres", dsn)
     if err != nil {
         d.task.Finish(err)
-        return gperr.New().Subject("failed to open database").Wrap(err)
+        return err
     }
 
     go d.backgroundSync()
