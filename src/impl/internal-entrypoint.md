@@ -15,12 +15,12 @@ The entrypoint package implements the primary HTTP handler that receives all inc
 - Configurable not-found handling
 - Per-domain route resolution
 - HTTP server management (HTTP/HTTPS)
-- Route pool abstractions via [`PoolLike`](https://github.com/yusing/godoxy/blob/main/internal/entrypoint/internal/entrypoint/types/entrypoint.go#L27) and [`RWPoolLike`](https://github.com/yusing/godoxy/blob/main/internal/entrypoint/internal/entrypoint/types/entrypoint.go#L33) interfaces
+- Route pool abstractions via [`PoolLike`](/impl/internal-entrypoint) and [`RWPoolLike`](/impl/internal-entrypoint) interfaces
 
 ### Primary Consumers
 
 - **HTTP servers**: Per-listen-addr servers dispatch requests to routes
-- **Route providers**: Register routes via [`StartAddRoute`](https://github.com/yusing/godoxy/blob/main/internal/entrypoint/internal/entrypoint/routes.go#L48)
+- **Route providers**: Register routes via [`StartAddRoute`](/impl/internal-entrypoint)
 - **Configuration layer**: Validates and applies middleware/access-logging config
 
 ### Non-goals
@@ -32,7 +32,7 @@ The entrypoint package implements the primary HTTP handler that receives all inc
 
 ### Stability
 
-Internal package with stable core interfaces. The [`Entrypoint`](https://github.com/yusing/godoxy/blob/main/internal/entrypoint/internal/entrypoint/types/entrypoint.go#L7) interface is the public contract.
+Internal package with stable core interfaces. The [`Entrypoint`](/impl/internal-entrypoint) interface is the public contract.
 
 ## Public API
 
@@ -322,7 +322,7 @@ entrypoint:
 
 ### Metrics
 
-Route metrics exposed via [`GetHealthInfo`](https://github.com/yusing/godoxy/blob/main/internal/entrypoint/internal/entrypoint/query.go#L10) methods:
+Route metrics exposed via [`GetHealthInfo`](/impl/internal-entrypoint) methods:
 
 ```go
 // Health info for all routes
@@ -426,7 +426,7 @@ if ep := entrypoint.FromCtx(r.Context()); ep != nil {
 
 ## Testing Notes
 
-- Benchmark tests in [`entrypoint_benchmark_test.go`](https://github.com/yusing/godoxy/blob/main/internal/entrypoint/internal/entrypoint/entrypoint_benchmark_test.go)
-- Integration tests in [`entrypoint_test.go`](https://github.com/yusing/godoxy/blob/main/internal/entrypoint/internal/entrypoint/entrypoint_test.go)
+- Benchmark tests in [`entrypoint_benchmark_test.go`](/impl/internal-entrypoint)
+- Integration tests in [`entrypoint_test.go`](/impl/internal-entrypoint)
 - Mock route pools for unit testing
-- Short link tests in [`shortlink_test.go`](https://github.com/yusing/godoxy/blob/main/internal/entrypoint/internal/entrypoint/shortlink_test.go)
+- Short link tests in [`shortlink_test.go`](/impl/internal-entrypoint)

@@ -15,7 +15,7 @@ The `eventqueue` package provides a generic event queue implementation that buff
 
 ### Primary Consumers
 
-- [`internal/watcher/events`](internal/watcher/events) - Uses this package for Docker and file events
+- [`internal/watcher/events`](/impl/internal-watcher) - Uses this package for Docker and file events
 - Any package requiring buffered event processing with batch flush
 
 ### Non-goals
@@ -407,6 +407,6 @@ fileQueue := eventqueue.New(...)
 
 ## Related Packages
 
-- [`internal/watcher/events`](internal/watcher/events) - Docker/file events using this package
+- [`internal/watcher/events`](/impl/internal-watcher) - Docker/file events using this package
 - [`github.com/yusing/goutils/task`](https://pkg.go.dev/github.com/yusing/goutils/task) - Task management
 - [`github.com/yusing/goutils/errs`](https://pkg.go.dev/github.com/yusing/goutils/errs) - Error handling
