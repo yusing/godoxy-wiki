@@ -1,0 +1,7073 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "GoDoxy API",
+    "title": "GoDoxy API",
+    "termsOfService": "https://github.com/yusing/godoxy/blob/main/LICENSE",
+    "contact": {
+      "name": "Yusing",
+      "url": "https://github.com/yusing/godoxy/issues"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/yusing/godoxy/blob/main/LICENSE"
+    },
+    "version": "1.0"
+  },
+  "basePath": "/api/v1",
+  "paths": {
+    "/agent/create": {
+      "post": {
+        "description": "Create a new agent and return the docker compose file, encrypted CA and client PEMs\nThe returned PEMs are encrypted with a random key and will be used for verification when adding a new agent",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "agent"
+        ],
+        "summary": "Create a new agent",
+        "parameters": [
+          {
+            "description": "Request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NewAgentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/NewAgentResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "create",
+        "operationId": "create"
+      }
+    },
+    "/agent/list": {
+      "get": {
+        "description": "List agents",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "agent",
+          "websocket"
+        ],
+        "summary": "List agents",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Agent"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "list",
+        "operationId": "list"
+      }
+    },
+    "/agent/verify": {
+      "post": {
+        "description": "Verify a new agent and return the number of routes added",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "agent"
+        ],
+        "summary": "Verify a new agent",
+        "parameters": [
+          {
+            "description": "Request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VerifyNewAgentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "verify",
+        "operationId": "verify"
+      }
+    },
+    "/auth/callback": {
+      "post": {
+        "description": "Handles the callback from the provider after successful authentication",
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Auth Callback",
+        "parameters": [
+          {
+            "description": "Userpass only",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/auth.UserPassAuthCallbackRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Userpass: OK",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "302": {
+            "description": "OIDC: Redirects to home page",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Userpass: invalid request / credentials",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "x-id": "callback",
+        "operationId": "callback"
+      }
+    },
+    "/auth/check": {
+      "head": {
+        "description": "Checks if the user is authenticated by validating their token",
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Check authentication status",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "302": {
+            "description": "Redirects to login page or IdP",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "x-id": "check",
+        "operationId": "check"
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Initiates the login process by redirecting the user to the provider's login page",
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "responses": {
+          "302": {
+            "description": "Redirects to login page or IdP",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "x-id": "login",
+        "operationId": "login"
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "description": "Logs out the user by invalidating the token",
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "responses": {
+          "302": {
+            "description": "Redirects to home page",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "x-id": "logout",
+        "operationId": "logout"
+      },
+      "post": {
+        "description": "Logs out the user by invalidating the token",
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "responses": {
+          "302": {
+            "description": "Redirects to home page",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "x-id": "logout",
+        "operationId": "logout"
+      }
+    },
+    "/cert/info": {
+      "get": {
+        "description": "Get cert info",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "cert"
+        ],
+        "summary": "Get cert info",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CertInfo"
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "No certificates found or autocert is not enabled",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "info",
+        "operationId": "info"
+      }
+    },
+    "/cert/renew": {
+      "get": {
+        "description": "Renew cert",
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "cert",
+          "websocket"
+        ],
+        "summary": "Renew cert",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "renew",
+        "operationId": "renew"
+      }
+    },
+    "/docker/container/{id}": {
+      "get": {
+        "description": "Get container by container id",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
+        "summary": "Get container",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Container ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ContainerResponse"
+            }
+          },
+          "400": {
+            "description": "ID is required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Container not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "container",
+        "operationId": "container"
+      }
+    },
+    "/docker/containers": {
+      "get": {
+        "description": "Get containers",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
+        "summary": "Get containers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ContainerResponse"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "containers",
+        "operationId": "containers"
+      }
+    },
+    "/docker/info": {
+      "get": {
+        "description": "Get docker info",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
+        "summary": "Get docker info",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ServerInfo"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "info",
+        "operationId": "info"
+      }
+    },
+    "/docker/logs/{id}": {
+      "get": {
+        "description": "Get docker container logs by container id",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker",
+          "websocket"
+        ],
+        "summary": "Get docker container logs",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "container id",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "description": "show stdout",
+            "name": "stdout",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "description": "show stderr",
+            "name": "stderr",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "from timestamp",
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "to timestamp",
+            "name": "to",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "levels",
+            "name": "levels",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "limit",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "server not found or container not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "logs",
+        "operationId": "logs"
+      }
+    },
+    "/docker/restart": {
+      "post": {
+        "description": "Restart container by container id",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
+        "summary": "Restart container",
+        "parameters": [
+          {
+            "description": "Request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dockerapi.RestartRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Container not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "restart",
+        "operationId": "restart"
+      }
+    },
+    "/docker/start": {
+      "post": {
+        "description": "Start container by container id",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
+        "summary": "Start container",
+        "parameters": [
+          {
+            "description": "Request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dockerapi.StartRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Container not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "start",
+        "operationId": "start"
+      }
+    },
+    "/docker/stats/{id}": {
+      "get": {
+        "description": "Get container stats by container id",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker",
+          "websocket"
+        ],
+        "summary": "Get container stats",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Container ID or route alias",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ContainerStatsResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request: id is required or route is not a docker container",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Container not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "stats",
+        "operationId": "stats"
+      }
+    },
+    "/docker/stop": {
+      "post": {
+        "description": "Stop container by container id",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
+        "summary": "Stop container",
+        "parameters": [
+          {
+            "description": "Request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dockerapi.StopRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Container not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "stop",
+        "operationId": "stop"
+      }
+    },
+    "/events": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get events history",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Event"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: internal error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "events",
+        "operationId": "events"
+      }
+    },
+    "/favicon": {
+      "get": {
+        "description": "Get favicon",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "image/svg+xml",
+          "image/x-icon",
+          "image/png",
+          "image/webp"
+        ],
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get favicon",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "URL of the route",
+            "name": "url",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Alias of the route",
+            "name": "alias",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/IconFetchResult"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request: alias is empty or route is not HTTPRoute",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden: unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found: route or icon not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: internal error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "favicon",
+        "operationId": "favicon"
+      }
+    },
+    "/file/content": {
+      "get": {
+        "description": "Get file content",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/godoxy+yaml"
+        ],
+        "tags": [
+          "file"
+        ],
+        "summary": "Get file content",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "filename",
+            "name": "filename",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "config",
+              "provider",
+              "middleware"
+            ],
+            "type": "string",
+            "x-enum-varnames": [
+              "FileTypeConfig",
+              "FileTypeProvider",
+              "FileTypeMiddleware"
+            ],
+            "name": "type",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "get",
+        "operationId": "get"
+      },
+      "put": {
+        "description": "Set file content",
+        "consumes": [
+          "text/plain"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "file"
+        ],
+        "summary": "Set file content",
+        "parameters": [
+          {
+            "enum": [
+              "config",
+              "provider",
+              "middleware"
+            ],
+            "type": "string",
+            "description": "Type",
+            "name": "type",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Filename",
+            "name": "filename",
+            "in": "query",
+            "required": true
+          },
+          {
+            "description": "File",
+            "name": "file",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "set",
+        "operationId": "set"
+      }
+    },
+    "/file/list": {
+      "get": {
+        "description": "List files",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "file"
+        ],
+        "summary": "List files",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListFilesResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "list",
+        "operationId": "list"
+      }
+    },
+    "/file/validate": {
+      "post": {
+        "description": "Validate file",
+        "consumes": [
+          "application/yaml"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "file"
+        ],
+        "summary": "Validate file",
+        "parameters": [
+          {
+            "enum": [
+              "config",
+              "provider",
+              "middleware"
+            ],
+            "type": "string",
+            "description": "Type",
+            "name": "type",
+            "in": "query",
+            "required": true
+          },
+          {
+            "description": "File content",
+            "name": "file",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File validated",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "417": {
+            "description": "Validation failed",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "validate",
+        "operationId": "validate"
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Get health info by route name",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "v1",
+          "websocket"
+        ],
+        "summary": "Get routes health info",
+        "responses": {
+          "200": {
+            "description": "Health info by route name",
+            "schema": {
+              "$ref": "#/definitions/HealthMap"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "health",
+        "operationId": "health"
+      }
+    },
+    "/homepage/categories": {
+      "get": {
+        "description": "List homepage categories",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "List homepage categories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "categories",
+        "operationId": "categories"
+      }
+    },
+    "/homepage/item_click": {
+      "post": {
+        "description": "Increment item click.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "Increment item click",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "which",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "item-click",
+        "operationId": "item-click"
+      }
+    },
+    "/homepage/items": {
+      "get": {
+        "description": "Homepage items",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage",
+          "websocket"
+        ],
+        "summary": "Homepage items",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Category filter",
+            "name": "category",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Provider filter",
+            "name": "provider",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Search query",
+            "name": "search",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "clicks",
+              "alphabetical",
+              "custom"
+            ],
+            "type": "string",
+            "default": "alphabetical",
+            "description": "Sort method",
+            "name": "sort_method",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/HomepageCategory"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "items",
+        "operationId": "items"
+      }
+    },
+    "/homepage/set/category_order": {
+      "post": {
+        "description": "Set homepage category order.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "Set homepage category order",
+        "parameters": [
+          {
+            "description": "Override category order",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HomepageOverrideCategoryOrderParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "set-category-order",
+        "operationId": "set-category-order"
+      }
+    },
+    "/homepage/set/item": {
+      "post": {
+        "description": "Override single homepage item.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "Override single homepage item",
+        "parameters": [
+          {
+            "description": "Override single item",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HomepageOverrideItemParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "set-item",
+        "operationId": "set-item"
+      }
+    },
+    "/homepage/set/item_all_sort_order": {
+      "post": {
+        "description": "Set homepage item all sort order.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "Set homepage item all sort order",
+        "parameters": [
+          {
+            "description": "Set item all sort order",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HomepageOverrideItemAllSortOrderParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "set-item-all-sort-order",
+        "operationId": "set-item-all-sort-order"
+      }
+    },
+    "/homepage/set/item_fav_sort_order": {
+      "post": {
+        "description": "Set homepage item fav sort order.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "Set homepage item fav sort order",
+        "parameters": [
+          {
+            "description": "Set item fav sort order",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HomepageOverrideItemFavSortOrderParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "set-item-fav-sort-order",
+        "operationId": "set-item-fav-sort-order"
+      }
+    },
+    "/homepage/set/item_favorite": {
+      "post": {
+        "description": "Set homepage item favorite.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "Set homepage item favorite",
+        "parameters": [
+          {
+            "description": "Set item favorite",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HomepageOverrideItemFavoriteParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "set-item-favorite",
+        "operationId": "set-item-favorite"
+      }
+    },
+    "/homepage/set/item_sort_order": {
+      "post": {
+        "description": "Set homepage item sort order.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "Set homepage item sort order",
+        "parameters": [
+          {
+            "description": "Set item sort order",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HomepageOverrideItemSortOrderParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "set-item-sort-order",
+        "operationId": "set-item-sort-order"
+      }
+    },
+    "/homepage/set/item_visible": {
+      "post": {
+        "description": "POST list of item ids and visibility value.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "Set homepage item visibility",
+        "parameters": [
+          {
+            "description": "Set item visibility",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HomepageOverrideItemVisibleParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "set-item-visible",
+        "operationId": "set-item-visible"
+      }
+    },
+    "/homepage/set/items_batch": {
+      "post": {
+        "description": "Override multiple homepage items.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
+        "summary": "Override multiple homepage items",
+        "parameters": [
+          {
+            "description": "Override multiple items",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HomepageOverrideItemsBatchParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "set-items-batch",
+        "operationId": "set-items-batch"
+      }
+    },
+    "/icons": {
+      "get": {
+        "description": "List icons",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "v1"
+        ],
+        "summary": "List icons",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Limit",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Keyword",
+            "name": "keyword",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/IconMetaSearch"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "icons",
+        "operationId": "icons"
+      }
+    },
+    "/metrics/all_system_info": {
+      "get": {
+        "description": "Get system info",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "metrics",
+          "websocket"
+        ],
+        "summary": "Get system info",
+        "parameters": [
+          {
+            "enum": [
+              "cpu_average",
+              "memory_usage",
+              "memory_usage_percent",
+              "disks_read_speed",
+              "disks_write_speed",
+              "disks_iops",
+              "disk_usage",
+              "network_speed",
+              "network_transfer",
+              "sensor_temperature"
+            ],
+            "type": "string",
+            "x-enum-varnames": [
+              "SystemInfoAggregateModeCPUAverage",
+              "SystemInfoAggregateModeMemoryUsage",
+              "SystemInfoAggregateModeMemoryUsagePercent",
+              "SystemInfoAggregateModeDisksReadSpeed",
+              "SystemInfoAggregateModeDisksWriteSpeed",
+              "SystemInfoAggregateModeDisksIOPS",
+              "SystemInfoAggregateModeDiskUsage",
+              "SystemInfoAggregateModeNetworkSpeed",
+              "SystemInfoAggregateModeNetworkTransfer",
+              "SystemInfoAggregateModeSensorTemperature"
+            ],
+            "name": "aggregate",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "duration",
+            "name": "interval",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "5m",
+              "15m",
+              "1h",
+              "1d",
+              "1mo"
+            ],
+            "type": "string",
+            "x-enum-varnames": [
+              "MetricsPeriod5m",
+              "MetricsPeriod15m",
+              "MetricsPeriod1h",
+              "MetricsPeriod1d",
+              "MetricsPeriod1mo"
+            ],
+            "name": "period",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "period specified, aggregated system info by agent name",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/definitions/SystemInfoAggregate"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "all_system_info",
+        "operationId": "all_system_info"
+      }
+    },
+    "/metrics/system_info": {
+      "get": {
+        "description": "Get system info",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "metrics",
+          "websocket"
+        ],
+        "summary": "Get system info",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "agentAddr",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "name": "agentName",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "cpu_average",
+              "memory_usage",
+              "memory_usage_percent",
+              "disks_read_speed",
+              "disks_write_speed",
+              "disks_iops",
+              "disk_usage",
+              "network_speed",
+              "network_transfer",
+              "sensor_temperature"
+            ],
+            "type": "string",
+            "x-enum-varnames": [
+              "SystemInfoAggregateModeCPUAverage",
+              "SystemInfoAggregateModeMemoryUsage",
+              "SystemInfoAggregateModeMemoryUsagePercent",
+              "SystemInfoAggregateModeDisksReadSpeed",
+              "SystemInfoAggregateModeDisksWriteSpeed",
+              "SystemInfoAggregateModeDisksIOPS",
+              "SystemInfoAggregateModeDiskUsage",
+              "SystemInfoAggregateModeNetworkSpeed",
+              "SystemInfoAggregateModeNetworkTransfer",
+              "SystemInfoAggregateModeSensorTemperature"
+            ],
+            "name": "aggregate",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "5m",
+              "15m",
+              "1h",
+              "1d",
+              "1mo"
+            ],
+            "type": "string",
+            "x-enum-varnames": [
+              "MetricsPeriod5m",
+              "MetricsPeriod15m",
+              "MetricsPeriod1h",
+              "MetricsPeriod1d",
+              "MetricsPeriod1mo"
+            ],
+            "name": "period",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "period specified",
+            "schema": {
+              "$ref": "#/definitions/SystemInfoAggregate"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "system_info",
+        "operationId": "system_info"
+      }
+    },
+    "/metrics/uptime": {
+      "get": {
+        "description": "Get uptime",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "metrics",
+          "websocket"
+        ],
+        "summary": "Get uptime",
+        "parameters": [
+          {
+            "enum": [
+              "5m",
+              "15m",
+              "1h",
+              "1d",
+              "1mo"
+            ],
+            "type": "string",
+            "example": "1m",
+            "x-enum-varnames": [
+              "MetricsPeriod5m",
+              "MetricsPeriod15m",
+              "MetricsPeriod1h",
+              "MetricsPeriod1d",
+              "MetricsPeriod1mo"
+            ],
+            "name": "interval",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "example": "",
+            "name": "keyword",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "example": 10,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "example": 10,
+            "name": "offset",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "period specified",
+            "schema": {
+              "$ref": "#/definitions/UptimeAggregate"
+            }
+          },
+          "204": {
+            "description": "No Content",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "uptime",
+        "operationId": "uptime"
+      }
+    },
+    "/proxmox/journalctl": {
+      "get": {
+        "description": "Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
+        "summary": "Get journalctl output",
+        "parameters": [
+          {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "default": 100,
+            "description": "Limit output lines (1-1000)",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Node name",
+            "name": "node",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "description": "Service names",
+            "name": "service",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Container VMID (optional - if not provided, streams node journalctl)",
+            "name": "vmid",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Journalctl output",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "journalctl",
+        "operationId": "journalctl"
+      }
+    },
+    "/proxmox/journalctl/{node}": {
+      "get": {
+        "description": "Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
+        "summary": "Get journalctl output",
+        "parameters": [
+          {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "default": 100,
+            "description": "Limit output lines (1-1000)",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Node name",
+            "name": "node",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "description": "Service names",
+            "name": "service",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Container VMID (optional - if not provided, streams node journalctl)",
+            "name": "vmid",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Node name",
+            "name": "node",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Journalctl output",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "journalctl",
+        "operationId": "journalctl"
+      }
+    },
+    "/proxmox/journalctl/{node}/{vmid}": {
+      "get": {
+        "description": "Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
+        "summary": "Get journalctl output",
+        "parameters": [
+          {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "default": 100,
+            "description": "Limit output lines (1-1000)",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Node name",
+            "name": "node",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "description": "Service names",
+            "name": "service",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Container VMID (optional - if not provided, streams node journalctl)",
+            "name": "vmid",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Node name",
+            "name": "node",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Container VMID (optional - if not provided, streams node journalctl)",
+            "name": "vmid",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Journalctl output",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "journalctl",
+        "operationId": "journalctl"
+      }
+    },
+    "/proxmox/journalctl/{node}/{vmid}/{service}": {
+      "get": {
+        "description": "Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
+        "summary": "Get journalctl output",
+        "parameters": [
+          {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "default": 100,
+            "description": "Limit output lines (1-1000)",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Node name",
+            "name": "node",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "description": "Service names",
+            "name": "service",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Container VMID (optional - if not provided, streams node journalctl)",
+            "name": "vmid",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Node name",
+            "name": "node",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "description": "Service names",
+            "name": "service",
+            "in": "path"
+          },
+          {
+            "type": "integer",
+            "description": "Container VMID (optional - if not provided, streams node journalctl)",
+            "name": "vmid",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Journalctl output",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "journalctl",
+        "operationId": "journalctl"
+      }
+    },
+    "/proxmox/lxc/:node/:vmid/restart": {
+      "post": {
+        "description": "Restart LXC container by node and vmid",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox"
+        ],
+        "summary": "Restart LXC container",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "node",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "name": "vmid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "lxcRestart",
+        "operationId": "lxcRestart"
+      }
+    },
+    "/proxmox/lxc/:node/:vmid/start": {
+      "post": {
+        "description": "Start LXC container by node and vmid",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox"
+        ],
+        "summary": "Start LXC container",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "node",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "name": "vmid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "lxcStart",
+        "operationId": "lxcStart"
+      }
+    },
+    "/proxmox/lxc/:node/:vmid/stop": {
+      "post": {
+        "description": "Stop LXC container by node and vmid",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox"
+        ],
+        "summary": "Stop LXC container",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "node",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "name": "vmid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "lxcStop",
+        "operationId": "lxcStop"
+      }
+    },
+    "/proxmox/stats/{node}": {
+      "get": {
+        "description": "Get proxmox node stats in json",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
+        "summary": "Get proxmox node stats",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Node name",
+            "name": "node",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stats output",
+            "schema": {
+              "$ref": "#/definitions/proxmox.NodeStats"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "nodeStats",
+        "operationId": "nodeStats"
+      }
+    },
+    "/proxmox/stats/{node}/{vmid}": {
+      "get": {
+        "description": "Get proxmox VM stats in format of \"STATUS|CPU%%|MEM USAGE/LIMIT|MEM%%|NET I/O|BLOCK I/O\"",
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
+        "summary": "Get proxmox VM stats",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "node",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "name": "vmid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stats output",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "vmStats",
+        "operationId": "vmStats"
+      }
+    },
+    "/proxmox/tail": {
+      "get": {
+        "description": "Get tail output for node or LXC container. If vmid is not provided, streams node tail.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
+        "summary": "Get tail output",
+        "parameters": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "description": "File paths",
+            "name": "file",
+            "in": "query",
+            "required": true
+          },
+          {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer",
+            "default": 100,
+            "description": "Limit output lines (1-1000)",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Node name",
+            "name": "node",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Container VMID (optional - if not provided, streams node journalctl)",
+            "name": "vmid",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tail output",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Node not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "tail",
+        "operationId": "tail"
+      }
+    },
+    "/route/by_provider": {
+      "get": {
+        "description": "List routes by provider",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route"
+        ],
+        "summary": "List routes by provider",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/routeApi.RoutesByProvider"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "byProvider",
+        "operationId": "byProvider"
+      }
+    },
+    "/route/list": {
+      "get": {
+        "description": "List routes",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route",
+          "websocket"
+        ],
+        "summary": "List routes",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Provider",
+            "name": "provider",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Route"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "routes",
+        "operationId": "routes"
+      }
+    },
+    "/route/playground": {
+      "post": {
+        "description": "Test rules against mock request/response",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route"
+        ],
+        "summary": "Rule Playground",
+        "parameters": [
+          {
+            "description": "Playground request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlaygroundRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlaygroundResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "playground",
+        "operationId": "playground"
+      }
+    },
+    "/route/providers": {
+      "get": {
+        "description": "List route providers",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route",
+          "websocket"
+        ],
+        "summary": "List route providers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RouteProvider"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "providers",
+        "operationId": "providers"
+      }
+    },
+    "/route/validate": {
+      "get": {
+        "description": "Validate route,",
+        "consumes": [
+          "application/yaml"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route",
+          "websocket"
+        ],
+        "summary": "Validate route",
+        "parameters": [
+          {
+            "description": "Route",
+            "name": "route",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Route"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route validated",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "417": {
+            "description": "Validation failed",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "validate",
+        "operationId": "validate"
+      },
+      "post": {
+        "description": "Validate route,",
+        "consumes": [
+          "application/yaml"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route",
+          "websocket"
+        ],
+        "summary": "Validate route",
+        "parameters": [
+          {
+            "description": "Route",
+            "name": "route",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Route"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route validated",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "417": {
+            "description": "Validation failed",
+            "schema": {}
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "validate",
+        "operationId": "validate"
+      }
+    },
+    "/route/{which}": {
+      "get": {
+        "description": "List route",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route"
+        ],
+        "summary": "List route",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Route name",
+            "name": "which",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Route"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "route",
+        "operationId": "route"
+      }
+    },
+    "/stats": {
+      "get": {
+        "description": "Get stats",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "v1",
+          "websocket"
+        ],
+        "summary": "Get GoDoxy stats",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/StatsResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "x-id": "stats",
+        "operationId": "stats"
+      }
+    },
+    "/version": {
+      "get": {
+        "description": "Get the version of the GoDoxy",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get version",
+        "responses": {
+          "200": {
+            "description": "version",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "x-id": "version",
+        "operationId": "version"
+      }
+    }
+  },
+  "definitions": {
+    "Agent": {
+      "type": "object",
+      "properties": {
+        "addr": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "runtime": {
+          "$ref": "#/definitions/agent.ContainerRuntime",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "supports_tcp_stream": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "supports_udp_stream": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "version": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "CIDR": {
+      "type": "object",
+      "properties": {
+        "ip": {
+          "description": "network number",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "mask": {
+          "description": "network mask",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "CertInfo": {
+      "type": "object",
+      "properties": {
+        "dns_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "email_addresses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "issuer": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "not_after": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "not_before": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "subject": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "Container": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "$ref": "#/definitions/agentpool.Agent",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "container_id": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "container_name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "docker_cfg": {
+          "$ref": "#/definitions/DockerProviderConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "errors": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "idlewatcher_config": {
+          "$ref": "#/definitions/IdlewatcherConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "image": {
+          "$ref": "#/definitions/ContainerImage",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "is_excluded": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "is_explicit": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "is_host_network_mode": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "labels": {
+          "description": "for displaying in UI",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "mounts": {
+          "description": "source:destination",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "network": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "private_hostname": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "private_ports": {
+          "description": "privatePort:types.Port",
+          "allOf": [
+            {
+              "$ref": "#/definitions/types.PortMapping"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "public_hostname": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "public_ports": {
+          "description": "non-zero publicPort:types.Port",
+          "allOf": [
+            {
+              "$ref": "#/definitions/types.PortMapping"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "running": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "state": {
+          "$ref": "#/definitions/container.ContainerState",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ContainerImage": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "sha256": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "tag": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "version": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ContainerResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "image": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "server": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "state": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ContainerState"
+            }
+          ],
+          "x-nullable": true
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ContainerState": {
+      "type": "string",
+      "enum": [
+        "created",
+        "running",
+        "paused",
+        "restarting",
+        "removing",
+        "exited",
+        "dead"
+      ],
+      "x-enum-comments": {
+        "StateCreated": "StateCreated indicates the container is created, but not (yet) started.",
+        "StateDead": "StateDead indicates that the container failed to be deleted. Containers in this state are attempted to be cleaned up when the daemon restarts.",
+        "StateExited": "StateExited indicates that the container exited.",
+        "StatePaused": "StatePaused indicates that the container's current state is paused.",
+        "StateRemoving": "StateRemoving indicates that the container is being removed.",
+        "StateRestarting": "StateRestarting indicates that the container is currently restarting.",
+        "StateRunning": "StateRunning indicates that the container is running."
+      },
+      "x-enum-descriptions": [
+        "StateCreated indicates the container is created, but not (yet) started.",
+        "StateRunning indicates that the container is running.",
+        "StatePaused indicates that the container's current state is paused.",
+        "StateRestarting indicates that the container is currently restarting.",
+        "StateRemoving indicates that the container is being removed.",
+        "StateExited indicates that the container exited.",
+        "StateDead indicates that the container failed to be deleted. Containers in this state are attempted to be cleaned up when the daemon restarts."
+      ],
+      "x-enum-varnames": [
+        "StateCreated",
+        "StateRunning",
+        "StatePaused",
+        "StateRestarting",
+        "StateRemoving",
+        "StateExited",
+        "StateDead"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ContainerStats": {
+      "type": "object",
+      "properties": {
+        "paused": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "running": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "stopped": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "total": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ContainerStatsResponse": {
+      "type": "object",
+      "properties": {
+        "blkio_stats": {
+          "description": "BlkioStats stores all IO service stats for data read and write.\n\nThis type is Linux-specific and holds many fields that are specific\nto cgroups v1.\n\nOn a cgroup v2 host, all fields other than \"io_service_bytes_recursive\"\nare omitted or \"null\".\n\nThis type is only populated on Linux and omitted for Windows containers.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/container.BlkioStats"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "cpu_stats": {
+          "description": "CPUStats contains CPU related info of the container.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/container.CPUStats"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "id": {
+          "description": "ID is the ID of the container for which the stats were collected.",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "memory_stats": {
+          "description": "MemoryStats aggregates all memory stats since container inception on Linux.\nWindows returns stats for commit and private working set only.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/container.MemoryStats"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "description": "Name is the name of the container for which the stats were collected.",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "networks": {
+          "description": "Networks contains Nntwork statistics for the container per interface.\n\nThis field is omitted if the container has no networking enabled.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/container.NetworkStats"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "num_procs": {
+          "description": "NumProcs is the number of processors on the system.\n\nThis field is Windows-specific and always zero for Linux containers.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "os_type": {
+          "description": "OSType is the OS of the container (\"linux\" or \"windows\") to allow\nplatform-specific handling of stats.",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "pids_stats": {
+          "description": "PidsStats contains Linux-specific stats of a container's process-IDs (PIDs).\n\nThis field is Linux-specific and omitted for Windows containers.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/container.PidsStats"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "precpu_stats": {
+          "description": "PreCPUStats contains the CPUStats of the previous sample.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/container.CPUStats"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "preread": {
+          "description": "PreRead is the date and time at which this first sample was collected.\nThis field is not propagated if the \"one-shot\" option is set. If the\n\"one-shot\" option is set, this field may be omitted, empty, or set\nto a default date (`0001-01-01T00:00:00Z`).",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "read": {
+          "description": "Read is the date and time at which this sample was collected.",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "storage_stats": {
+          "description": "StorageStats is the disk I/O stats for read/write on Windows.\n\nThis type is Windows-specific and omitted for Linux containers.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/container.StorageStats"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ContainerStopMethod": {
+      "type": "string",
+      "enum": [
+        "pause",
+        "stop",
+        "kill"
+      ],
+      "x-enum-varnames": [
+        "ContainerStopMethodPause",
+        "ContainerStopMethodStop",
+        "ContainerStopMethodKill"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "DockerProviderConfig": {
+      "type": "object",
+      "properties": {
+        "tls": {
+          "$ref": "#/definitions/DockerTLSConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "DockerTLSConfig": {
+      "type": "object",
+      "required": [
+        "ca_file"
+      ],
+      "properties": {
+        "ca_file": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "cert_file": {
+          "type": "string"
+        },
+        "key_file": {
+          "type": "string"
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "message": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "Event": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "category": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "data": {
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "level": {
+          "$ref": "#/definitions/events.Level",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "timestamp": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "uuid": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "FileType": {
+      "type": "string",
+      "enum": [
+        "config",
+        "provider",
+        "middleware"
+      ],
+      "x-enum-varnames": [
+        "FileTypeConfig",
+        "FileTypeProvider",
+        "FileTypeMiddleware"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "FinalRequest": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "host": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "method": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "query": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "FinalResponse": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HTTPHeader": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "value": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HealthCheckConfig": {
+      "type": "object",
+      "properties": {
+        "disable": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "interval": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "retries": {
+          "description": "<0: immediate, 0: default, >0: threshold",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "timeout": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "use_get": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HealthExtra": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/LoadBalancerConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "pool": {
+          "type": "object",
+          "additionalProperties": {},
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HealthInfoWithoutDetail": {
+      "type": "object",
+      "properties": {
+        "latency": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "healthy",
+            "unhealthy",
+            "napping",
+            "starting",
+            "error",
+            "unknown"
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "uptime": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HealthJSON": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/HealthCheckConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "detail": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "extra": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/HealthExtra"
+            }
+          ],
+          "x-nullable": true
+        },
+        "lastSeen": {
+          "description": "unix timestamp in seconds",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "latency": {
+          "description": "latency in milliseconds",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "started": {
+          "description": "unix timestamp in seconds",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "status": {
+          "$ref": "#/definitions/HealthStatusString",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "uptime": {
+          "description": "uptime in seconds",
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HealthMap": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/HealthInfoWithoutDetail"
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HealthStatusString": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "healthy",
+        "napping",
+        "starting",
+        "unhealthy",
+        "error"
+      ],
+      "x-enum-varnames": [
+        "StatusUnknownStr",
+        "StatusHealthyStr",
+        "StatusNappingStr",
+        "StatusStartingStr",
+        "StatusUnhealthyStr",
+        "StatusErrorStr"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageCategory": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HomepageItem"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageItem": {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "all_sort_order": {
+          "description": "sort order in all",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "category": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "clicks": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "container_id": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "description": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "fav_sort_order": {
+          "description": "sort order in favorite",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "favorite": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "icon": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "description": "display name",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "origin_url": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "provider": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "show": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "sort_order": {
+          "description": "sort order in category",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "widget_config": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/widgets.Config"
+            }
+          ],
+          "x-nullable": true
+        },
+        "widgets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HomepageItemWidget"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageItemConfig": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "description": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "favorite": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "icon": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "description": "display name",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "show": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "url": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "widget_config": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/widgets.Config"
+            }
+          ],
+          "x-nullable": true
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageItemWidget": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "value": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageOverrideCategoryOrderParams": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "which": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageOverrideItemAllSortOrderParams": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "which": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageOverrideItemFavSortOrderParams": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "which": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageOverrideItemFavoriteParams": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "which": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageOverrideItemParams": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "$ref": "#/definitions/HomepageItemConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "which": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageOverrideItemSortOrderParams": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "which": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageOverrideItemVisibleParams": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "which": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "HomepageOverrideItemsBatchParams": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/HomepageItemConfig"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "IconFetchResult": {
+      "type": "object",
+      "properties": {
+        "icon": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "IconMetaSearch": {
+      "type": "object",
+      "properties": {
+        "Dark": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "Light": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "PNG": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "Ref": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "SVG": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "Source": {
+          "$ref": "#/definitions/icons.Source",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "WebP": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "IdlewatcherConfig": {
+      "type": "object",
+      "properties": {
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "docker": {
+          "$ref": "#/definitions/IdlewatcherDockerConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "idle_timeout": {
+          "description": "0: no idle watcher.\nPositive: idle watcher with idle timeout.\nNegative: idle watcher as a dependency.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/time.Duration"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "no_loading_page": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "proxmox": {
+          "$ref": "#/definitions/IdlewatcherProxmoxNodeConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "start_endpoint": {
+          "description": "Optional path that must be hit to start container",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "stop_method": {
+          "$ref": "#/definitions/ContainerStopMethod",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "stop_signal": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "stop_timeout": {
+          "$ref": "#/definitions/time.Duration",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "wake_timeout": {
+          "$ref": "#/definitions/time.Duration",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "IdlewatcherDockerConfig": {
+      "type": "object",
+      "required": [
+        "container_id",
+        "container_name",
+        "docker_cfg"
+      ],
+      "properties": {
+        "container_id": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "container_name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "docker_cfg": {
+          "$ref": "#/definitions/DockerProviderConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "IdlewatcherProxmoxNodeConfig": {
+      "type": "object",
+      "required": [
+        "node",
+        "vmid"
+      ],
+      "properties": {
+        "node": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "vmid": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ListFilesResponse": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "middleware": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "provider": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "LoadBalancerConfig": {
+      "type": "object",
+      "properties": {
+        "link": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "mode": {
+          "$ref": "#/definitions/LoadBalancerMode",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {},
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "sticky": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "sticky_max_age": {
+          "$ref": "#/definitions/time.Duration",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "weight": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "LoadBalancerMode": {
+      "type": "string",
+      "enum": [
+        "",
+        "roundrobin",
+        "leastconn",
+        "iphash"
+      ],
+      "x-enum-varnames": [
+        "LoadbalanceModeUnset",
+        "LoadbalanceModeRoundRobin",
+        "LoadbalanceModeLeastConn",
+        "LoadbalanceModeIPHash"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "LogFilter-CIDR": {
+      "type": "object",
+      "properties": {
+        "negative": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CIDR"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "LogFilter-HTTPHeader": {
+      "type": "object",
+      "properties": {
+        "negative": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HTTPHeader"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "LogFilter-HTTPMethod": {
+      "type": "object",
+      "properties": {
+        "negative": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "LogFilter-Host": {
+      "type": "object",
+      "properties": {
+        "negative": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "LogFilter-StatusCodeRange": {
+      "type": "object",
+      "properties": {
+        "negative": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StatusCodeRange"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "LogRetention": {
+      "type": "object",
+      "properties": {
+        "days": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "keep_size": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "last": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "MetricsPeriod": {
+      "type": "string",
+      "enum": [
+        "5m",
+        "15m",
+        "1h",
+        "1d",
+        "1mo"
+      ],
+      "x-enum-varnames": [
+        "MetricsPeriod5m",
+        "MetricsPeriod15m",
+        "MetricsPeriod1h",
+        "MetricsPeriod1d",
+        "MetricsPeriod1mo"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "MockCookie": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "value": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "MockRequest": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "cookies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MockCookie"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "host": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "method": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "query": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "remoteIP": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "MockResponse": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "statusCode": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "NewAgentRequest": {
+      "type": "object",
+      "required": [
+        "host",
+        "name",
+        "port",
+        "type"
+      ],
+      "properties": {
+        "container_runtime": {
+          "default": "docker",
+          "enum": [
+            "docker",
+            "podman"
+          ],
+          "allOf": [
+            {
+              "$ref": "#/definitions/agent.ContainerRuntime"
+            }
+          ]
+        },
+        "host": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "nightly": {
+          "type": "boolean"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1,
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "docker",
+            "system"
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "NewAgentResponse": {
+      "type": "object",
+      "properties": {
+        "ca": {
+          "$ref": "#/definitions/PEMPairResponse",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "client": {
+          "$ref": "#/definitions/PEMPairResponse",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "compose": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "PEMPairResponse": {
+      "type": "object",
+      "properties": {
+        "cert": {
+          "type": "string",
+          "format": "base64",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "key": {
+          "type": "string",
+          "format": "base64",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ParsedRule": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "isResponseRule": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "on": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "validationError": {
+          "description": "we need the structured error, not the plain string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "PlaygroundRequest": {
+      "type": "object",
+      "required": [
+        "rules"
+      ],
+      "properties": {
+        "mockRequest": {
+          "$ref": "#/definitions/MockRequest"
+        },
+        "mockResponse": {
+          "$ref": "#/definitions/MockResponse"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/routeApi.RawRule"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "PlaygroundResponse": {
+      "type": "object",
+      "properties": {
+        "executionError": {
+          "description": "we need the structured error, not the plain string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "finalRequest": {
+          "$ref": "#/definitions/FinalRequest",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "finalResponse": {
+          "$ref": "#/definitions/FinalResponse",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "matchedRules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "parsedRules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ParsedRule"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "upstreamCalled": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "Port": {
+      "type": "object",
+      "properties": {
+        "listening": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "proxy": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ProviderStats": {
+      "type": "object",
+      "properties": {
+        "reverse_proxies": {
+          "$ref": "#/definitions/RouteStats",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "streams": {
+          "$ref": "#/definitions/RouteStats",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "total": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "type": {
+          "$ref": "#/definitions/ProviderType",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ProviderType": {
+      "type": "string",
+      "enum": [
+        "docker",
+        "file",
+        "agent"
+      ],
+      "x-enum-varnames": [
+        "ProviderTypeDocker",
+        "ProviderTypeFile",
+        "ProviderTypeAgent"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ProxmoxNodeConfig": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "node": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "vmid": {
+          "description": "unset: auto discover; explicit 0: node-level route; >0: lxc/qemu resource route",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "vmname": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ProxyStats": {
+      "type": "object",
+      "properties": {
+        "providers": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ProviderStats"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "reverse_proxies": {
+          "$ref": "#/definitions/RouteStats",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "streams": {
+          "$ref": "#/definitions/RouteStats",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "total": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "RequestLoggerConfig": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "$ref": "#/definitions/accesslog.Fields",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "filters": {
+          "$ref": "#/definitions/accesslog.Filters",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "common",
+            "combined",
+            "json"
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "retention": {
+          "$ref": "#/definitions/LogRetention",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "rotate_interval": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "stdout": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "Route": {
+      "type": "object",
+      "properties": {
+        "access_log": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/RequestLoggerConfig"
+            }
+          ],
+          "x-nullable": true
+        },
+        "agent": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "alias": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "bind": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "container": {
+          "description": "Docker only",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Container"
+            }
+          ],
+          "x-nullable": true
+        },
+        "disable_compression": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "excluded": {
+          "type": "boolean",
+          "x-nullable": true
+        },
+        "excluded_reason": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "health": {
+          "description": "for swagger",
+          "allOf": [
+            {
+              "$ref": "#/definitions/HealthJSON"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "healthcheck": {
+          "description": "null on load-balancer routes",
+          "allOf": [
+            {
+              "$ref": "#/definitions/HealthCheckConfig"
+            }
+          ],
+          "x-nullable": true
+        },
+        "homepage": {
+          "$ref": "#/definitions/HomepageItemConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "host": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "idlewatcher": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IdlewatcherConfig"
+            }
+          ],
+          "x-nullable": true
+        },
+        "index": {
+          "description": "Index file to serve for single-page app mode",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "load_balance": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LoadBalancerConfig"
+            }
+          ],
+          "x-nullable": true
+        },
+        "lurl": {
+          "description": "private fields",
+          "type": "string",
+          "x-nullable": true
+        },
+        "middlewares": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/types.LabelMap"
+          },
+          "x-nullable": true
+        },
+        "no_tls_verify": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "path_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": true
+        },
+        "port": {
+          "$ref": "#/definitions/Port",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "provider": {
+          "description": "for backward compatibility",
+          "type": "string",
+          "x-nullable": true
+        },
+        "proxmox": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ProxmoxNodeConfig"
+            }
+          ],
+          "x-nullable": true
+        },
+        "purl": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "response_header_timeout": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "root": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "rule_file": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/rules.Rule"
+          },
+          "x-nullable": true
+        },
+        "scheme": {
+          "type": "string",
+          "enum": [
+            "http",
+            "https",
+            "h2c",
+            "tcp",
+            "udp",
+            "fileserver"
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "spa": {
+          "description": "Single-page app mode: serves index for non-existent paths",
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "ssl_certificate": {
+          "description": "Path to client certificate",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "ssl_certificate_key": {
+          "description": "Path to client certificate key",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "ssl_protocols": {
+          "description": "Allowed TLS protocols",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "ssl_server_name": {
+          "description": "SSL/TLS proxy options (nginx-like)",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "ssl_trusted_certificate": {
+          "description": "Path to trusted CA certificates",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "RouteProvider": {
+      "type": "object",
+      "properties": {
+        "full_name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "short_name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "RouteStats": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "healthy": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "napping": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "total": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "unhealthy": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "unknown": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "RouteStatus": {
+      "type": "object",
+      "properties": {
+        "latency": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "healthy",
+            "unhealthy",
+            "unknown",
+            "napping",
+            "starting"
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "timestamp": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "RouteStatusesByAlias": {
+      "type": "object",
+      "properties": {
+        "statuses": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/HealthInfoWithoutDetail"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "timestamp": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "RouteUptimeAggregate": {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "avg_latency": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "current_status": {
+          "type": "string",
+          "enum": [
+            "healthy",
+            "unhealthy",
+            "unknown",
+            "napping",
+            "starting"
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "downtime": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "idle": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RouteStatus"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "uptime": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "ServerInfo": {
+      "type": "object",
+      "properties": {
+        "containers": {
+          "$ref": "#/definitions/ContainerStats",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "images": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "memory": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "n_cpu": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "version": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "StatsResponse": {
+      "type": "object",
+      "properties": {
+        "proxies": {
+          "$ref": "#/definitions/ProxyStats",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "uptime": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "StatusCodeRange": {
+      "type": "object",
+      "properties": {
+        "end": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "start": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "SuccessResponse": {
+      "type": "object",
+      "properties": {
+        "details": {
+          "type": "object",
+          "additionalProperties": {},
+          "x-nullable": true
+        },
+        "message": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "SystemInfo": {
+      "type": "object",
+      "properties": {
+        "cpu_average": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "disks": {
+          "description": "disk usage by partition",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/disk.UsageStat"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "disks_io": {
+          "description": "disk IO by device",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/disk.IOCountersStat"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "memory": {
+          "$ref": "#/definitions/mem.VirtualMemoryStat",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "network": {
+          "$ref": "#/definitions/net.IOCountersStat",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "sensors": {
+          "description": "sensor temperature by key",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/sensors.TemperatureStat"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "timestamp": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "SystemInfoAggregate": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "total": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "SystemInfoAggregateMode": {
+      "type": "string",
+      "enum": [
+        "cpu_average",
+        "memory_usage",
+        "memory_usage_percent",
+        "disks_read_speed",
+        "disks_write_speed",
+        "disks_iops",
+        "disk_usage",
+        "network_speed",
+        "network_transfer",
+        "sensor_temperature"
+      ],
+      "x-enum-varnames": [
+        "SystemInfoAggregateModeCPUAverage",
+        "SystemInfoAggregateModeMemoryUsage",
+        "SystemInfoAggregateModeMemoryUsagePercent",
+        "SystemInfoAggregateModeDisksReadSpeed",
+        "SystemInfoAggregateModeDisksWriteSpeed",
+        "SystemInfoAggregateModeDisksIOPS",
+        "SystemInfoAggregateModeDiskUsage",
+        "SystemInfoAggregateModeNetworkSpeed",
+        "SystemInfoAggregateModeNetworkTransfer",
+        "SystemInfoAggregateModeSensorTemperature"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "UptimeAggregate": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RouteUptimeAggregate"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "total": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "VerifyNewAgentRequest": {
+      "type": "object",
+      "properties": {
+        "ca": {
+          "$ref": "#/definitions/PEMPairResponse",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "client": {
+          "$ref": "#/definitions/PEMPairResponse",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "container_runtime": {
+          "$ref": "#/definitions/agent.ContainerRuntime",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "host": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "accesslog.FieldConfig": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/accesslog.FieldMode"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "default": {
+          "enum": [
+            "keep",
+            "drop",
+            "redact"
+          ],
+          "allOf": [
+            {
+              "$ref": "#/definitions/accesslog.FieldMode"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "accesslog.FieldMode": {
+      "type": "string",
+      "enum": [
+        "keep",
+        "drop",
+        "redact"
+      ],
+      "x-enum-varnames": [
+        "FieldModeKeep",
+        "FieldModeDrop",
+        "FieldModeRedact"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "accesslog.Fields": {
+      "type": "object",
+      "properties": {
+        "cookies": {
+          "$ref": "#/definitions/accesslog.FieldConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "headers": {
+          "$ref": "#/definitions/accesslog.FieldConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "query": {
+          "$ref": "#/definitions/accesslog.FieldConfig",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "accesslog.Filters": {
+      "type": "object",
+      "properties": {
+        "cidr": {
+          "$ref": "#/definitions/LogFilter-CIDR",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "headers": {
+          "description": "header exists or header == value",
+          "allOf": [
+            {
+              "$ref": "#/definitions/LogFilter-HTTPHeader"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "host": {
+          "$ref": "#/definitions/LogFilter-Host",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "method": {
+          "$ref": "#/definitions/LogFilter-HTTPMethod",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "status_codes": {
+          "$ref": "#/definitions/LogFilter-StatusCodeRange",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "agent.ContainerRuntime": {
+      "type": "string",
+      "enum": [
+        "docker",
+        "podman"
+      ],
+      "x-enum-varnames": [
+        "ContainerRuntimeDocker",
+        "ContainerRuntimePodman"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "agentpool.Agent": {
+      "type": "object",
+      "properties": {
+        "addr": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "runtime": {
+          "$ref": "#/definitions/agent.ContainerRuntime",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "supports_tcp_stream": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "supports_udp_stream": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "version": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "auth.UserPassAuthCallbackRequest": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "username": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.BlkioStatEntry": {
+      "type": "object",
+      "properties": {
+        "major": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "minor": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "op": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "value": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.BlkioStats": {
+      "type": "object",
+      "properties": {
+        "io_merged_recursive": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container.BlkioStatEntry"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "io_queue_recursive": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container.BlkioStatEntry"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "io_service_bytes_recursive": {
+          "description": "number of bytes transferred to and from the block device",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container.BlkioStatEntry"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "io_service_time_recursive": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container.BlkioStatEntry"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "io_serviced_recursive": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container.BlkioStatEntry"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "io_time_recursive": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container.BlkioStatEntry"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "io_wait_time_recursive": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container.BlkioStatEntry"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "sectors_recursive": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/container.BlkioStatEntry"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.CPUStats": {
+      "type": "object",
+      "properties": {
+        "cpu_usage": {
+          "description": "CPU Usage. Linux and Windows.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/container.CPUUsage"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "online_cpus": {
+          "description": "Online CPUs. Linux only.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "system_cpu_usage": {
+          "description": "System Usage. Linux only.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "throttling_data": {
+          "description": "Throttling Data. Linux only.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/container.ThrottlingData"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.CPUUsage": {
+      "type": "object",
+      "properties": {
+        "percpu_usage": {
+          "description": "Total CPU time consumed per core (Linux). Not used on Windows.\nUnits: nanoseconds.",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "total_usage": {
+          "description": "Total CPU time consumed.\nUnits: nanoseconds (Linux)\nUnits: 100's of nanoseconds (Windows)",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "usage_in_kernelmode": {
+          "description": "Time spent by tasks of the cgroup in kernel mode (Linux).\nTime spent by all container processes in kernel mode (Windows).\nUnits: nanoseconds (Linux).\nUnits: 100's of nanoseconds (Windows). Not populated for Hyper-V Containers.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "usage_in_usermode": {
+          "description": "Time spent by tasks of the cgroup in user mode (Linux).\nTime spent by all container processes in user mode (Windows).\nUnits: nanoseconds (Linux).\nUnits: 100's of nanoseconds (Windows). Not populated for Hyper-V Containers",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.ContainerState": {
+      "type": "string",
+      "enum": [
+        "created",
+        "running",
+        "paused",
+        "restarting",
+        "removing",
+        "exited",
+        "dead"
+      ],
+      "x-enum-comments": {
+        "StateCreated": "StateCreated indicates the container is created, but not (yet) started.",
+        "StateDead": "StateDead indicates that the container failed to be deleted. Containers in this state are attempted to be cleaned up when the daemon restarts.",
+        "StateExited": "StateExited indicates that the container exited.",
+        "StatePaused": "StatePaused indicates that the container's current state is paused.",
+        "StateRemoving": "StateRemoving indicates that the container is being removed.",
+        "StateRestarting": "StateRestarting indicates that the container is currently restarting.",
+        "StateRunning": "StateRunning indicates that the container is running."
+      },
+      "x-enum-descriptions": [
+        "StateCreated indicates the container is created, but not (yet) started.",
+        "StateRunning indicates that the container is running.",
+        "StatePaused indicates that the container's current state is paused.",
+        "StateRestarting indicates that the container is currently restarting.",
+        "StateRemoving indicates that the container is being removed.",
+        "StateExited indicates that the container exited.",
+        "StateDead indicates that the container failed to be deleted. Containers in this state are attempted to be cleaned up when the daemon restarts."
+      ],
+      "x-enum-varnames": [
+        "StateCreated",
+        "StateRunning",
+        "StatePaused",
+        "StateRestarting",
+        "StateRemoving",
+        "StateExited",
+        "StateDead"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.MemoryStats": {
+      "type": "object",
+      "properties": {
+        "commitbytes": {
+          "description": "committed bytes",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "commitpeakbytes": {
+          "description": "peak committed bytes",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "failcnt": {
+          "description": "number of times memory usage hits limits.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "limit": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "max_usage": {
+          "description": "maximum usage ever recorded.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "privateworkingset": {
+          "description": "private working set",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "stats": {
+          "description": "TODO(vishh): Export these as stronger types.\nall the stats exported via memory.stat.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "usage": {
+          "description": "current res_counter usage for memory",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.NetworkStats": {
+      "type": "object",
+      "properties": {
+        "endpoint_id": {
+          "description": "Endpoint ID. Not used on Linux.",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "instance_id": {
+          "description": "Instance ID. Not used on Linux.",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "rx_bytes": {
+          "description": "Bytes received. Windows and Linux.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "rx_dropped": {
+          "description": "Incoming packets dropped. Windows and Linux.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "rx_errors": {
+          "description": "Received errors. Not used on Windows. Note that we don't `omitempty` this\nfield as it is expected in the >=v1.21 API stats structure.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "rx_packets": {
+          "description": "Packets received. Windows and Linux.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "tx_bytes": {
+          "description": "Bytes sent. Windows and Linux.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "tx_dropped": {
+          "description": "Outgoing packets dropped. Windows and Linux.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "tx_errors": {
+          "description": "Sent errors. Not used on Windows. Note that we don't `omitempty` this\nfield as it is expected in the >=v1.21 API stats structure.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "tx_packets": {
+          "description": "Packets sent. Windows and Linux.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.PidsStats": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "description": "Current is the number of pids in the cgroup",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "limit": {
+          "description": "Limit is the hard limit on the number of pids in the cgroup.\nA \"Limit\" of 0 means that there is no limit.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.PortSummary": {
+      "type": "object",
+      "properties": {
+        "IP": {
+          "description": "Host IP address that the container's port is mapped to",
+          "allOf": [
+            {
+              "$ref": "#/definitions/netip.Addr"
+            }
+          ],
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "PrivatePort": {
+          "description": "Port on the container\nRequired: true",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "PublicPort": {
+          "description": "Port exposed on the host",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "Type": {
+          "description": "type\nRequired: true\nEnum: [\"tcp\",\"udp\",\"sctp\"]",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.StorageStats": {
+      "type": "object",
+      "properties": {
+        "read_count_normalized": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "read_size_bytes": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "write_count_normalized": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "write_size_bytes": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "container.ThrottlingData": {
+      "type": "object",
+      "properties": {
+        "periods": {
+          "description": "Number of periods with throttling active",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "throttled_periods": {
+          "description": "Number of periods when the container hits its throttling limit.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "throttled_time": {
+          "description": "Aggregate time the container was throttled for in nanoseconds.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "disk.IOCountersStat": {
+      "type": "object",
+      "properties": {
+        "iops": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "description": "ReadCount        uint64 `json:\"readCount\"`\nMergedReadCount  uint64 `json:\"mergedReadCount\"`\nWriteCount       uint64 `json:\"writeCount\"`\nMergedWriteCount uint64 `json:\"mergedWriteCount\"`\nReadBytes        uint64 `json:\"readBytes\"`\nWriteBytes       uint64 `json:\"writeBytes\"`\nReadTime         uint64 `json:\"readTime\"`\nWriteTime        uint64 `json:\"writeTime\"`\nIopsInProgress   uint64 `json:\"iopsInProgress\"`\nIoTime           uint64 `json:\"ioTime\"`\nWeightedIO       uint64 `json:\"weightedIO\"`",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "read_bytes": {
+          "description": "SerialNumber     string `json:\"serialNumber\"`\nLabel            string `json:\"label\"`",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "read_count": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "read_speed": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "write_bytes": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "write_count": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "write_speed": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "disk.UsageStat": {
+      "type": "object",
+      "properties": {
+        "free": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "fstype": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "path": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "total": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "used": {
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "used_percent": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "dockerapi.RestartRequest": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "signal": {
+          "description": "Signal (optional) is the signal to send to the container to (gracefully)\nstop it before forcibly terminating the container with SIGKILL after the\ntimeout expires. If no value is set, the default (SIGTERM) is used.",
+          "type": "string"
+        },
+        "timeout": {
+          "description": "Timeout (optional) is the timeout (in seconds) to wait for the container\nto stop gracefully before forcibly terminating it with SIGKILL.\n\n- Use nil to use the default timeout (10 seconds).\n- Use '-1' to wait indefinitely.\n- Use '0' to not wait for the container to exit gracefully, and\n  immediately proceeds to forcibly terminating the container.\n- Other positive values are used as timeout (in seconds).",
+          "type": "integer"
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "dockerapi.StartRequest": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "checkpointDir": {
+          "type": "string"
+        },
+        "checkpointID": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "dockerapi.StopRequest": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "signal": {
+          "description": "Signal (optional) is the signal to send to the container to (gracefully)\nstop it before forcibly terminating the container with SIGKILL after the\ntimeout expires. If no value is set, the default (SIGTERM) is used.",
+          "type": "string"
+        },
+        "timeout": {
+          "description": "Timeout (optional) is the timeout (in seconds) to wait for the container\nto stop gracefully before forcibly terminating it with SIGKILL.\n\n- Use nil to use the default timeout (10 seconds).\n- Use '-1' to wait indefinitely.\n- Use '0' to not wait for the container to exit gracefully, and\n  immediately proceeds to forcibly terminating the container.\n- Other positive values are used as timeout (in seconds).",
+          "type": "integer"
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "events.Level": {
+      "type": "string",
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error"
+      ],
+      "x-enum-varnames": [
+        "LevelDebug",
+        "LevelInfo",
+        "LevelWarn",
+        "LevelError"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "icons.Source": {
+      "type": "string",
+      "enum": [
+        "https://",
+        "@target",
+        "@walkxcode",
+        "@selfhst"
+      ],
+      "x-enum-varnames": [
+        "SourceAbsolute",
+        "SourceRelative",
+        "SourceWalkXCode",
+        "SourceSelfhSt"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "mem.VirtualMemoryStat": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "description": "RAM available for programs to allocate\n\nThis value is computed from the kernel specific values.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "total": {
+          "description": "Total amount of RAM on this system",
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "used": {
+          "description": "RAM used by programs\n\nThis value is computed from the kernel specific values.",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "used_percent": {
+          "description": "Percentage of RAM used by programs\n\nThis value is computed from the kernel specific values.",
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "net.IOCountersStat": {
+      "type": "object",
+      "properties": {
+        "bytes_recv": {
+          "description": "number of bytes received",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "bytes_sent": {
+          "description": "Name      string `json:\"name\"`       // interface name",
+          "type": "integer",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "download_speed": {
+          "description": "godoxy",
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "upload_speed": {
+          "description": "godoxy",
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "netip.Addr": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "ipv4"
+        },
+        {
+          "type": "string",
+          "format": "ipv6"
+        }
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "proxmox.NodeStats": {
+      "type": "object",
+      "properties": {
+        "cpu_model": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "cpu_usage": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "kernel_version": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "load_avg_15m": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "load_avg_1m": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "load_avg_5m": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "mem_pct": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "mem_total": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "mem_usage": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "pve_version": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "rootfs_pct": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "rootfs_total": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "rootfs_usage": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "uptime": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "routeApi.RawRule": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "on": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "routeApi.RoutesByProvider": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Route"
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "rules.Rule": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "on": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "sensors.TemperatureStat": {
+      "type": "object",
+      "properties": {
+        "critical": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "high": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "name": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "temperature": {
+          "type": "number",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "time.Duration": {
+      "type": "integer",
+      "format": "int64",
+      "enum": [
+        -9223372036854775808,
+        9223372036854775807,
+        1,
+        1000,
+        1000000,
+        1000000000,
+        60000000000,
+        3600000000000
+      ],
+      "x-enum-varnames": [
+        "minDuration",
+        "maxDuration",
+        "Nanosecond",
+        "Microsecond",
+        "Millisecond",
+        "Second",
+        "Minute",
+        "Hour"
+      ],
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "types.LabelMap": {
+      "type": "object",
+      "additionalProperties": {},
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "types.PortMapping": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/container.PortSummary"
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "widgets.Config": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "provider": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    }
+  },
+  "externalDocs": {
+    "description": "GoDoxy Docs",
+    "url": "https://docs.godoxy.dev"
+  }
+}
