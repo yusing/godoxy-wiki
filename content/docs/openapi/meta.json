@@ -1,0 +1,7 @@
+{
+  "title": "GoDoxy API",
+  "description": "API Documentation",
+  "root": true,
+  "icon": "Shapes",
+  "pages": ["index", "...(generated)"]
+}
