@@ -1,7 +1,6 @@
-# godoxy-wiki-fumadocs
+# GoDoxy Wiki
 
-This is a Next.js application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+This is the wiki for the [GoDoxy](https://github.com/yusing/godoxy) project.
 
 Run development server:
 
@@ -13,7 +12,7 @@ pnpm dev
 yarn dev
 ```
 
-Open http://localhost:3000 with your browser to see the result.
+Open <http://localhost:3000> with your browser to see the result.
 
 ## Explore
 
