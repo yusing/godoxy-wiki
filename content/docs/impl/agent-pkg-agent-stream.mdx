@@ -1,5 +1,5 @@
 ---
-title: Stream proxy protocol
+title: agent/pkg/agent/stream
 description: This package implements a small header-based handshake that allows an authenticated client to request forwarding to a `(host, port)` destination. It supports both TCP-over-TLS and UDP-over-DTLS transports
 ---
 
@@ -50,9 +50,9 @@ See [`StreamRequestHeader`](https://github.com/yusing/godoxy/blob/main/agent/pkg
 
 ## File Structure
 
-| File                                                                                                   | Purpose                                                      |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| [`header.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/stream/header.go)             | Stream request header structure and validation.              |
+| File                                | Purpose                                                      |
+| ----------------------------------- | ------------------------------------------------------------ |
+| [`header.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/stream/header.go)            | Stream request header structure and validation.              |
 | [`tcp_client.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/stream/tcp_client.go#L12) | TCP client implementation with TLS transport.                |
 | [`tcp_server.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/stream/tcp_server.go#L13) | TCP server implementation for handling stream requests.      |
 | [`udp_client.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/stream/udp_client.go#L13) | UDP client implementation with DTLS transport.               |

@@ -1,5 +1,5 @@
 ---
-title: Agent Package
+title: agent/pkg/agent
 description: The `agent` package provides the client-side implementation for interacting with GoDoxy agents. It handles agent configuration, secure communication via TLS, and provides utilities for agent deployment and management
 ---
 
@@ -28,14 +28,14 @@ graph TD
 
 ## File Structure
 
-| File                                                                                                | Purpose                                                   |
-| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| File                                     | Purpose                                                   |
+| ---------------------------------------- | --------------------------------------------------------- |
 | [`config.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/config.go)                 | Core configuration, initialization, and API client logic. |
 | [`new_agent.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/new_agent.go)           | Agent creation and certificate generation logic.          |
 | [`docker_compose.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/docker_compose.go) | Generator for agent Docker Compose configurations.        |
 | [`bare_metal.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/bare_metal.go)         | Generator for bare metal installation scripts.            |
 | [`env.go`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/env.go)                       | Environment configuration types and constants.            |
-| `common/`                                                                                           | Shared constants and utilities for agents.                |
+| `common/`                                | Shared constants and utilities for agents.                |
 
 ## Core Types
 
