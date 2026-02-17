@@ -5,7 +5,6 @@ const withMDX = createMDX();
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
-  cacheComponents: true,
   images: {
     remotePatterns: [
       new URL("https://img.shields.io/github/v/release/**?style=flat-square"),
