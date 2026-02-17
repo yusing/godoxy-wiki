@@ -1,0 +1,66 @@
+---
+title: Real IP
+description: Resolve client IP from proxy headers
+---
+
+<Callout type="info">
+  Recommended for entrypoint - affects `$remote_addr`, `$remote_host`, logs, and
+  CIDRWhitelist.
+</Callout>
+
+| Option      | Description       | Default     | Required |
+| ----------- | ----------------- | ----------- | -------- |
+| `header`    | Real IP header    | `X-Real-IP` | No       |
+| `from`      | Trusted CIDRs/IPs | -           | Yes      |
+| `recursive` | Recursive mode    | `true`      | No       |
+
+## Recursive Mode
+
+- `true`: First IP not in `from` list
+- `false`: Last IP not in `from` list
+
+### Expected Behavior
+
+```yaml
+from: 192.168.0.0/16, 10.0.0.1
+header: X-Forwarded-For
+```
+
+```text
+X-Forwarded-For: 1.2.3.4, 192.168.0.123, 10.0.0.123
+```
+
+| Recursive | Result       |
+| --------- | ------------ |
+| `true`    | `1.2.3.4`    |
+| `false`   | `10.0.0.123` |
+
+## Examples
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: real_ip
+      header: X-Real-IP
+      from: [127.0.0.1, 192.168.0.0/16]
+```
+
+### Docker Labels
+
+```yaml
+proxy.#1.middlewares.real_ip: |
+  header: X-Real-IP
+  from: [127.0.0.1, 192.168.0.0/16]
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    real_ip:
+      header: X-Real-IP
+      from: [127.0.0.1, 192.168.0.0/16]
+```

@@ -1,0 +1,6 @@
+{
+  "title": "Content Modification",
+  "icon": "Sparkles",
+  "pages": ["Modify-HTML", "Themed"],
+  "defaultOpen": true
+}

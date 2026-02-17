@@ -1,0 +1,45 @@
+---
+title: Cloudflare Real IP
+description: Resolve client IP from Cloudflare proxy headers
+---
+
+<Callout type="info">
+  Recommended for entrypoint - affects `$remote_addr`, `$remote_host`, logs, and
+  CIDRWhitelist.
+</Callout>
+
+## Configuration
+
+No configuration options.
+
+## Preset Values
+
+| Option      | Description       | Default                        |
+| ----------- | ----------------- | ------------------------------ |
+| `header`    | Real IP header    | `CF-Connecting-IP`             |
+| `from`      | Trusted CIDRs/IPs | Cloudflare IPs + all local IPs |
+| `recursive` | Recursive mode    | `true`                         |
+
+## Examples
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: cloudflare_real_ip
+```
+
+### Docker Labels
+
+```yaml
+proxy.#1.middlewares.cloudflare_real_ip:
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    cloudflare_real_ip:
+```

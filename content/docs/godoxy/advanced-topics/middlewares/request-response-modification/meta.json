@@ -1,0 +1,11 @@
+{
+  "title": "Request & Response Modification",
+  "icon": "Pencil",
+  "pages": [
+    "Modify-Request",
+    "Modify-Response",
+    "Hide-X-Forwarded",
+    "Set-X-Forwarded"
+  ],
+  "defaultOpen": true
+}

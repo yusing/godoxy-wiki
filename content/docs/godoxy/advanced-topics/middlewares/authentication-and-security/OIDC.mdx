@@ -1,0 +1,61 @@
+---
+title: OIDC
+description: OpenID Connect authentication
+---
+
+## Configuration
+
+### Middleware
+
+| Option           | Description    | Default                      |
+| ---------------- | -------------- | ---------------------------- |
+| `allowed_users`  | Allowed users  | `GODOXY_OIDC_ALLOWED_USERS`  |
+| `allowed_groups` | Allowed groups | `GODOXY_OIDC_ALLOWED_GROUPS` |
+| `client_id`      | Client ID      | `GODOXY_OIDC_CLIENT_ID`      |
+| `client_secret`  | Client secret  | `GODOXY_OIDC_CLIENT_SECRET`  |
+| `scope`          | OAuth scope    | `GODOXY_OIDC_SCOPE`          |
+
+See [OIDC Configuration](../../../getting-started/OIDC) for more information.
+
+## Examples
+
+### WebUI
+
+Enabled by default if environment variables are set.
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: oidc
+      bypass:
+        - route pocket-id
+        - route immich & path glob(/api/*)
+        - remote 127.0.0.1
+        - remote 192.168.0.0/16
+```
+
+### Docker Labels
+
+```yaml
+proxy.#1.middlewares.oidc: |
+  allowed_users: user1, user2
+  allowed_groups: group1, group2
+  client_id: client1
+  client_secret: secret1
+  scope: openid, profile, email, groups
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    oidc:
+      allowed_users: user1, user2
+      allowed_groups: group1, group2
+      client_id: client1
+      client_secret: secret1
+      scope: openid, profile, email, groups
+```

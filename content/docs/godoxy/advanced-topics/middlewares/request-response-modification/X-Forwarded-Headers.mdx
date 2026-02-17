@@ -1,0 +1,39 @@
+---
+title: X-Forwarded Headers
+description: Modify X-Forwarded headers
+---
+
+## Middlewares
+
+| Name               | Purpose                         |
+| ------------------ | ------------------------------- |
+| `hide_x_forwarded` | Remove X-Forwarded-\* headers   |
+| `set_x_forwarded`  | Override X-Forwarded-\* headers |
+
+## Configuration
+
+No configuration options.
+
+## Examples
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: hide_x_forwarded
+```
+
+### Docker Labels
+
+```yaml
+proxy.#1.middlewares.hide_x_forwarded:
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    hide_x_forwarded:
+```

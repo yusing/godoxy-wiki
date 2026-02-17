@@ -1,0 +1,99 @@
+---
+title: Modify Response
+description: Modify response headers and paths
+---
+
+## Name
+
+`modify_response` / `response`
+
+## Configuration
+
+| Option         | Description     | Default | Required |
+| -------------- | --------------- | ------- | -------- |
+| `set_headers`  | Replace headers | -       | No       |
+| `add_headers`  | Add headers     | -       | No       |
+| `hide_headers` | Remove headers  | -       | No       |
+
+## Variables Reference
+
+<Callout type="info">
+  Variables are expanded at runtime using the syntax `$variable_name` or
+  `$function_name(args)`.
+
+Use `$$` in docker labels to escape the `$` character.
+
+</Callout>
+
+| Category     | Variable              | Description           |
+| ------------ | --------------------- | --------------------- |
+| **Request**  | `req_method`          | HTTP method           |
+|              | `req_scheme`          | URL scheme            |
+|              | `req_host`            | Host without port     |
+|              | `req_port`            | Port number           |
+|              | `req_addr`            | Host:port             |
+|              | `req_path`            | URL path              |
+|              | `req_query`           | Query string          |
+|              | `req_url`             | Full URL              |
+|              | `req_uri`             | Encoded path?query    |
+|              | `req_content_type`    | Content-Type header   |
+|              | `req_content_length`  | Request body length   |
+| **Client**   | `remote_addr`         | Client IP             |
+|              | `remote_host`         | Client IP (parsed)    |
+|              | `remote_port`         | Client port           |
+| **Response** | `resp_content_type`   | Response Content-Type |
+|              | `resp_content_length` | Response body length  |
+|              | `status_code`         | HTTP status           |
+| **Upstream** | `upstream_name`       | Server alias          |
+|              | `upstream_scheme`     | Server scheme         |
+|              | `upstream_host`       | Server host           |
+|              | `upstream_port`       | Server port           |
+|              | `upstream_addr`       | Server address:port   |
+|              | `upstream_url`        | Full server URL       |
+| **Dynamic**  | `header(name)`        | Get header value      |
+|              | `resp_header(name)`   | Get response header   |
+|              | `arg(name)`           | Get query param       |
+
+## Examples
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: modify_response
+      set_headers:
+        X-Custom: value1, value2
+      add_headers:
+        X-Custom: value1, value2
+```
+
+### Docker Labels
+
+```yaml
+# Set headers (replace)
+proxy.myapp.middlewares.response.set_headers: |
+  X-Custom: value1, value2
+  X-Real-IP: $$remote_host
+
+# Add headers (append)
+proxy.myapp.middlewares.response.add_headers: |
+  X-Custom: value1, value2
+
+# Hide headers (remove)
+proxy.myapp.middlewares.response.hide_headers: X-Real-IP, X-Forwarded-For
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    modify_response:
+      set_headers:
+        X-Custom: value1, value2
+        X-Real-IP: $$remote_host
+      add_headers:
+        X-Custom: value1, value2
+      hide_headers: X-Real-IP, X-Forwarded-For
+```

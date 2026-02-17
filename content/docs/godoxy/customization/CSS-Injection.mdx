@@ -1,0 +1,25 @@
+---
+title: CSS Injection
+description: Inject CSS into the HTML of your application
+---
+
+## Overview
+
+CSS Injection is simple with help of the [`themed`](../advanced-topics/middlewares/content-modification/Themed) middleware.
+
+## Examples
+
+Using themes from [Theme Park](https://docs.theme-park.dev)
+
+```yaml
+# docker labels
+proxy.app.middlewares.themed.css: https://theme-park.dev/css/base/<app>/<theme>.css
+
+# route file
+app:
+  middlewares:
+    themed:
+      css: https://theme-park.dev/css/base/<app>/<theme>.css
+```
+
+Check out the [`themed` middleware](../advanced-topics/middlewares/content-modification/Themed) middleware for more options.

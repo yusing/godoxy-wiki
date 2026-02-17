@@ -1,0 +1,32 @@
+---
+title: Redirect HTTP
+description: Redirect HTTP requests to HTTPS
+---
+
+## Configuration
+
+No configuration options.
+
+## Examples
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: redirect_http
+```
+
+### Docker Labels
+
+```yaml
+proxy.#1.middlewares.redirect_http:
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    redirect_http:
+```

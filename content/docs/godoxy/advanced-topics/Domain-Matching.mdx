@@ -1,0 +1,94 @@
+---
+title: Domain Matching
+description: Configure domain matching for GoDoxy
+---
+
+An alias is either a short alias or an FQDN (Fully Qualified Domain Name) alias.
+
+### Docker
+
+By default, the container name is used as the short alias unless `proxy.aliases` is set.
+
+### General
+
+#### Without `match_domains`
+
+If `match_domains` is not set in `config.yml`, below will match route with short alias `app`:
+
+- `app.anydomain.com`
+- `app.*.anydomain.com`
+- ...
+
+Below will match route with FQDN alias `app.example.com`:
+
+- `app.example.com`
+- `app.example.com.*`
+
+#### Using `match_domains`
+
+Use this to restrict which base domains are valid.
+
+With `match_domains` in `config.yml`:
+
+```yaml
+match_domains:
+  - example.com
+  - example.org
+```
+
+Then a short alias `app` can be accessed only at:
+
+- `app.example.com`
+- `app.example.org`
+
+And a route with FQDN alias `app.example.com` can be accessed at:
+
+- `app.example.com`
+
+#### Use case example for `match_domains`
+
+Given your main domain is `my.app`:
+
+- Add `my.app` to `autocert.domains` and `match_domains` in `config.yml`.
+
+  ```yaml
+  autocert:
+    domains:
+      - my.app
+  match_domains:
+    - my.app
+  ```
+
+- Use short aliases like `adguard` and `sonarr` when you want them accessible under your main domain.
+
+  ```yaml
+  services:
+    adguard: # adguard.my.app
+      ...
+      labels:
+        proxy.aliases: adguard
+    sonarr: # sonarr.my.app
+      ...
+      labels:
+        proxy.aliases: sonarr
+  ```
+
+- Use FQDN aliases like `adguard.other.app` and `sonarr.other.app` when you want them accessible under other domains.
+
+  ```yaml
+  # docker compose
+  services:
+    adguard:
+      ...
+      labels:
+        proxy.aliases: adguard.other.app
+    sonarr:
+      ...
+      labels:
+        proxy.aliases: sonarr.other.app
+
+  # config.yml
+  autocert:
+    domains:
+      - my.app
+  ```

@@ -1,0 +1,58 @@
+---
+title: Forward Auth
+description: Forward authentication to another service
+---
+
+## Configuration
+
+| Option          | Description        | Default                                                           |
+| --------------- | ------------------ | ----------------------------------------------------------------- |
+| `route`         | Auth server route  | `tinyauth`                                                        |
+| `auth_endpoint` | Auth endpoint path | `/api/auth/traefik`                                               |
+| `headers`       | Headers to forward | `["Remote-User", "Remote-Name", "Remote-Email", "Remote-Groups"]` |
+
+## Behavior
+
+```mermaid
+graph TD
+    A[Request received] --> B[Sends GET request to <br> route origin + auth_endpoint]
+    B --> C[Populate X-Forwarded-* headers]
+    C --> D{Auth response<br>status}
+    D -- "2xx" --> E[Copy headers<br>and forward upstream]
+    D -- "Non-2xx/3xx" --> F[Return auth response<br>to client]
+```
+
+## Examples
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: forward_auth
+      route: tinyauth
+      auth_endpoint: /api/auth/traefik
+      headers: Remote-User, Remote-Name, Remote-Email, Remote-Groups
+      bypass:
+        - route tinyauth
+```
+
+### Docker Labels
+
+```yaml
+proxy.myapp.middlewares.forward_auth: |
+  route: tinyauth
+  auth_endpoint: /api/auth/traefik
+  headers: Remote-User, Remote-Name, Remote-Email, Remote-Groups
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    forward_auth:
+      route: tinyauth
+      auth_endpoint: /api/auth/traefik
+      headers: Remote-User, Remote-Name, Remote-Email, Remote-Groups
+```

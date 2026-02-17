@@ -1,0 +1,30 @@
+---
+title: Custom Error Pages
+description: Customize error responses
+---
+
+## Configuration
+
+No configuration options.
+
+See [Custom Error Pages](../../../customization/Custom-Error-Pages) for documentation.
+
+## Examples
+
+### Entrypoint
+
+Enabled by default.
+
+### Docker Labels
+
+```yaml
+proxy.#1.middlewares.custom_error_pages:
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    custom_error_pages:
+```

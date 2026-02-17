@@ -1,0 +1,64 @@
+---
+title: CIDR Whitelist
+description: Allow/deny requests by IP range
+---
+
+## Configuration
+
+| Option        | Description   | Default          | Required |
+| ------------- | ------------- | ---------------- | -------- |
+| `allow`       | Allow list    | `[]`             | Yes      |
+| `deny`        | Deny list     | `[]`             | Yes      |
+| `status_code` | Status code   | `403`            | No       |
+| `message`     | Error message | `IP not allowed` | No       |
+
+See [Request-level access control](../Access-Control#request-level) for documentation.
+
+## Examples
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: cidr_whitelist
+      allow:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+      status_code: 403
+      message: "IP not allowed"
+```
+
+### Docker Labels
+
+#### Flat
+
+```yaml
+proxy.#1.middlewares.cidr_whitelist.allow: 10.0.0.0/8, 192.168.0.0/16
+proxy.#1.middlewares.cidr_whitelist.status_code: 403
+proxy.#1.middlewares.cidr_whitelist.message: "IP not allowed"
+```
+
+#### YAML Block
+
+```yaml
+proxy.#1.middlewares.cidr_whitelist: |
+  allow:
+    - 10.0.0.0/8
+    - 192.168.0.0/16
+  status_code: 403
+  message: "IP not allowed"
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    cidr_whitelist:
+      allow:
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+      status_code: 403
+      message: "IP not allowed"
+```

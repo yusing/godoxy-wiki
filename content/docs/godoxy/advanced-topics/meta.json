@@ -1,0 +1,16 @@
+{
+  "title": "Advanced Topics",
+  "icon": "Brain",
+  "pages": [
+    "Access-Control",
+    "Certificates",
+    "Domain-Matching",
+    "Idle-Sleep",
+    "Health-Monitoring",
+    "Notifications",
+    "Load-Balancing",
+    "Rule-Based-Routing",
+    "middlewares"
+  ],
+  "defaultOpen": true
+}

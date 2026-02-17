@@ -1,0 +1,142 @@
+---
+title: Middlewares
+description: Configure middlewares for GoDoxy
+---
+
+## Quick Start
+
+| Method                 | Order       | Use Case           | Configuration              |
+| ---------------------- | ----------- | ------------------ | -------------------------- |
+| **Entrypoint**         | Ordered     | Global middlewares | `config.yml`               |
+| **Middleware Compose** | Ordered     | Reusable configs   | `config/middlewares/*.yml` |
+| **Docker Labels**      | Unordered\* | Per-route          | Container labels           |
+| **Route Files**        | Unordered\* | Per-route          | Route files                |
+
+<Callout type="info">
+  Set `priority` for unordered methods when order matters.
+</Callout>
+
+### Basic Example
+
+```yaml
+# Global middleware (entrypoint)
+entrypoint:
+  middlewares:
+    - use: real_ip
+      header: X-Real-IP
+      from: [127.0.0.1, 192.168.0.0/16]
+
+# Per-service (Docker labels)
+services:
+  app:
+    labels:
+      proxy.myapp.middlewares.redirect_http.priority: 1
+      proxy.myapp.middlewares.cidr_whitelist.priority: 2
+      proxy.myapp.middlewares.cidr_whitelist.allow: 127.0.0.1, 192.168.0.0/16
+```
+
+### Naming Convention
+
+Middleware names and options are **case-insensitive**: `redirectHTTP`, `redirect_http`, `RedirectHttp` are equivalent.
+
+## Applying Middlewares
+
+### Entrypoint & Middleware Compose
+
+```yaml
+# Entrypoint (config.yml)
+entrypoint:
+  middlewares:
+    - use: CloudflareRealIP
+    - use: CIDRWhitelist
+      allow:
+        - 127.0.0.1
+        - 223.0.0.0/8
+
+# Middleware Compose (config/middlewares/whitelist.yml)
+myWhitelist:
+  - use: CloudflareRealIP
+  - use: CIDRWhitelist
+    allow:
+      - 127.0.0.1
+      - 223.0.0.0/8
+```
+
+### Docker Labels
+
+```yaml
+# Single line
+proxy.#1.middlewares.{name}.{option}: { value }
+
+# YAML block
+proxy.#1.middlewares.{name}: |
+  {option}: {value}
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    { name }:
+      { option }: { value }
+```
+
+### Reusing Compositions
+
+```yaml
+# Docker labels
+proxy.#1.middlewares.myWhitelist@file:
+
+# Route file
+myapp:
+  middlewares:
+    myWhitelist@file:
+
+# Entrypoint
+entrypoint:
+  middlewares:
+    - use: myWhitelist@file
+```
+
+## Bypass Rules
+
+Bypass rules are used for bypassing middlewares in specific cases.
+
+## Examples
+
+See [Rules syntax](Rule-Based-Routing#syntax) for complete documentation.
+
+### Entrypoint Example
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: oidc
+      bypass:
+        - route pocket-id
+        - route immich & path glob(/api/*)
+        - route dockmon & path /api/agent/ws
+        - remote 192.168.0.0/16
+```
+
+### Docker Labels Example
+
+```yaml
+proxy.#1.middlewares.oidc.bypass: |
+  - route pocket-id
+  - route immich & path glob(/api/*)
+  - route dockmon & path /api/agent/ws
+  - remote 192.168.0.0/16
+```
+
+### Route File Example
+
+```yaml
+myapp:
+  middlewares:
+    oidc:
+      bypass:
+        - path glob(/api/*)
+        - remote 192.168.0.0/16
+```

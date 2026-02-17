@@ -1,0 +1,55 @@
+---
+title: Modify HTML
+description: Modify the HTML content
+---
+
+## Configuration
+
+| Option    | Description    | Default |
+| --------- | -------------- | ------- |
+| `target`  | CSS selector   | -       |
+| `html`    | HTML to inject | -       |
+| `replace` | Replace mode   | `false` |
+
+## Behavior
+
+<Mermaid
+  className="h-32 w-auto"
+  chart="flowchart TD
+A[Incoming Response] --> B{Content-Type}
+B -->|text/html or application/xhtml+xml| C{Mode}
+B -->|Other| D[Skip processing]
+C -->|Append| E[Find first matching element]
+C -->|Replace| F[Find all matching elements]
+E --> G[Modify first element]
+F --> H[Replace all elements]
+G --> I[Forward modified response]
+H --> I
+D --> I"
+/>
+
+## Supported Selectors
+
+It supports common CSS selectors, for example:
+
+| Selector Type | Example             |
+| ------------- | ------------------- |
+| element       | `body`              |
+| ID            | `#main`             |
+| class         | `.container`        |
+| attribute     | `[data-test='val']` |
+
+## Examples
+
+```yaml
+# Inject CSS into head
+proxy.myapp.middlewares.modify_html: |
+  target: head
+  html: '<style>body { background: red; }</style>'
+
+# Replace main content
+proxy.myapp.middlewares.modify_html: |
+  target: main
+  html: '<section><h2>New</h2></section>'
+  replace: true
+```

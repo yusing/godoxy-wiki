@@ -1,0 +1,6 @@
+{
+  "title": "Customization",
+  "icon": "Puzzle",
+  "pages": ["WebUI", "Custom-Error-Pages", "CSS-Injection", "Short-Links"],
+  "defaultOpen": true
+}

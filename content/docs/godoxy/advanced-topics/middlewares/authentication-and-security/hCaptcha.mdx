@@ -1,0 +1,46 @@
+---
+title: hCaptcha
+description: Bot protection with hCaptcha
+---
+
+## Configuration
+
+| Option           | Description    | Default | Required |
+| ---------------- | -------------- | ------- | -------- |
+| `site_key`       | Site key       | -       | Yes      |
+| `secret_key`     | Secret key     | -       | Yes      |
+| `session_expiry` | Session expiry | `24h`   | No       |
+
+![captcha page light](./images/captcha-page-light.png)
+![captcha page dark](./images/captcha-page-dark.png)
+
+Users solve captcha once per session.
+
+## Examples
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: hcaptcha
+      site_key: your-site-key
+      secret_key: your-secret-key
+```
+
+### Docker Labels
+
+```yaml
+proxy.#1.middlewares.hcaptcha.site_key: your-site-key
+proxy.#1.middlewares.hcaptcha.secret_key: your-secret-key
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    hcaptcha:
+      site_key: your-site-key
+      secret_key: your-secret-key
+```

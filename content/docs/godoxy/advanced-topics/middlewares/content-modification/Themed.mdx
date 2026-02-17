@@ -1,0 +1,42 @@
+---
+title: Themed
+description: Inject theme CSS into the HTML
+---
+
+## Configuration
+
+| Option        | Description  | Conflicts |
+| ------------- | ------------ | --------- |
+| `theme`       | Preset theme | `css`     |
+| `font_url`    | Font URL     | -         |
+| `font_family` | Font name    | -         |
+| `css`         | Custom CSS   | `theme`   |
+
+## Available Themes
+
+- `dark`
+- `dark-grey`
+- `solarized-dark`
+
+## Examples
+
+### Docker Labels
+
+```yaml
+proxy.myapp.middlewares.themed: |
+  theme: dark
+  font_url: https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap
+  font_family: Inter
+proxy.myapp2.middlewares.themed.css: https://theme-park.dev/css/base/<app>/<theme>.css
+```
+
+### Route File
+
+```yaml
+app:
+  middlewares:
+    themed:
+      theme: dark
+      font_url: https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap
+      font_family: Inter
+```

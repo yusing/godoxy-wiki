@@ -1,0 +1,14 @@
+{
+  "title": "GoDoxy",
+  "description": "The reverse proxy",
+  "pages": [
+    "Setup",
+    "Benchmarks-and-Resource-Usage",
+    "getting-started",
+    "customization",
+    "advanced-topics"
+  ],
+  "root": true,
+  "icon": "Waypoints",
+  "defaultOpen": true
+}

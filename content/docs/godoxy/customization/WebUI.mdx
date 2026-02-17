@@ -1,0 +1,133 @@
+---
+title: WebUI Configuration
+description: Customize how applications appear on the GoDoxy dashboard. Configure display names, icons, categories, and descriptions
+---
+
+<Callout type="info">
+Starting from v0.9, you can edit and hide/unhide apps directly from the WebUI by right-clicking.
+
+WebUI edits override labels and route file settings.
+
+</Callout>
+
+## Overview
+
+The WebUI configuration determines how routes are displayed on the dashboard. You can configure these settings via Docker labels, route files, or directly in the WebUI.
+
+## Configuration Methods
+
+| Method        | Description                                     |
+| ------------- | ----------------------------------------------- |
+| Docker Labels | Configure per-container in `docker-compose.yml` |
+| Route Files   | Configure for non-Docker apps in `config/*.yml` |
+| WebUI         | Right-click menu for quick edits                |
+
+## Property Reference
+
+| Property      | Description          | Default         | Values         |
+| ------------- | -------------------- | --------------- | -------------- |
+| `show`        | Display on dashboard | `true`          | boolean        |
+| `name`        | Display name         | Sanitized alias | string         |
+| `icon`        | Dashboard icon       | Auto-detected   | icon reference |
+| `url`         | Override app URL     | Dynamic         | absolute URL   |
+| `category`    | Dashboard category   | Auto-detected   | string         |
+| `description` | Short description    | Empty           | string         |
+
+## Icon Reference
+
+Icons can be sourced from preset libraries or custom locations:
+
+| Source            | Format                      | Example                        |
+| ----------------- | --------------------------- | ------------------------------ |
+| Walkxcode presets | `@walkxcode/<filename>.png` | `@walkxcode/nginx.png`         |
+| Selfhst presets   | `@selfhst/<filename>.svg`   | `@selfhst/adguard-home.png`    |
+| Absolute URL      | `https://...`               | `https://example.com/icon.png` |
+| Relative path     | `/path/to/icon.png`         | `/-/pwa-icons/logo-192.png`    |
+
+## Category Configuration
+
+Categories are automatically detected from:
+
+- Container image names
+- Alias matches against [selfh.st directory](https://cdn.jsdelivr.net/gh/selfhst/icons/index.json)
+- GoDoxy's [preset categories](https://github.com/yusing/godoxy/blob/main/internal/homepage/categories.go)
+
+Fallback categories:
+
+- `Docker` for Docker containers without matches
+- `Others` for unmatched routes
+
+## Examples
+
+### Docker Compose
+
+```yaml
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: always
+    labels:
+      proxy.aliases: gitlab, gitlab-reg, gitlab-ssh
+      # Main GitLab instance
+      proxy.gitlab: |
+        port: 80
+        homepage:
+          name: GitLab
+          icon: "/-/pwa-icons/logo-192.png"
+          description: GitLab CE instance
+          category: dev
+      # Registry (hidden from dashboard)
+      proxy.gitlab-reg: |
+        port: 5050
+        homepage:
+          show: false
+      # SSH gateway (hidden from dashboard)
+      proxy.gitlab-ssh: |
+        port: "22223:22"
+        homepage:
+          show: false
+    shm_size: 256m
+```
+
+### Route File
+
+```yaml
+# config/services.yml
+adgh:
+  host: 10.0.2.1
+  homepage:
+    name: AdGuard Home
+    icon: "@selfhst/adguard-home.png"
+    description: DNS filtering and ad blocking
+    category: network
+
+pihole:
+  host: 10.0.2.2
+  homepage:
+    name: Pi-hole
+    icon: "@selfhst/pihole.png"
+    description: Network-wide ad blocking
+    category: network
+```
+
+## WebUI Interaction Guide
+
+### Editing Applications
+
+1. Right-click on any application card
+2. Select `Edit App` from the context menu
+3. Modify display settings as needed
+4. Changes apply immediately
+
+### Hiding Applications
+
+1. Right-click on the application
+2. Select `Hide App`
+3. To unhide, right-click again and select `Show App`
+
+### Renaming Categories
+
+1. Double-click the category header
+2. Enter the new name
+3. Press `Enter` to save

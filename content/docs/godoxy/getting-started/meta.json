@@ -1,0 +1,15 @@
+{
+  "title": "Getting Started",
+  "icon": "Rocket",
+  "pages": [
+    "Basics",
+    "Examples",
+    "Configuring-GoDoxy",
+    "Configuring-Routes",
+    "Multi-Docker-Nodes",
+    "DNS-01-Providers",
+    "OIDC",
+    "Proxmox"
+  ],
+  "defaultOpen": true
+}

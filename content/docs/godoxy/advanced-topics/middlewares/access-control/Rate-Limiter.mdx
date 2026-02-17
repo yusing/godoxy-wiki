@@ -1,0 +1,55 @@
+---
+title: Rate Limiter
+description: Limit request rate per client
+---
+
+## Configuration
+
+| Option    | Description            | Default | Required |
+| --------- | ---------------------- | ------- | -------- |
+| `average` | Requests per period    | -       | Yes      |
+| `burst`   | Max requests in period | -       | Yes      |
+| `periods` | Time period format     | `1s`    | No       |
+
+## Examples
+
+### Entrypoint
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: rate_limit
+      average: 10
+      burst: 20
+      periods: 1m
+```
+
+### Docker Labels
+
+#### Flat
+
+```yaml
+proxy.#1.middlewares.rate_limit.average: 10
+proxy.#1.middlewares.rate_limit.burst: 20
+proxy.#1.middlewares.rate_limit.periods: 1m
+```
+
+#### YAML Block
+
+```yaml
+proxy.#1.middlewares.rate_limit: |
+  average: 10
+  burst: 20
+  periods: 1m
+```
+
+### Route Files
+
+```yaml
+myapp:
+  middlewares:
+    rate_limit:
+      average: 10
+      burst: 20
+      periods: 1m
+```

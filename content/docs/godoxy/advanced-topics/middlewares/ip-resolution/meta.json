@@ -1,0 +1,6 @@
+{
+  "title": "IP Resolution",
+  "icon": "Network",
+  "pages": ["Real-IP", "Cloudflare-Real-IP"],
+  "defaultOpen": true
+}
