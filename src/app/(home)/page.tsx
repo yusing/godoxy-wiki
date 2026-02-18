@@ -80,7 +80,7 @@ export default function HomePage() {
 
         <div className="flex justify-center">
           <Link
-            href="/docs/godoxy"
+            href="/docs/godoxy/Setup"
             className={`px-6 py-3 rounded-full bg-fd-accent text-fd-accent-foreground font-medium hover:bg-fd-accent/90 transition-colors ${geistMono.className} cursor-pointer`}
           >
             {">"} Explore Documentation
