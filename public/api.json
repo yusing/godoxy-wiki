@@ -952,7 +952,6 @@
           "application/json"
         ],
         "produces": [
-          "application/json",
           "application/godoxy+yaml"
         ],
         "tags": [
