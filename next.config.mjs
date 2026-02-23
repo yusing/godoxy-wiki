@@ -3,7 +3,7 @@ import path from "path";
 
 const withMDX = createMDX();
 
-const root = path.resolve(__dirname, "..");
+const root = path.resolve(__dirname);
 console.log("root", root);
 
 /** @type {import('next').NextConfig} */
