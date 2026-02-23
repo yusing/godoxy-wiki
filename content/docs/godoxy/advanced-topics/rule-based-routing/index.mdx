@@ -1,0 +1,366 @@
+---
+title: Rule-Based Routing
+description: Configure rule-based routing for GoDoxy
+---
+
+<Callout type="warn" title="Experimental Feature">
+  This feature is experimental and not fully tested.
+
+Everything, including syntax, may change until it is considered complete and
+stable.
+
+</Callout>
+
+## Overview
+
+Rule-based routing allows you to define custom routing logic for incoming requests. Rules can match requests based on various conditions (headers, query parameters, cookies, etc.) and execute specific actions (serve files, proxy requests, redirect, etc.).
+
+## Rule Structure
+
+GoDoxy supports both YAML and block syntax.
+
+<Callout type="info" title="Recommended Syntax">
+  Block syntax is the recommended syntax.
+</Callout>
+
+### Block DSL At A Glance
+
+Each block is one rule. There are 3 rule forms:
+
+```bash
+# Default rule (fallback)
+default {
+  remove resp_header X-Internal
+}
+
+# Conditional rule
+path glob("/api/*") {
+  proxy http://api:8080
+}
+
+# Unconditional rule (always matches)
+{
+  log info /dev/stdout "$req_method $req_path"
+}
+```
+
+Equivalent YAML mapping:
+
+- block header condition -> `on: ...`
+- block body commands -> `do: ...`
+- `default { ... }` -> YAML rule with `name: default` or `on: default`
+
+Rule grammar (simplified):
+
+```text
+rule := "default" "{" do_body "}"
+    | on_expr "{" do_body "}"
+    | "{" do_body "}"
+```
+
+### Block Syntax
+
+```bash
+default {
+  remove resp_header X-Internal
+}
+
+path glob("/api/*") {
+  proxy http://api:8080
+}
+```
+
+### YAML Compatibility (legacy)
+
+```yaml
+- name: default
+  do: remove resp_header X-Internal
+- on: path glob("/api/*")
+  do: proxy http://api:8080
+```
+
+## Rule Behavior
+
+- Rules are processed in **pre** and **post** phases.
+- A default rule (`name: default` or `on: default`) is a **fallback** rule and runs only when no non-default pre rule matches.
+- Pre-phase terminating commands stop remaining pre commands.
+- Post-only commands from already-matched rules can still run in post phase.
+- Response-based matchers (`status`, `resp_header`) are evaluated in post phase.
+- If an earlier rule always terminates for the same matcher, later equivalent rules are rejected as dead rules.
+
+## Nested Block Syntax
+
+Inside a rule body, you can nest conditional blocks with `elif` and `else`.
+
+### Syntax
+
+```bash
+path /example {
+  set header X-Mode outer
+
+  method GET {
+    set header X-Mode get
+  } elif method POST {
+    set header X-Mode post
+  } else {
+    set header X-Mode other
+  }
+}
+```
+
+Chain grammar (simplified):
+
+```text
+nested_block := on_expr "{" do_body "}"
+chain        := nested_block { "elif" on_expr "{" do_body "}" } [ "else" "{" do_body "}" ]
+```
+
+### Notes
+
+- `<condition> { ... }` runs nested commands only when the condition matches.
+- Nested blocks are recognized when a line ends with an unquoted `{` (trailing whitespace/comments ignored).
+- `elif` and `else` must be on the **same line** as the preceding `}`.
+- Multiple `elif` branches are allowed; only one `else` is allowed.
+- Nested commands follow the same termination and phase rules as top-level commands.
+
+## Syntax Reference
+
+### Block Delimiters And Comments
+
+- Structural braces (`{` and `}`) are parsed only outside quotes/comments.
+- Supported comments:
+  - `// line comment`
+  - `# line comment`
+  - `/* block comment */`
+
+### Quoting and Escaping
+
+Like in Linux shell, values containing spaces and quotes should be quoted or escaped:
+
+```sh
+header Some-Header "foo bar"     # Double quotes
+header Some-Header 'foo bar'     # Single quotes
+header Some-Header foo\ bar      # Escaped space
+header Some-Header 'foo \"bar\"' # Escaped quotes inside single quotes
+```
+
+### Supported Escape Sequences
+
+| Sequence | Description              | Context                       |
+| -------- | ------------------------ | ----------------------------- |
+| `\n`     | New line                 | String values, regex patterns |
+| `\t`     | Tab                      | String values, regex patterns |
+| `\r`     | Carriage return          | String values, regex patterns |
+| `\\`     | Backslash                | String values, regex patterns |
+| `\"`     | Double quote             | String values                 |
+| `\'`     | Single quote             | String values                 |
+| `\`      | Space                    | String values                 |
+| `$$`     | Dollar sign (literal)    | Any                           |
+| `\b`     | Word boundary            | Regex patterns only           |
+| `\B`     | Non-word boundary        | Regex patterns only           |
+| `\s`     | Whitespace character     | Regex patterns only           |
+| `\S`     | Non-whitespace character | Regex patterns only           |
+| `\w`     | Word character           | Regex patterns only           |
+| `\W`     | Non-word character       | Regex patterns only           |
+| `\d`     | Digit character          | Regex patterns only           |
+| `\D`     | Non-digit character      | Regex patterns only           |
+| `\$`     | Dollar sign (literal)    | Regex patterns only           |
+| `\.`     | Dot (literal)            | Regex patterns only           |
+
+### Environment Variable Substitution
+
+Environment variables can be substituted using `${VARIABLE_NAME}` syntax:
+
+```sh
+error 403 "Forbidden: ${CLOUDFLARE_API_KEY}"
+proxy https://${DOMAIN}/api
+set header X-Tenant "tenant-${DOMAIN}"
+```
+
+To escape the `$` character and prevent substitution, use `$$`:
+
+```sh
+error 404 "$${NON_EXISTENT}" # Results in literal "${NON_EXISTENT}"
+```
+
+### Pattern Matching
+
+Conditions that match values now support three types of patterns:
+
+| Pattern Type | Syntax               | Description                       |
+| ------------ | -------------------- | --------------------------------- |
+| **String**   | `"value"` or `value` | Exact string match                |
+| **Glob**     | `glob(pattern)`      | Glob pattern matching (wildcards) |
+| **Regex**    | `regex(pattern)`     | Regular expression matching       |
+
+<Callout type="info">Quotes are optional for regex and glob</Callout>
+
+#### Pattern Examples
+
+```sh
+# String matching (default)
+header X-API-Key "secret-key"
+
+# Glob pattern matching
+header User-Agent glob(Mozilla*)
+path glob(/api/v[0-9]/*)
+
+# Regular expression matching
+header X-API-Key regex("^sk-[a-zA-Z0-9]{32}$")
+path regex("^/api/v[0-9]+/users/[a-f0-9-]{36}$")
+```
+
+#### Valid Block-Syntax Sequences
+
+```bash
+# Non-terminating then terminating
+method GET {
+  rewrite / /index.html
+  serve /static
+}
+
+# Request mutation chain
+method POST {
+  set header X-Custom value
+  add query debug true
+  remove header X-Secret
+}
+
+# Post-phase log via status variable
+path glob("/api/*") {
+  proxy http://backend:8080
+  log info /dev/stdout "$req_method $status_code"
+}
+
+# Pass-through alias
+header X-Bypass true {
+  bypass
+}
+```
+
+## Configuration Examples
+
+### Docker Compose Label (YAML container config + block rule body)
+
+```yaml
+services:
+  app:
+    labels:
+      proxy.app.rules: |
+        header Connection Upgrade &
+        header Upgrade websocket {
+          pass
+        }
+        default {
+          rewrite / /report.html
+          serve /tmp/access
+        }
+```
+
+### Route File Rule Body (Block Syntax)
+
+```bash
+path glob("/api/*") {
+  proxy http://api-server:8080
+}
+
+default {
+  pass
+}
+```
+
+In this example, `default { pass }` runs only when `/api/*` does not match.
+
+## Common Use Cases (Block Syntax)
+
+### API Gateway with Basic Auth
+
+```bash
+path regex("^/api/v[0-9]+/public/.*") {
+  proxy http://api-server:8080
+}
+
+path glob("/api/v[0-9]/admin/*") &
+basic_auth admin "$2y$10$hashed_password" {
+  set header X-Admin true
+  proxy http://admin-server:8080
+}
+
+path glob("/api/v[0-9]/admin/*") {
+  require_basic_auth "Admin Access"
+}
+```
+
+### Security + Allowlist
+
+```bash
+header User-Agent glob(*bot*) |
+header User-Agent regex(.+crawler.+) |
+remote 192.168.1.0/24 {
+  error 403 "Access denied"
+}
+
+host glob(*.example.com) | host example.com {
+  pass
+}
+
+default {
+  proxy http://main-server:8080
+}
+```
+
+### CORS Preflight
+
+```bash
+method OPTIONS &
+header Origin &
+header Access-Control-Request-Method {
+  set resp_header Access-Control-Allow-Origin $header(Origin)
+  set resp_header Access-Control-Allow-Methods GET,POST,PUT,PATCH,DELETE,OPTIONS
+  set resp_header Access-Control-Allow-Headers $header(Access-Control-Request-Headers)
+  set resp_header Access-Control-Allow-Credentials true
+  error 204 ""
+}
+
+header Origin {
+  set resp_header Access-Control-Allow-Origin $header(Origin)
+  set resp_header Access-Control-Allow-Credentials true
+}
+```
+
+### Request Mutation + Proxy
+
+```bash
+path glob("/api/**") {
+  set header X-Request-Id $header(X-Request-Id)
+  add header X-Forwarded-For $remote_host
+  remove header X-Secret
+  add query debug true
+  set cookie locale en-US
+  proxy http://api-server:8080
+}
+```
+
+### Response-Conditional Logging
+
+```bash
+path glob("/api/**") {
+  proxy http://api-server:8080
+}
+
+status 4xx | status 5xx {
+  log error /dev/stderr "Status=$status_code CT=$resp_header(Content-Type)"
+}
+```
+
+### Environment Variables
+
+```bash
+path glob("/service/**") {
+  proxy https://${SERVICE_HOST}:${SERVICE_PORT}
+}
+
+path /secret {
+  error 403 "Forbidden: ${REDACT_REASON}"
+}
+```

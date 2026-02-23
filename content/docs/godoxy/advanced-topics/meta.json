@@ -9,7 +9,7 @@
     "Health-Monitoring",
     "Notifications",
     "Load-Balancing",
-    "Rule-Based-Routing",
+    "rule-based-routing",
     "middlewares"
   ],
   "defaultOpen": true

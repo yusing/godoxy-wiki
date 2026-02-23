@@ -90,22 +90,6 @@ The `Handle` and `HandleFunc` methods recover from panics and return them as err
 
 ## Usage Examples
 
-### Using the Default Client
-
-```go
-import "github.com/yusing/godoxy/internal/net/gphttp"
-
-// Simple GET request
-resp, err := gphttp.Get("https://example.com")
-if err != nil {
-    log.Fatal(err)
-}
-defer resp.Body.Close()
-
-// POST request
-resp, err := gphttp.Post("https://example.com", "application/json", body)
-```
-
 ### Creating Custom Transports
 
 ```go

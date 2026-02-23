@@ -1,0 +1,150 @@
+---
+title: Conditions
+description: Conditions are used to match the request and determine if the rule should be applied.
+---
+
+In block syntax, conditions are written in the rule header (before `{ ... }`).
+In YAML, the same expression is written in `on:`.
+Conditions can be combined using logical operators.
+
+## Logical Operators
+
+| Operator    | Description                         | Example                                    |
+| ----------- | ----------------------------------- | ------------------------------------------ |
+| `\|`        | **OR** - Any condition can match    | `header X-API-Key \| header Authorization` |
+| `&` or `\n` | **AND** - All conditions must match | `method GET & path /api/*`                 |
+
+## Syntax
+
+```plain
+<condition> <args> [[ | <condition> <args> ] [ & <condition> <args> ]]...
+```
+
+## Available Conditions
+
+| Condition     | Arguments                                  | Description                                | Example                                                                              |
+| ------------- | ------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `header`      | `<name> <pattern>`                         | Match when request header matches pattern  | `header Content-Type application/json`, `header X-API-Key regex("^sk-.*")`           |
+| `header`      | `<name>`                                   | Match when header exists (any value)       | `header X-API-Key`                                                                   |
+| `query`       | `<name> <pattern>`                         | Match when query parameter matches pattern | `query debug true`, `query id regex("^[a-f0-9-]{36}$")`                              |
+| `query`       | `<name>`                                   | Match when query parameter exists          | `query debug`                                                                        |
+| `cookie`      | `<name> <pattern>`                         | Match when cookie matches pattern          | `cookie session_id abc123`, `cookie token glob("sess_*")`                            |
+| `cookie`      | `<name>`                                   | Match when cookie exists                   | `cookie session_id`                                                                  |
+| `form`        | `<name> <pattern>`                         | Match when form field matches pattern      | `form action submit`, `form email regex("^[^@]+@[^@]+$")`                            |
+| `form`        | `<name>`                                   | Match when form field exists               | `form action`                                                                        |
+| `postform`    | `<name> <pattern>`                         | Match when POST form field matches pattern | `postform action submit`, `postform file glob("*.pdf")`                              |
+| `postform`    | `<name>`                                   | Match when POST form field exists          | `postform action`                                                                    |
+| `proto`       | `<http \| https \| h1 \| h2 \| h2c \| h3>` | Match when protocol equals value           | `proto h2`                                                                           |
+| `method`      | `<method>`                                 | Match when HTTP method equals value        | `method POST`                                                                        |
+| `host`        | `<pattern>`                                | Match when host matches pattern            | `host example.com`, `host glob(*.example.com)`, `host regex("^[a-z]+-prod\.com$")`   |
+| `path`        | `<pattern>`                                | Match when path matches pattern            | `path /version`, `path glob(/api/*)`, `path regex("^/api/v[0-9]+/.*)`                |
+| `remote`      | `<ip \| cidr>`                             | Match when client IP matches CIDR range    | `remote 192.168.1.0/24`                                                              |
+| `route`       | `<pattern>`                                | Match when route name matches pattern      | `route api`, `route glob(api-*)`                                                     |
+| `basic_auth`  | `<username> <hashed_password>`             | Match when basic auth credentials match    | `basic_auth admin $2y$10$...`                                                        |
+| `status`      | `<status>`                                 | Match when status code matches value       | `status 200`, `status 200-300`, `status 2xx`                                         |
+| `resp_header` | `<name> <pattern>`                         | Match when response header matches pattern | `resp_header Content-Type application/json`, `resp_header X-API-Key regex("^sk-.*")` |
+| `resp_header` | `<name>`                                   | Match when response header exists          | `resp_header Content-Type`                                                           |
+
+## Form Field Conditions
+
+Both `form` and `postform` conditions match form field values, but they resolve values differently:
+
+### `postform` Precedence Order
+
+- Matches request body form fields only (no query-string fallback)
+
+### `form` Precedence Order
+
+1. Form body fields (POST/PUT/PATCH, urlencoded or multipart)
+2. Query parameters (fallback)
+
+### Example
+
+```sh
+# For POST /example?action=query with body action=form
+postform action form     # Matches body value only
+form action form         # Matches form value first; query can be fallback
+```
+
+## Basic Authentication
+
+For `basic_auth` conditions, the password must be bcrypt hashed. Generate the hash using:
+
+```sh
+htpasswd -nbB '' your-password | cut -c 2-
+```
+
+### Basic Auth Concept
+
+To protect a resource, you need to:
+
+- Require basic authentication by default
+- Allow specific users to pass through (or proxy to another service) with valid credentials
+
+### Example Basic Auth Rule
+
+```bash
+default {
+  require_basic_auth "Restricted Area"
+}
+
+basic_auth user1 "$2y$10$..." | basic_auth user2 "$2y$10$..." {
+  pass
+}
+```
+
+## Path Pattern Syntax
+
+The `path` condition supports three types of patterns for matching request paths:
+
+### String Matching
+
+```sh
+path /api/users # Exact match for /api/users
+```
+
+### Glob Patterns
+
+Glob patterns use the following syntax based on the [github.com/gobwas/glob](https://github.com/gobwas/glob) library:
+
+| Pattern   | Description                                       | Example                       | Matches                                      | Non-matches                              |
+| --------- | ------------------------------------------------- | ----------------------------- | -------------------------------------------- | ---------------------------------------- |
+| `*`       | Any sequence of non-separator characters          | `/api/*`                      | `/api/users`, `/api/posts`                   | `/api/users/123`, `/api/v1/users`        |
+| `**`      | Any sequence of characters (including separators) | `/static/**`                  | `/static/css/style.css`, `/static/js/app.js` | -                                        |
+| `?`       | Any single non-separator character                | `/file?.txt`                  | `/file1.txt`, `/fileA.txt`                   | `/file12.txt`, `/file/abc.txt`           |
+| `[abc]`   | Character class (match any listed character)      | `/file[123].txt`              | `/file1.txt`, `/file2.txt`, `/file3.txt`     | `/file4.txt`, `/fileA.txt`               |
+| `[!abc]`  | Negated character class (match any except listed) | `/file[!123].txt`             | `/fileA.txt`, `/fileB.txt`                   | `/file1.txt`, `/file2.txt`, `/file3.txt` |
+| `[a-z]`   | Character range (match any in range)              | `/file[a-z].txt`              | `/filea.txt`, `/filem.txt`, `/filez.txt`     | `/fileA.txt`, `/file1.txt`               |
+| `[0-9]`   | Numeric range                                     | `/v[0-9]/api`                 | `/v1/api`, `/v5/api`, `/v9/api`              | `/v10/api`, `/va/api`                    |
+| `{a,b,c}` | Pattern alternatives (comma-separated)            | `/api/{users,posts,comments}` | `/api/users`, `/api/posts`, `/api/comments`  | `/api/products`, `/api/users/123`        |
+| `\*`      | Literal asterisk (escaped)                        | `/file\*.txt`                 | `/file*.txt`                                 | `/fileabc.txt`, `/file123.txt`           |
+| `\?`      | Literal question mark (escaped)                   | `/file\?.txt`                 | `/file?.txt`                                 | `/filea.txt`, `/file1.txt`               |
+
+### Advanced Glob Examples
+
+```sh
+# Match common web asset files
+path glob("/static/**/*.{css,js,png,jpg,jpeg,gif,svg}")
+
+# Match versioned API paths
+path glob("/api/v[0-9]/*")
+
+# Match UUID patterns (simplified)
+path glob("/users/[a-f0-9-]*/profile")
+
+# Match date-based paths
+path glob("/logs/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/*")
+
+# Match file extensions with character classes
+path glob("/uploads/*.{[Pp][Dd][Ff],[Dd][Oo][Cc][Xx]}")
+
+# Exclude specific patterns with negated character classes
+path glob("/images/[!_]*")  # Exclude files starting with underscore
+```
+
+### Regular Expressions
+
+```sh
+path regex("^/api/v[0-9]+/users/[a-f0-9-]{36}$")  # Match specific UUID pattern
+path regex("^/files/[0-9]{4}-[0-9]{2}-[0-9]{2}$")  # Match date pattern
+```
