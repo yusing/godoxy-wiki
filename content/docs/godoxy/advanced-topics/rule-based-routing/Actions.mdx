@@ -90,6 +90,13 @@ Static variables provide information about the request, response, and upstream s
 
 Dynamic variables accept arguments and can extract specific values from headers, cookies, query parameters, and form data.
 
+Functions support **composition**: the result of one function can be passed as the argument to another. For example:
+
+```sh
+# Redact the Authorization header value in logs
+log info /dev/stdout "Auth: $redacted($header(Authorization))"
+```
+
 ### Request Headers: `$header(name)` or `$header(name, index)`
 
 Extract header values from the request.
@@ -164,6 +171,18 @@ Extract form field values from POST/PUT/PATCH request bodies only (no query para
 - **Example**:
   - `$postform(action)` → matches only form field, not query parameter
 
+### Redact: `$redacted(value)`
+
+Mask a sensitive value, showing only the first 2 and last 2 characters with asterisks in between.
+
+- **Arguments**:
+  - `value` (required): A literal string or the result of another dynamic variable function
+
+- **Example**:
+  - `$redacted(mysecrettoken)` → `my*********en`
+  - `$redacted($header(Authorization))` → `Be************ne` (redacts the Authorization header value)
+  - `$redacted($cookie(session_id))` → `ab****23`
+
 ## Variable Examples
 
 Complete examples showing how to use variables in different commands:
@@ -172,8 +191,8 @@ Complete examples showing how to use variables in different commands:
 # Logging with request and response information
 log info /dev/stdout "Method=$req_method Path=$req_path Status=$status_code"
 
-# Logging with headers
-log info /dev/stdout "User-Agent=$header(User-Agent) Auth=$header(Authorization)"
+# Logging with headers (redacting sensitive values)
+log info /dev/stdout "User-Agent=$header(User-Agent) Auth=$redacted($header(Authorization))"
 
 # Logging with response headers
 log info /dev/stdout "Content-Type=$resp_header(Content-Type) Content-Length=$resp_content_length"
