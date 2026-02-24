@@ -2946,8 +2946,8 @@
             }
           }
         },
-        "x-id": "routes",
-        "operationId": "routes"
+        "x-id": "list",
+        "operationId": "list"
       }
     },
     "/route/playground": {
@@ -4844,16 +4844,19 @@
       "properties": {
         "days": {
           "type": "integer",
+          "minimum": 0,
           "x-nullable": false,
           "x-omitempty": false
         },
         "keep_size": {
           "type": "integer",
+          "minimum": 0,
           "x-nullable": false,
           "x-omitempty": false
         },
         "last": {
           "type": "integer",
+          "minimum": 0,
           "x-nullable": false,
           "x-omitempty": false
         }
@@ -5090,11 +5093,6 @@
           "x-nullable": false,
           "x-omitempty": false
         },
-        "isResponseRule": {
-          "type": "boolean",
-          "x-nullable": false,
-          "x-omitempty": false
-        },
         "name": {
           "type": "string",
           "x-nullable": false,
@@ -5127,10 +5125,7 @@
           "$ref": "#/definitions/MockResponse"
         },
         "rules": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/routeApi.RawRule"
-          },
+          "type": "string",
           "x-nullable": false,
           "x-omitempty": false
         }
@@ -6644,11 +6639,13 @@
           "x-omitempty": false
         },
         "fstype": {
+          "description": "interned",
           "type": "string",
           "x-nullable": false,
           "x-omitempty": false
         },
         "path": {
+          "description": "interned",
           "type": "string",
           "x-nullable": false,
           "x-omitempty": false
@@ -6926,28 +6923,6 @@
       "x-nullable": false,
       "x-omitempty": false
     },
-    "routeApi.RawRule": {
-      "type": "object",
-      "properties": {
-        "do": {
-          "type": "string",
-          "x-nullable": false,
-          "x-omitempty": false
-        },
-        "name": {
-          "type": "string",
-          "x-nullable": false,
-          "x-omitempty": false
-        },
-        "on": {
-          "type": "string",
-          "x-nullable": false,
-          "x-omitempty": false
-        }
-      },
-      "x-nullable": false,
-      "x-omitempty": false
-    },
     "routeApi.RoutesByProvider": {
       "type": "object",
       "additionalProperties": {
@@ -6995,6 +6970,7 @@
           "x-omitempty": false
         },
         "name": {
+          "description": "interned",
           "type": "string",
           "x-nullable": false,
           "x-omitempty": false
