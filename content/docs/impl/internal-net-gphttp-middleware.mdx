@@ -14,6 +14,8 @@ This package implements a flexible HTTP middleware system for GoDoxy. Middleware
 - **Bypass Rules**: Skip middleware based on request properties
 - **Dynamic Loading**: Load middleware definitions from files at runtime
 
+Response body rewriting is only applied to unencoded, text-like content types (for example `text/*`, JSON, YAML, XML). Response status and headers can always be modified.
+
 ## Architecture
 
 ```mermaid
