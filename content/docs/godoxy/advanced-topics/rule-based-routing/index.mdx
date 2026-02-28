@@ -118,7 +118,8 @@ chain        := nested_block { "elif" on_expr "{" do_body "}" } [ "else" "{" do_
 ### Notes
 
 - `<condition> { ... }` runs nested commands only when the condition matches.
-- Nested blocks are recognized when a line ends with an unquoted `{` (trailing whitespace/comments ignored).
+- Nested blocks are recognized when a logical header ends with an unquoted `{`.
+- Logical headers can continue to the next line when the current line ends with `|` or `&`.
 - `elif` and `else` must be on the **same line** as the preceding `}`.
 - Multiple `elif` branches are allowed; only one `else` is allowed.
 - Nested commands follow the same termination and phase rules as top-level commands.
@@ -213,6 +214,19 @@ path regex("^/api/v[0-9]+/users/[a-f0-9-]{36}$")
 #### Valid Block-Syntax Sequences
 
 ```bash
+# Multiline OR in header (line continuation)
+method GET |
+method POST |
+method PUT {
+  pass
+}
+
+# Multiline AND in header
+header Connection Upgrade &
+header Upgrade websocket {
+  bypass
+}
+
 # Non-terminating then terminating
 method GET {
   rewrite / /index.html
