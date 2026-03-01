@@ -12,10 +12,10 @@
     "format": "biome format --write"
   },
   "dependencies": {
-    "fumadocs-core": "16.6.5",
-    "fumadocs-mdx": "14.2.8",
-    "fumadocs-openapi": "^10.3.11",
-    "fumadocs-ui": "npm:@fumadocs/base-ui@^16.6.5",
+    "fumadocs-core": "16.6.8",
+    "fumadocs-mdx": "14.2.9",
+    "fumadocs-openapi": "^10.3.14",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@^16.6.8",
     "lucide-react": "^0.575.0",
     "mermaid": "^11.12.3",
     "next": "16.1.6",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.1",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.3.1",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.6",
