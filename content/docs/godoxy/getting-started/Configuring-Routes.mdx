@@ -219,10 +219,11 @@ labels:
 
 ### Stream Properties (TCP/UDP)
 
-| Property | Description              | Default                                 | Values           |
-| -------- | ------------------------ | --------------------------------------- | ---------------- |
-| `port`   | Listening and proxy port | `0:lowest_port` (random listening port) | `from:to` format |
-| `bind`   | Bind address             | `0.0.0.0`                               | IP address       |
+| Property                      | Description                            | Default                                 | Values           |
+| ----------------------------- | -------------------------------------- | --------------------------------------- | ---------------- |
+| `port`                        | Listening and proxy port               | `0:lowest_port` (random listening port) | `from:to` format |
+| `bind`                        | Bind address                           | `0.0.0.0`                               | IP address       |
+| `relay_proxy_protocol_header` | Relay PROXY protocol header (TCP only) | `false`                                 | boolean          |
 
 ### HTTP-Specific Properties
 
