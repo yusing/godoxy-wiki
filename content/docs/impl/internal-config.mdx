@@ -31,6 +31,7 @@ type Config struct {
     ACL             *acl.Config
     AutoCert        *autocert.Config
     Entrypoint      entrypoint.Config
+    InboundMTLSProfiles map[string]types.InboundMTLSProfile
     Providers       Providers
     MatchDomains    []string
     Homepage        homepage.Config
@@ -47,6 +48,8 @@ type Providers struct {
     MaxMind      *maxmind.Config
 }
 ```
+
+`InboundMTLSProfiles` stores reusable named inbound HTTPS client-certificate trust profiles. `entrypoint` and routes reference these profiles by name.
 
 ### State interface
 

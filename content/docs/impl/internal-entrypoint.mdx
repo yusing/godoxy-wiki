@@ -94,6 +94,7 @@ type RWPoolLike[Route types.Route] interface {
 ```go
 type Config struct {
     SupportProxyProtocol bool                     `json:"support_proxy_protocol"`
+    InboundMTLSProfile   string                   `json:"inbound_mtls_profile,omitempty"`
     Rules                struct {
         NotFound rules.Rules                     `json:"not_found"`
     }                                               `json:"rules"`
@@ -101,6 +102,12 @@ type Config struct {
     AccessLog            *accesslog.RequestLoggerConfig `json:"access_log" validate:"omitempty"`
 }
 ```
+
+`InboundMTLSProfile` references a named root-level inbound mTLS profile and enforces client-certificate validation for all HTTPS traffic on the entrypoint.
+
+- When configured, route-level inbound mTLS overrides are not supported.
+- Without a global profile, route-level inbound mTLS is selected by the TLS handshake SNI server name, using the same `FindRoute` lookup as HTTP routing.
+- For a route that enforces client certificates, the route matched from the HTTP `Host` and the route matched from TLS SNI must be the same route (compared by route identity/key after `FindRoute`). That "resolution" is the entrypoint's route table, not DNS or any external name resolution.
 
 ### Context Functions
 
