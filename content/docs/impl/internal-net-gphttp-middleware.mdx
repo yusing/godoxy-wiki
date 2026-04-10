@@ -12,6 +12,7 @@ This package implements a flexible HTTP middleware system for GoDoxy. Middleware
 - **Middleware Chaining**: Compose multiple middleware in priority order
 - **YAML Composition**: Define middleware chains in configuration files
 - **Bypass Rules**: Skip middleware based on request properties
+- **Entrypoint Overlay Promotion**: Promote route-local bypass-only overlays into matching entrypoint middleware for HTTP routes
 - **Dynamic Loading**: Load middleware definitions from files at runtime
 
 Response body rewriting is only applied to unencoded, text-like content types (for example `text/*`, JSON, YAML, XML). Response status and headers can always be modified.
@@ -140,6 +141,8 @@ type Bypass []rules.RuleOn
 // ShouldBypass checks if request should skip middleware
 func (b Bypass) ShouldBypass(w http.ResponseWriter, r *http.Request) bool
 ```
+
+For HTTP routes, a route-local middleware entry that contains only `bypass` and matches an existing entrypoint middleware name is treated as an overlay: its bypass rules are promoted into the effective entrypoint middleware for that route, and the route-local overlay is consumed so the same middleware is not evaluated twice.
 
 ## Available Middleware
 

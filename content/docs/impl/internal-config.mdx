@@ -49,8 +49,6 @@ type Providers struct {
 }
 ```
 
-`InboundMTLSProfiles` stores reusable named inbound HTTPS client-certificate trust profiles. `entrypoint` and routes reference these profiles by name.
-
 ### State interface
 
 ```go
@@ -74,6 +72,8 @@ type State interface {
     FlushTmpLog()
 }
 ```
+
+`StartAPIServers` starts the authenticated API from `common.APIHTTPAddr` and, when `LOCAL_API_ADDR` is set, an additional **unauthenticated** local listener from `common.LocalAPIHTTPAddr`. That address is validated for loopback binds (with optional DNS resolution); non-loopback requires `LOCAL_API_ALLOW_NON_LOOPBACK` and logs a warning. See [`internal/api/v1/README.md`](/impl/internal-api-v1#configuration-surface).
 
 ### Exported functions
 
