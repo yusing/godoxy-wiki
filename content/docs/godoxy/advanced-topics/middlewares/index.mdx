@@ -140,3 +140,62 @@ myapp:
         - path glob(/api/*)
         - remote 192.168.0.0/16
 ```
+
+## Entrypoint Overlay Promotion
+
+When an entrypoint middleware is active (e.g. `oidc`), you can add **per-route bypass rules** that are promoted into the entrypoint middleware for that specific route. This avoids the middleware being evaluated twice — once at the entrypoint level and again at the route level.
+
+### How It Works
+
+A route-local middleware entry that contains **only `bypass`** and matches an existing entrypoint middleware name (case-insensitive, snake-agnostic) is treated as an **overlay**:
+
+1. The route's bypass rules are qualified with the route name and appended to the matching entrypoint middleware's bypass list for that route only
+2. The route-local overlay is consumed — it is not evaluated again as a separate middleware
+3. If the route entry has options beyond `bypass`, it is **not** treated as an overlay and works as a normal route middleware instead
+
+### Entrypoint Configuration Example
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: oidc
+```
+
+### Docker Labels Example
+
+```yaml
+# Entrypoint has OIDC enabled
+# This route adds bypass rules for the entrypoint OIDC middleware
+proxy.myapp.middlewares.oidc.bypass: |
+  - path glob(/public/*)
+  - path /health
+```
+
+### Route File Example
+
+```yaml
+myapp:
+  middlewares:
+    oidc:
+      bypass:
+        - path glob(/public/*)
+        - path /health
+```
+
+With the above configuration, requests to `myapp` matching `/public/*` or `/health` will bypass the entrypoint's OIDC middleware. The route-local `oidc` entry is consumed and not applied again.
+
+### Mixed Options (Not an Overlay)
+
+If the route middleware entry contains options other than `bypass`, it is **not** promoted and works as a regular route middleware:
+
+```yaml
+myapp:
+  middlewares:
+    oidc:
+      allowed_groups:
+        - admins
+      bypass:
+        - path glob(/public/*)
+```
+
+In this case, `oidc` is applied as a normal route middleware with both `allowed_groups` and `bypass`. The entrypoint OIDC middleware still applies separately.

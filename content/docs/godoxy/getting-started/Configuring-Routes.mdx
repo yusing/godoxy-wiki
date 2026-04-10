@@ -148,6 +148,10 @@ api.example.com:
   agent: https://10.0.1.2:8890
 ```
 
+### Middleware Bypass Overlays
+
+When an entrypoint middleware is active (e.g. OIDC), you can add per-route bypass rules that are promoted into the entrypoint middleware for that route only. This avoids the middleware being evaluated twice. See [Entrypoint Overlay Promotion](/docs/godoxy/advanced-topics/middlewares#entrypoint-overlay-promotion) for details.
+
 ### Configuration Reuse with YAML Anchors
 
 Use YAML anchors to share configuration across routes:
