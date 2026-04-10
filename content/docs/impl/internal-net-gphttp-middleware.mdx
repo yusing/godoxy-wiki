@@ -142,7 +142,7 @@ type Bypass []rules.RuleOn
 func (b Bypass) ShouldBypass(w http.ResponseWriter, r *http.Request) bool
 ```
 
-For HTTP routes, a route-local middleware entry that contains only `bypass` and matches an existing entrypoint middleware name is treated as an overlay: its bypass rules are promoted into the effective entrypoint middleware for that route, and the route-local overlay is consumed so the same middleware is not evaluated twice.
+For HTTP routes, any route-local middleware entry that sets `bypass` and matches an existing entrypoint middleware name contributes an overlay: its bypass rules are promoted into the effective entrypoint middleware for that route. When the route-local entry contains only `bypass`, it is consumed so the same middleware is not evaluated twice; entries with additional options still execute at route scope after promotion.
 
 ## Available Middleware
 
