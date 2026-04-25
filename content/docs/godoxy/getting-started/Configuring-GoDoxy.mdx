@@ -35,6 +35,7 @@ The `config.yml` file is divided into several sections:
 | `match_domains`  | List of domains to match                                                         |
 | `defaults`       | Default values                                                                   |
 | `homepage`       | Configures homepage settings                                                     |
+| `webui`          | Configures the built-in embedded WebUI route                                     |
 
 ### Environment Variables substitution
 
@@ -209,7 +210,7 @@ defaults:
 
 ### Homepage Settings
 
-Configure how GoDoxy handles the WebUI App dashboard.
+Configure how GoDoxy handles the app dashboard content shown inside the WebUI.
 
 ```yaml
 homepage:
@@ -217,3 +218,19 @@ homepage:
 ```
 
 See [WebUI Configurations](../customization/WebUI)
+
+### Built-in WebUI Route
+
+GoDoxy serves the WebUI from embedded build assets. A separate frontend/WebUI container is no longer required for the normal deployment path.
+
+Configure the hostnames for the embedded WebUI route with `webui.aliases`:
+
+```yaml
+webui:
+  aliases:
+    - godoxy.example.com
+    - godoxy.local.app
+```
+
+If `webui.aliases` is omitted, GoDoxy falls back to the legacy `GODOXY_FRONTEND_ALIASES` / `FRONTEND_ALIASES` environment variable.
+If the embedded WebUI alias conflicts with another loaded route, GoDoxy logs a warning and the embedded WebUI route wins.

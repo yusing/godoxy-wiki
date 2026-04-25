@@ -13,8 +13,10 @@ description: Basics of GoDoxy
 | `vx.y.z`        | Stable release                                    |
 
 - Proxy `ghcr.io/yusing/godoxy:<tag>`
-- Frontend `ghcr.io/yusing/godoxy-frontend:<tag>`
 - Agent `ghcr.io/yusing/godoxy-agent:<tag>`
+
+Starting from v0.29.0, the WebUI is served by the `godoxy` image from embedded static assets;
+no separate frontend image or container is required.
 
 ### Current version
 
@@ -64,6 +66,7 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 | `GODOXY_API_JWT_SECURE`    | Secure flag for JWT cookie       | `true`                                                            | boolean                                           |
 | `GODOXY_API_JWT_SECRET`    | Base64 JWT secret for api server | random **(you will have to login again after restarting GoDoxy)** | string                                            |
 | `GODOXY_API_JWT_TOKEN_TTL` | JWT Time-to-live                 | `24h`                                                             | [duration](https://pkg.go.dev/time#ParseDuration) |
+| `GODOXY_FRONTEND_ALIASES` | Legacy embedded WebUI route aliases; prefer `webui.aliases` in `config.yml` | `godoxy` | comma-separated hostnames |
 
 <Callout type="warn">
 To use WebUI without HTTPS, set `GODOXY_API_JWT_SECURE` to `false`.
