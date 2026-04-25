@@ -46,17 +46,4 @@ Results (Last updated: `2026-01-03 12:53 +0800`):
 - **Traefik** maintains solid performance (~69k req/s HTTP/1.1, ~56k req/s HTTP/2)
 - **Caddy** significantly underperforms, likely a bug (also had errors in HTTP/2 test: 1597 failed requests)
 
-## Resource Usage
-
-<Callout type="info">
-For memory constrained environments, you can use the frontend with `latest-lite` tag.
-
-See [Lite Image](getting-started/Basics#lite-image) for more details.
-
-</Callout>
-
 ![Resource Usage](images/docker-stats.png)
-
-With Lite Image:
-
-![Lite Image](images/docker-stats-lite.png)
