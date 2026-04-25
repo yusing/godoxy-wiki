@@ -35,7 +35,7 @@ The `config.yml` file is divided into several sections:
 | `match_domains`  | List of domains to match                                                         |
 | `defaults`       | Default values                                                                   |
 | `homepage`       | Configures homepage settings                                                     |
-| `webui`          | Configures the built-in embedded WebUI route                                     |
+| `webui`          | Embedded WebUI: `aliases`, optional `inbound_mtls_profile`, `middlewares`, `access_log` |
 
 ### Environment Variables substitution
 
@@ -217,13 +217,58 @@ homepage:
   use_default_categories: true
 ```
 
-See [WebUI Configurations](../customization/WebUI)
+See [Dashboard Configurations](../customization/WebUI)
 
 ### Built-in WebUI Route
 
-GoDoxy serves the WebUI from embedded build assets. A separate frontend/WebUI container is no longer required for the normal deployment path.
+GoDoxy serves the WebUI from embedded build assets (`fileserver` with SPA and `embed://webui` rules). A separate WebUI container is not required for normal use. The built-in WebUI is registered as a provider named `webui` after your configured providers are loaded.
 
-Configure the hostnames for the embedded WebUI route with `webui.aliases`:
+#### `webui` field reference
+
+These fields map to the root `webui` object in `config.yml` (see also [`WebUIConfig`](https://github.com/yusing/godoxy/blob/main/internal/config/types/config.go) in the repository).
+
+<TypeTable
+  type={{
+    aliases: {
+      description:
+        "Hostnames (aliases) for the embedded WebUI. Each value becomes one fileserver route. Values are lowercased and trimmed; empty strings are skipped.",
+      type: "string[]",
+      required: false,
+      default: 'falls back to env (see below); default "godoxy"',
+    },
+    inbound_mtls_profile: {
+      description:
+        "Name of a profile from top-level `inbound_mtls_profiles` for HTTPS client-certificate validation on the WebUI routes. Ignored when a global `entrypoint.inbound_mtls_profile` is set.",
+      type: "string",
+      required: false,
+      default: null,
+    },
+    middlewares: {
+      description:
+        "Per-route middleware map (named chains). Keys are chain names; values are the same label-style options as other routes. Use this to protect the WebUI (for example a CIDR allowlist) without changing entrypoint defaults.",
+      type: "Record<string, object>",
+      required: false,
+      default: null,
+    },
+    access_log: {
+      description:
+        "Access logging for the embedded WebUI routes (format, path, filters, fields, rotation, and retention). Same shape as `entrypoint.access_log`.",
+      type: "RequestLogConfig",
+      required: false,
+      default: null,
+    },
+  }}
+/>
+
+#### Aliases and environment fallback
+
+If `webui.aliases` is **omitted** or **empty** after parsing, GoDoxy uses the legacy comma-separated env lookup (via `goutils/env` prefixes: `GODOXY_`, `GOPROXY_`, or unprefixed). The key is `FRONTEND_ALIASES`; default is `godoxy`.
+
+| Variable (any matching prefix) | Role |
+| ----------------------------- | ---- |
+| `…FRONTEND_ALIASES` | Comma-separated hostnames for the embedded WebUI when `webui.aliases` is not set |
+
+Example:
 
 ```yaml
 webui:
@@ -232,5 +277,28 @@ webui:
     - godoxy.local.app
 ```
 
-If `webui.aliases` is omitted, GoDoxy falls back to the legacy `GODOXY_FRONTEND_ALIASES` / `FRONTEND_ALIASES` environment variable.
-If the embedded WebUI alias conflicts with another loaded route, GoDoxy logs a warning and the embedded WebUI route wins.
+#### Per-route hardening and logging
+
+`inbound_mtls_profile`, `middlewares`, and `access_log` apply to every alias under `webui` (each hostname gets the same settings). For inbound mTLS, define `inbound_mtls_profiles` at the root of `config.yml` and reference a profile by name. See [Inbound mTLS](../advanced-topics/Inbound-MTLS).
+
+```yaml
+# Example: restrict who can open the WebUI and log access separately
+webui:
+  aliases:
+    - godoxy
+  middlewares:
+    cidr_whitelist:
+      status: 403
+      message: IP not allowed
+      allow:
+        - 127.0.0.1
+        - 10.0.0.0/8
+        - 192.168.0.0/16
+  access_log:
+    format: combined
+    path: /app/logs/webui-access.log
+```
+
+#### Conflicts and precedence
+
+If an embedded WebUI alias collides with another route, GoDoxy logs a warning and **the embedded WebUI route takes precedence** for that alias.
