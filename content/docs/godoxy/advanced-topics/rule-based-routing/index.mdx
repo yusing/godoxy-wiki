@@ -13,7 +13,7 @@ stable.
 
 ## Overview
 
-Rule-based routing allows you to define custom routing logic for incoming requests. Rules can match requests based on various conditions (headers, query parameters, cookies, etc.) and execute specific actions (serve files, proxy requests, redirect, etc.).
+Rule-based routing allows you to define custom routing logic for incoming requests. Rules can match requests based on various conditions (headers, query parameters, cookies, etc.) and execute specific actions (serve files, dispatch internal handlers, proxy requests, redirect, etc.).
 
 ## Rule Structure
 
@@ -246,6 +246,11 @@ path glob("/api/*") {
   log info /dev/stdout "$req_method $status_code"
 }
 
+# Dispatch to a built-in GoDoxy handler
+path glob("/api/v1/*") {
+  handle api
+}
+
 # Pass-through alias
 header X-Bypass true {
   bypass
@@ -278,12 +283,16 @@ path glob("/api/*") {
   proxy http://api-server:8080
 }
 
+path glob("/api/v1/*") {
+  handle api
+}
+
 default {
   pass
 }
 ```
 
-In this example, `default { pass }` runs only when `/api/*` does not match.
+In this example, `handle api` dispatches to GoDoxy's registered in-process API handler, while `default { pass }` runs only when neither API rule matches.
 
 ## Common Use Cases (Block Syntax)
 
@@ -354,6 +363,21 @@ path glob("/api/**") {
   proxy http://api-server:8080
 }
 ```
+
+### In-Process Handler Dispatch
+
+```bash
+path glob("/api/v1/*") {
+  handle api
+}
+
+path glob("/auth/*") {
+  rewrite /auth /api/v1/auth
+  handle api
+}
+```
+
+Use `handle` for handlers already registered inside the current GoDoxy process, such as the built-in API. Use `proxy` for external upstream services.
 
 ### Response-Conditional Logging
 
