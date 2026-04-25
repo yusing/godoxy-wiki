@@ -19,9 +19,15 @@
     "/agent/create": {
       "post": {
         "description": "Create a new agent and return the docker compose file, encrypted CA and client PEMs\nThe returned PEMs are encrypted with a random key and will be used for verification when adding a new agent",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["agent"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "agent"
+        ],
         "summary": "Create a new agent",
         "parameters": [
           {
@@ -73,9 +79,16 @@
     "/agent/list": {
       "get": {
         "description": "List agents",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["agent", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "agent",
+          "websocket"
+        ],
         "summary": "List agents",
         "responses": {
           "200": {
@@ -101,9 +114,15 @@
     "/agent/verify": {
       "post": {
         "description": "Verify a new agent and return the number of routes added",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["agent"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "agent"
+        ],
         "summary": "Verify a new agent",
         "parameters": [
           {
@@ -149,8 +168,12 @@
     "/auth/callback": {
       "post": {
         "description": "Handles the callback from the provider after successful authentication",
-        "produces": ["text/plain"],
-        "tags": ["auth"],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
         "summary": "Auth Callback",
         "parameters": [
           {
@@ -196,8 +219,12 @@
     "/auth/check": {
       "head": {
         "description": "Checks if the user is authenticated by validating their token",
-        "produces": ["text/plain"],
-        "tags": ["auth"],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
         "summary": "Check authentication status",
         "responses": {
           "200": {
@@ -220,8 +247,12 @@
     "/auth/login": {
       "post": {
         "description": "Initiates the login process by redirecting the user to the provider's login page",
-        "produces": ["text/plain"],
-        "tags": ["auth"],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
         "summary": "Login",
         "responses": {
           "302": {
@@ -244,8 +275,12 @@
     "/auth/logout": {
       "get": {
         "description": "Logs out the user by invalidating the token",
-        "produces": ["text/plain"],
-        "tags": ["auth"],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
         "summary": "Logout",
         "responses": {
           "302": {
@@ -260,8 +295,12 @@
       },
       "post": {
         "description": "Logs out the user by invalidating the token",
-        "produces": ["text/plain"],
-        "tags": ["auth"],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "auth"
+        ],
         "summary": "Logout",
         "responses": {
           "302": {
@@ -278,8 +317,12 @@
     "/cert/info": {
       "get": {
         "description": "Get cert info",
-        "produces": ["application/json"],
-        "tags": ["cert"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "cert"
+        ],
         "summary": "Get cert info",
         "responses": {
           "200": {
@@ -317,14 +360,25 @@
     "/cert/renew": {
       "get": {
         "description": "Renew cert",
-        "produces": ["text/plain"],
-        "tags": ["cert", "websocket"],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "cert",
+          "websocket"
+        ],
         "summary": "Renew cert",
         "responses": {
           "200": {
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "403": {
@@ -347,8 +401,12 @@
     "/docker/container/{id}": {
       "get": {
         "description": "Get container by container id",
-        "produces": ["application/json"],
-        "tags": ["docker"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
         "summary": "Get container",
         "parameters": [
           {
@@ -398,8 +456,12 @@
     "/docker/containers": {
       "get": {
         "description": "Get containers",
-        "produces": ["application/json"],
-        "tags": ["docker"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
         "summary": "Get containers",
         "responses": {
           "200": {
@@ -431,8 +493,12 @@
     "/docker/info": {
       "get": {
         "description": "Get docker info",
-        "produces": ["application/json"],
-        "tags": ["docker"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
         "summary": "Get docker info",
         "responses": {
           "200": {
@@ -461,9 +527,16 @@
     "/docker/logs/{id}": {
       "get": {
         "description": "Get docker container logs by container id",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["docker", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker",
+          "websocket"
+        ],
         "summary": "Get docker container logs",
         "parameters": [
           {
@@ -546,8 +619,12 @@
     "/docker/restart": {
       "post": {
         "description": "Restart container by container id",
-        "produces": ["application/json"],
-        "tags": ["docker"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
         "summary": "Restart container",
         "parameters": [
           {
@@ -599,8 +676,12 @@
     "/docker/start": {
       "post": {
         "description": "Start container by container id",
-        "produces": ["application/json"],
-        "tags": ["docker"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
         "summary": "Start container",
         "parameters": [
           {
@@ -652,8 +733,13 @@
     "/docker/stats/{id}": {
       "get": {
         "description": "Get container stats by container id",
-        "produces": ["application/json"],
-        "tags": ["docker", "websocket"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker",
+          "websocket"
+        ],
         "summary": "Get container stats",
         "parameters": [
           {
@@ -695,16 +781,18 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           }
-        },
-        "x-id": "stats",
-        "operationId": "stats"
+        }
       }
     },
     "/docker/stop": {
       "post": {
         "description": "Stop container by container id",
-        "produces": ["application/json"],
-        "tags": ["docker"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "docker"
+        ],
         "summary": "Stop container",
         "parameters": [
           {
@@ -755,9 +843,15 @@
     },
     "/events": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["v1"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "v1"
+        ],
         "summary": "Get events history",
         "responses": {
           "200": {
@@ -789,14 +883,18 @@
     "/favicon": {
       "get": {
         "description": "Get favicon",
-        "consumes": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "image/svg+xml",
           "image/x-icon",
           "image/png",
           "image/webp"
         ],
-        "tags": ["v1"],
+        "tags": [
+          "v1"
+        ],
         "summary": "Get favicon",
         "parameters": [
           {
@@ -854,9 +952,15 @@
     "/file/content": {
       "get": {
         "description": "Get file content",
-        "consumes": ["application/json"],
-        "produces": ["application/godoxy+yaml"],
-        "tags": ["file"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/godoxy+yaml"
+        ],
+        "tags": [
+          "file"
+        ],
         "summary": "Get file content",
         "parameters": [
           {
@@ -867,7 +971,11 @@
             "required": true
           },
           {
-            "enum": ["config", "provider", "middleware"],
+            "enum": [
+              "config",
+              "provider",
+              "middleware"
+            ],
             "type": "string",
             "x-enum-varnames": [
               "FileTypeConfig",
@@ -910,13 +1018,23 @@
       },
       "put": {
         "description": "Set file content",
-        "consumes": ["text/plain"],
-        "produces": ["application/json"],
-        "tags": ["file"],
+        "consumes": [
+          "text/plain"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "file"
+        ],
         "summary": "Set file content",
         "parameters": [
           {
-            "enum": ["config", "provider", "middleware"],
+            "enum": [
+              "config",
+              "provider",
+              "middleware"
+            ],
             "type": "string",
             "description": "Type",
             "name": "type",
@@ -973,9 +1091,15 @@
     "/file/list": {
       "get": {
         "description": "List files",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["file"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "file"
+        ],
         "summary": "List files",
         "responses": {
           "200": {
@@ -1004,13 +1128,23 @@
     "/file/validate": {
       "post": {
         "description": "Validate file",
-        "consumes": ["application/yaml"],
-        "produces": ["application/json"],
-        "tags": ["file"],
+        "consumes": [
+          "application/yaml"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "file"
+        ],
         "summary": "Validate file",
         "parameters": [
           {
-            "enum": ["config", "provider", "middleware"],
+            "enum": [
+              "config",
+              "provider",
+              "middleware"
+            ],
             "type": "string",
             "description": "Type",
             "name": "type",
@@ -1064,9 +1198,16 @@
     "/health": {
       "get": {
         "description": "Get health info by route name",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["v1", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "v1",
+          "websocket"
+        ],
         "summary": "Get routes health info",
         "responses": {
           "200": {
@@ -1095,9 +1236,15 @@
     "/homepage/categories": {
       "get": {
         "description": "List homepage categories",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "List homepage categories",
         "responses": {
           "200": {
@@ -1129,9 +1276,15 @@
     "/homepage/item_click": {
       "post": {
         "description": "Increment item click.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "Increment item click",
         "parameters": [
           {
@@ -1168,9 +1321,16 @@
     "/homepage/items": {
       "get": {
         "description": "Homepage items",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage",
+          "websocket"
+        ],
         "summary": "Homepage items",
         "parameters": [
           {
@@ -1192,7 +1352,11 @@
             "in": "query"
           },
           {
-            "enum": ["clicks", "alphabetical", "custom"],
+            "enum": [
+              "clicks",
+              "alphabetical",
+              "custom"
+            ],
             "type": "string",
             "default": "alphabetical",
             "description": "Sort method",
@@ -1236,9 +1400,15 @@
     "/homepage/set/category_order": {
       "post": {
         "description": "Set homepage category order.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "Set homepage category order",
         "parameters": [
           {
@@ -1278,9 +1448,15 @@
     "/homepage/set/item": {
       "post": {
         "description": "Override single homepage item.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "Override single homepage item",
         "parameters": [
           {
@@ -1320,9 +1496,15 @@
     "/homepage/set/item_all_sort_order": {
       "post": {
         "description": "Set homepage item all sort order.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "Set homepage item all sort order",
         "parameters": [
           {
@@ -1362,9 +1544,15 @@
     "/homepage/set/item_fav_sort_order": {
       "post": {
         "description": "Set homepage item fav sort order.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "Set homepage item fav sort order",
         "parameters": [
           {
@@ -1404,9 +1592,15 @@
     "/homepage/set/item_favorite": {
       "post": {
         "description": "Set homepage item favorite.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "Set homepage item favorite",
         "parameters": [
           {
@@ -1446,9 +1640,15 @@
     "/homepage/set/item_sort_order": {
       "post": {
         "description": "Set homepage item sort order.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "Set homepage item sort order",
         "parameters": [
           {
@@ -1488,9 +1688,15 @@
     "/homepage/set/item_visible": {
       "post": {
         "description": "POST list of item ids and visibility value.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "Set homepage item visibility",
         "parameters": [
           {
@@ -1530,9 +1736,15 @@
     "/homepage/set/items_batch": {
       "post": {
         "description": "Override multiple homepage items.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["homepage"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "homepage"
+        ],
         "summary": "Override multiple homepage items",
         "parameters": [
           {
@@ -1572,9 +1784,15 @@
     "/icons": {
       "get": {
         "description": "List icons",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["v1"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "v1"
+        ],
         "summary": "List icons",
         "parameters": [
           {
@@ -1620,8 +1838,13 @@
     "/metrics/all_system_info": {
       "get": {
         "description": "Get system info",
-        "produces": ["application/json"],
-        "tags": ["metrics", "websocket"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "metrics",
+          "websocket"
+        ],
         "summary": "Get system info",
         "parameters": [
           {
@@ -1660,7 +1883,13 @@
             "in": "query"
           },
           {
-            "enum": ["5m", "15m", "1h", "1d", "1mo"],
+            "enum": [
+              "5m",
+              "15m",
+              "1h",
+              "1d",
+              "1mo"
+            ],
             "type": "string",
             "x-enum-varnames": [
               "MetricsPeriod5m",
@@ -1709,8 +1938,13 @@
     "/metrics/system_info": {
       "get": {
         "description": "Get system info",
-        "produces": ["application/json"],
-        "tags": ["metrics", "websocket"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "metrics",
+          "websocket"
+        ],
         "summary": "Get system info",
         "parameters": [
           {
@@ -1753,7 +1987,13 @@
             "in": "query"
           },
           {
-            "enum": ["5m", "15m", "1h", "1d", "1mo"],
+            "enum": [
+              "5m",
+              "15m",
+              "1h",
+              "1d",
+              "1mo"
+            ],
             "type": "string",
             "x-enum-varnames": [
               "MetricsPeriod5m",
@@ -1805,12 +2045,23 @@
     "/metrics/uptime": {
       "get": {
         "description": "Get uptime",
-        "produces": ["application/json"],
-        "tags": ["metrics", "websocket"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "metrics",
+          "websocket"
+        ],
         "summary": "Get uptime",
         "parameters": [
           {
-            "enum": ["5m", "15m", "1h", "1d", "1mo"],
+            "enum": [
+              "5m",
+              "15m",
+              "1h",
+              "1d",
+              "1mo"
+            ],
             "type": "string",
             "example": "1m",
             "x-enum-varnames": [
@@ -1883,9 +2134,16 @@
     "/proxmox/journalctl": {
       "get": {
         "description": "Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["proxmox", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
         "summary": "Get journalctl output",
         "parameters": [
           {
@@ -1960,9 +2218,16 @@
     "/proxmox/journalctl/{node}": {
       "get": {
         "description": "Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["proxmox", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
         "summary": "Get journalctl output",
         "parameters": [
           {
@@ -2044,9 +2309,16 @@
     "/proxmox/journalctl/{node}/{vmid}": {
       "get": {
         "description": "Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["proxmox", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
         "summary": "Get journalctl output",
         "parameters": [
           {
@@ -2134,9 +2406,16 @@
     "/proxmox/journalctl/{node}/{vmid}/{service}": {
       "get": {
         "description": "Get journalctl output for node or LXC container. If vmid is not provided, streams node journalctl.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["proxmox", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
         "summary": "Get journalctl output",
         "parameters": [
           {
@@ -2234,8 +2513,12 @@
     "/proxmox/lxc/:node/:vmid/restart": {
       "post": {
         "description": "Restart LXC container by node and vmid",
-        "produces": ["application/json"],
-        "tags": ["proxmox"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox"
+        ],
         "summary": "Restart LXC container",
         "parameters": [
           {
@@ -2284,8 +2567,12 @@
     "/proxmox/lxc/:node/:vmid/start": {
       "post": {
         "description": "Start LXC container by node and vmid",
-        "produces": ["application/json"],
-        "tags": ["proxmox"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox"
+        ],
         "summary": "Start LXC container",
         "parameters": [
           {
@@ -2334,8 +2621,12 @@
     "/proxmox/lxc/:node/:vmid/stop": {
       "post": {
         "description": "Stop LXC container by node and vmid",
-        "produces": ["application/json"],
-        "tags": ["proxmox"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox"
+        ],
         "summary": "Stop LXC container",
         "parameters": [
           {
@@ -2384,8 +2675,13 @@
     "/proxmox/stats/{node}": {
       "get": {
         "description": "Get proxmox node stats in json",
-        "produces": ["application/json"],
-        "tags": ["proxmox", "websocket"],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
         "summary": "Get proxmox node stats",
         "parameters": [
           {
@@ -2435,8 +2731,13 @@
     "/proxmox/stats/{node}/{vmid}": {
       "get": {
         "description": "Get proxmox VM stats in format of \"STATUS|CPU%%|MEM USAGE/LIMIT|MEM%%|NET I/O|BLOCK I/O\"",
-        "produces": ["text/plain"],
-        "tags": ["proxmox", "websocket"],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
         "summary": "Get proxmox VM stats",
         "parameters": [
           {
@@ -2491,9 +2792,16 @@
     "/proxmox/tail": {
       "get": {
         "description": "Get tail output for node or LXC container. If vmid is not provided, streams node tail.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["proxmox", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "proxmox",
+          "websocket"
+        ],
         "summary": "Get tail output",
         "parameters": [
           {
@@ -2569,9 +2877,15 @@
     "/route/by_provider": {
       "get": {
         "description": "List routes by provider",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["route"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route"
+        ],
         "summary": "List routes by provider",
         "responses": {
           "200": {
@@ -2600,9 +2914,16 @@
     "/route/list": {
       "get": {
         "description": "List routes",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["route", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route",
+          "websocket"
+        ],
         "summary": "List routes",
         "parameters": [
           {
@@ -2636,9 +2957,15 @@
     "/route/playground": {
       "post": {
         "description": "Test rules against mock request/response",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["route"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route"
+        ],
         "summary": "Rule Playground",
         "parameters": [
           {
@@ -2678,9 +3005,16 @@
     "/route/providers": {
       "get": {
         "description": "List route providers",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["route", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route",
+          "websocket"
+        ],
         "summary": "List route providers",
         "responses": {
           "200": {
@@ -2712,9 +3046,16 @@
     "/route/validate": {
       "get": {
         "description": "Validate route,",
-        "consumes": ["application/yaml"],
-        "produces": ["application/json"],
-        "tags": ["route", "websocket"],
+        "consumes": [
+          "application/yaml"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route",
+          "websocket"
+        ],
         "summary": "Validate route",
         "parameters": [
           {
@@ -2762,9 +3103,16 @@
       },
       "post": {
         "description": "Validate route,",
-        "consumes": ["application/yaml"],
-        "produces": ["application/json"],
-        "tags": ["route", "websocket"],
+        "consumes": [
+          "application/yaml"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route",
+          "websocket"
+        ],
         "summary": "Validate route",
         "parameters": [
           {
@@ -2814,9 +3162,15 @@
     "/route/{which}": {
       "get": {
         "description": "List route",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["route"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "route"
+        ],
         "summary": "List route",
         "parameters": [
           {
@@ -2860,9 +3214,16 @@
     "/stats": {
       "get": {
         "description": "Get stats",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "tags": ["v1", "websocket"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "v1",
+          "websocket"
+        ],
         "summary": "Get GoDoxy stats",
         "responses": {
           "200": {
@@ -2891,9 +3252,15 @@
     "/version": {
       "get": {
         "description": "Get the version of the GoDoxy",
-        "consumes": ["application/json"],
-        "produces": ["text/plain"],
-        "tags": ["v1"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "v1"
+        ],
         "summary": "Get version",
         "responses": {
           "200": {
@@ -3283,17 +3650,12 @@
       "type": "object",
       "properties": {
         "blkio_stats": {
-          "description": "BlkioStats stores all IO service stats for data read and write.\n\nThis type is Linux-specific and holds many fields that are specific\nto cgroups v1.\n\nOn a cgroup v2 host, all fields other than \"io_service_bytes_recursive\"\nare omitted or \"null\".\n\nThis type is only populated on Linux and omitted for Windows containers.",
-          "allOf": [
-            {
-              "$ref": "#/definitions/container.BlkioStats"
-            }
-          ],
+          "$ref": "#/definitions/container.BlkioStats",
           "x-nullable": false,
           "x-omitempty": false
         },
         "cpu_stats": {
-          "description": "CPUStats contains CPU related info of the container.",
+          "description": "Shared stats",
           "allOf": [
             {
               "$ref": "#/definitions/container.CPUStats"
@@ -3303,29 +3665,21 @@
           "x-omitempty": false
         },
         "id": {
-          "description": "ID is the ID of the container for which the stats were collected.",
           "type": "string",
           "x-nullable": false,
           "x-omitempty": false
         },
         "memory_stats": {
-          "description": "MemoryStats aggregates all memory stats since container inception on Linux.\nWindows returns stats for commit and private working set only.",
-          "allOf": [
-            {
-              "$ref": "#/definitions/container.MemoryStats"
-            }
-          ],
+          "$ref": "#/definitions/container.MemoryStats",
           "x-nullable": false,
           "x-omitempty": false
         },
         "name": {
-          "description": "Name is the name of the container for which the stats were collected.",
           "type": "string",
           "x-nullable": false,
           "x-omitempty": false
         },
         "networks": {
-          "description": "Networks contains Nntwork statistics for the container per interface.\n\nThis field is omitted if the container has no networking enabled.",
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/container.NetworkStats"
@@ -3334,19 +3688,13 @@
           "x-omitempty": false
         },
         "num_procs": {
-          "description": "NumProcs is the number of processors on the system.\n\nThis field is Windows-specific and always zero for Linux containers.",
+          "description": "Windows specific stats, not populated on Linux.",
           "type": "integer",
           "x-nullable": false,
           "x-omitempty": false
         },
-        "os_type": {
-          "description": "OSType is the OS of the container (\"linux\" or \"windows\") to allow\nplatform-specific handling of stats.",
-          "type": "string",
-          "x-nullable": false,
-          "x-omitempty": false
-        },
         "pids_stats": {
-          "description": "PidsStats contains Linux-specific stats of a container's process-IDs (PIDs).\n\nThis field is Linux-specific and omitted for Windows containers.",
+          "description": "Linux specific stats, not populated on Windows.",
           "allOf": [
             {
               "$ref": "#/definitions/container.PidsStats"
@@ -3356,7 +3704,7 @@
           "x-omitempty": false
         },
         "precpu_stats": {
-          "description": "PreCPUStats contains the CPUStats of the previous sample.",
+          "description": "\"Pre\"=\"Previous\"",
           "allOf": [
             {
               "$ref": "#/definitions/container.CPUStats"
@@ -3366,24 +3714,18 @@
           "x-omitempty": false
         },
         "preread": {
-          "description": "PreRead is the date and time at which this first sample was collected.\nThis field is not propagated if the \"one-shot\" option is set. If the\n\"one-shot\" option is set, this field may be omitted, empty, or set\nto a default date (`0001-01-01T00:00:00Z`).",
           "type": "string",
           "x-nullable": false,
           "x-omitempty": false
         },
         "read": {
-          "description": "Read is the date and time at which this sample was collected.",
+          "description": "Common stats",
           "type": "string",
           "x-nullable": false,
           "x-omitempty": false
         },
         "storage_stats": {
-          "description": "StorageStats is the disk I/O stats for read/write on Windows.\n\nThis type is Windows-specific and omitted for Linux containers.",
-          "allOf": [
-            {
-              "$ref": "#/definitions/container.StorageStats"
-            }
-          ],
+          "$ref": "#/definitions/container.StorageStats",
           "x-nullable": false,
           "x-omitempty": false
         }
@@ -3393,7 +3735,11 @@
     },
     "ContainerStopMethod": {
       "type": "string",
-      "enum": ["pause", "stop", "kill"],
+      "enum": [
+        "pause",
+        "stop",
+        "kill"
+      ],
       "x-enum-varnames": [
         "ContainerStopMethodPause",
         "ContainerStopMethodStop",
@@ -3421,7 +3767,9 @@
     },
     "DockerTLSConfig": {
       "type": "object",
-      "required": ["ca_file"],
+      "required": [
+        "ca_file"
+      ],
       "properties": {
         "ca_file": {
           "type": "string",
@@ -3492,7 +3840,11 @@
     },
     "FileType": {
       "type": "string",
-      "enum": ["config", "provider", "middleware"],
+      "enum": [
+        "config",
+        "provider",
+        "middleware"
+      ],
       "x-enum-varnames": [
         "FileTypeConfig",
         "FileTypeProvider",
@@ -4234,7 +4586,11 @@
     },
     "IdlewatcherDockerConfig": {
       "type": "object",
-      "required": ["container_id", "container_name", "docker_cfg"],
+      "required": [
+        "container_id",
+        "container_name",
+        "docker_cfg"
+      ],
       "properties": {
         "container_id": {
           "type": "string",
@@ -4257,7 +4613,10 @@
     },
     "IdlewatcherProxmoxNodeConfig": {
       "type": "object",
-      "required": ["node", "vmid"],
+      "required": [
+        "node",
+        "vmid"
+      ],
       "properties": {
         "node": {
           "type": "string",
@@ -4344,7 +4703,12 @@
     },
     "LoadBalancerMode": {
       "type": "string",
-      "enum": ["", "roundrobin", "leastconn", "iphash"],
+      "enum": [
+        "",
+        "roundrobin",
+        "leastconn",
+        "iphash"
+      ],
       "x-enum-varnames": [
         "LoadbalanceModeUnset",
         "LoadbalanceModeRoundRobin",
@@ -4481,7 +4845,13 @@
     },
     "MetricsPeriod": {
       "type": "string",
-      "enum": ["5m", "15m", "1h", "1d", "1mo"],
+      "enum": [
+        "5m",
+        "15m",
+        "1h",
+        "1d",
+        "1mo"
+      ],
       "x-enum-varnames": [
         "MetricsPeriod5m",
         "MetricsPeriod15m",
@@ -4601,11 +4971,19 @@
     },
     "NewAgentRequest": {
       "type": "object",
-      "required": ["host", "name", "port", "type"],
+      "required": [
+        "host",
+        "name",
+        "port",
+        "type"
+      ],
       "properties": {
         "container_runtime": {
           "default": "docker",
-          "enum": ["docker", "podman"],
+          "enum": [
+            "docker",
+            "podman"
+          ],
           "allOf": [
             {
               "$ref": "#/definitions/agent.ContainerRuntime"
@@ -4634,7 +5012,10 @@
         },
         "type": {
           "type": "string",
-          "enum": ["docker", "system"],
+          "enum": [
+            "docker",
+            "system"
+          ],
           "x-nullable": false,
           "x-omitempty": false
         }
@@ -4712,7 +5093,9 @@
     },
     "PlaygroundRequest": {
       "type": "object",
-      "required": ["rules"],
+      "required": [
+        "rules"
+      ],
       "properties": {
         "mockRequest": {
           "$ref": "#/definitions/MockRequest"
@@ -4818,7 +5201,11 @@
     },
     "ProviderType": {
       "type": "string",
-      "enum": ["docker", "file", "agent"],
+      "enum": [
+        "docker",
+        "file",
+        "agent"
+      ],
       "x-enum-varnames": [
         "ProviderTypeDocker",
         "ProviderTypeFile",
@@ -4911,7 +5298,11 @@
         },
         "format": {
           "type": "string",
-          "enum": ["common", "combined", "json"],
+          "enum": [
+            "common",
+            "combined",
+            "json"
+          ],
           "x-nullable": false,
           "x-omitempty": false
         },
@@ -5023,6 +5414,12 @@
           ],
           "x-nullable": true
         },
+        "inbound_mtls_profile": {
+          "description": "HTTP-based routes only: must match a configured inbound_mtls_profiles entry and is ignored when entrypoint.inbound_mtls_profile is set",
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
         "index": {
           "description": "Index file to serve for single-page app mode",
           "type": "string",
@@ -5084,6 +5481,12 @@
           "x-nullable": false,
           "x-omitempty": false
         },
+        "relay_proxy_protocol_header": {
+          "description": "TCP only: relay PROXY protocol header to the destination",
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
         "response_header_timeout": {
           "type": "integer",
           "x-nullable": false,
@@ -5107,7 +5510,14 @@
         },
         "scheme": {
           "type": "string",
-          "enum": ["http", "https", "h2c", "tcp", "udp", "fileserver"],
+          "enum": [
+            "http",
+            "https",
+            "h2c",
+            "tcp",
+            "udp",
+            "fileserver"
+          ],
           "x-nullable": false,
           "x-omitempty": false
         },
@@ -5218,7 +5628,13 @@
         },
         "status": {
           "type": "string",
-          "enum": ["healthy", "unhealthy", "unknown", "napping", "starting"],
+          "enum": [
+            "healthy",
+            "unhealthy",
+            "unknown",
+            "napping",
+            "starting"
+          ],
           "x-nullable": false,
           "x-omitempty": false
         },
@@ -5266,7 +5682,13 @@
         },
         "current_status": {
           "type": "string",
-          "enum": ["healthy", "unhealthy", "unknown", "napping", "starting"],
+          "enum": [
+            "healthy",
+            "unhealthy",
+            "unknown",
+            "napping",
+            "starting"
+          ],
           "x-nullable": false,
           "x-omitempty": false
         },
@@ -5548,7 +5970,11 @@
           "x-omitempty": false
         },
         "default": {
-          "enum": ["keep", "drop", "redact"],
+          "enum": [
+            "keep",
+            "drop",
+            "redact"
+          ],
           "allOf": [
             {
               "$ref": "#/definitions/accesslog.FieldMode"
@@ -5563,8 +5989,16 @@
     },
     "accesslog.FieldMode": {
       "type": "string",
-      "enum": ["keep", "drop", "redact"],
-      "x-enum-varnames": ["FieldModeKeep", "FieldModeDrop", "FieldModeRedact"],
+      "enum": [
+        "keep",
+        "drop",
+        "redact"
+      ],
+      "x-enum-varnames": [
+        "FieldModeKeep",
+        "FieldModeDrop",
+        "FieldModeRedact"
+      ],
       "x-nullable": false,
       "x-omitempty": false
     },
@@ -5629,8 +6063,14 @@
     },
     "agent.ContainerRuntime": {
       "type": "string",
-      "enum": ["docker", "podman"],
-      "x-enum-varnames": ["ContainerRuntimeDocker", "ContainerRuntimePodman"],
+      "enum": [
+        "docker",
+        "podman"
+      ],
+      "x-enum-varnames": [
+        "ContainerRuntimeDocker",
+        "ContainerRuntimePodman"
+      ],
       "x-nullable": false,
       "x-omitempty": false
     },
@@ -6045,16 +6485,12 @@
       "x-nullable": false,
       "x-omitempty": false
     },
-    "container.PortSummary": {
+    "container.Port": {
       "type": "object",
       "properties": {
         "IP": {
           "description": "Host IP address that the container's port is mapped to",
-          "allOf": [
-            {
-              "$ref": "#/definitions/netip.Addr"
-            }
-          ],
+          "type": "string",
           "x-nullable": false,
           "x-omitempty": false
         },
@@ -6071,7 +6507,7 @@
           "x-omitempty": false
         },
         "Type": {
-          "description": "type\nRequired: true\nEnum: [\"tcp\",\"udp\",\"sctp\"]",
+          "description": "type\nRequired: true",
           "type": "string",
           "x-nullable": false,
           "x-omitempty": false
@@ -6222,7 +6658,9 @@
     },
     "dockerapi.RestartRequest": {
       "type": "object",
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -6230,7 +6668,7 @@
           "x-omitempty": false
         },
         "signal": {
-          "description": "Signal (optional) is the signal to send to the container to (gracefully)\nstop it before forcibly terminating the container with SIGKILL after the\ntimeout expires. If no value is set, the default (SIGTERM) is used.",
+          "description": "Signal (optional) is the signal to send to the container to (gracefully)\nstop it before forcibly terminating the container with SIGKILL after the\ntimeout expires. If not value is set, the default (SIGTERM) is used.",
           "type": "string"
         },
         "timeout": {
@@ -6243,7 +6681,9 @@
     },
     "dockerapi.StartRequest": {
       "type": "object",
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "properties": {
         "checkpointDir": {
           "type": "string"
@@ -6262,7 +6702,9 @@
     },
     "dockerapi.StopRequest": {
       "type": "object",
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -6270,7 +6712,7 @@
           "x-omitempty": false
         },
         "signal": {
-          "description": "Signal (optional) is the signal to send to the container to (gracefully)\nstop it before forcibly terminating the container with SIGKILL after the\ntimeout expires. If no value is set, the default (SIGTERM) is used.",
+          "description": "Signal (optional) is the signal to send to the container to (gracefully)\nstop it before forcibly terminating the container with SIGKILL after the\ntimeout expires. If not value is set, the default (SIGTERM) is used.",
           "type": "string"
         },
         "timeout": {
@@ -6283,14 +6725,29 @@
     },
     "events.Level": {
       "type": "string",
-      "enum": ["debug", "info", "warn", "error"],
-      "x-enum-varnames": ["LevelDebug", "LevelInfo", "LevelWarn", "LevelError"],
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error"
+      ],
+      "x-enum-varnames": [
+        "LevelDebug",
+        "LevelInfo",
+        "LevelWarn",
+        "LevelError"
+      ],
       "x-nullable": false,
       "x-omitempty": false
     },
     "icons.Source": {
       "type": "string",
-      "enum": ["https://", "@target", "@walkxcode", "@selfhst"],
+      "enum": [
+        "https://",
+        "@target",
+        "@walkxcode",
+        "@selfhst"
+      ],
       "x-enum-varnames": [
         "SourceAbsolute",
         "SourceRelative",
@@ -6359,20 +6816,6 @@
           "x-omitempty": false
         }
       },
-      "x-nullable": false,
-      "x-omitempty": false
-    },
-    "netip.Addr": {
-      "anyOf": [
-        {
-          "type": "string",
-          "format": "ipv4"
-        },
-        {
-          "type": "string",
-          "format": "ipv6"
-        }
-      ],
       "x-nullable": false,
       "x-omitempty": false
     },
@@ -6518,8 +6961,14 @@
       "type": "integer",
       "format": "int64",
       "enum": [
-        -9223372036854775808, 9223372036854775807, 1, 1000, 1000000, 1000000000,
-        60000000000, 3600000000000
+        -9223372036854775808,
+        9223372036854775807,
+        1,
+        1000,
+        1000000,
+        1000000000,
+        60000000000,
+        3600000000000
       ],
       "x-enum-varnames": [
         "minDuration",
@@ -6543,7 +6992,7 @@
     "types.PortMapping": {
       "type": "object",
       "additionalProperties": {
-        "$ref": "#/definitions/container.PortSummary"
+        "$ref": "#/definitions/container.Port"
       },
       "x-nullable": false,
       "x-omitempty": false
