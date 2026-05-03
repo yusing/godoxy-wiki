@@ -6,44 +6,232 @@ icon: Scale
 
 ## TL;DR
 
-- Benchmarked with `wrk` (HTTP/1.1) and `h2load` (HTTP/2)
-- Benchmark server is written in Go returns 4096 random bytes body
-- GoDoxy performs comparably to Traefik, with similar throughput
-- Benchmarked on basic route `bench.6uo.me` -> `bench:80` without access logging and any other middleware
-- Real world performance may vary depending on the use case and configuration
+All rows below come from one full `make benchmark` run (four proxies) on **2026-05-03** (`Profile: smoke`). They are useful for relative comparison on this machine and profile, not for universal rankings.
 
-## Benchmark
+- **Reused HTTP/1.1**: **Nginx** **~72k req/s**; **Traefik** **~42.5k**; **GoDoxy** **~41.4k**; **Caddy** **~34.6k**.
+- **Reused HTTP/2** (`h2load -m16`): **Nginx** **~85k req/s**; **GoDoxy** **~39.4k**; **Caddy** **~31.3k**; **Traefik** **~19.6k** — this run reported **0** h2load failures and **0** HTTP **5xx** for every proxy in the summary lines.
+- **Reused HTTP/3** (`h3bench`): **Nginx** **~31.5k req/s**; **GoDoxy** **~21.0k**; **Traefik** **~17.5k**; **Caddy** **~15.9k** (all **Failed: 0** in the h3bench summaries).
+- Fresh connection tests used **2000** requests with **32** concurrent connections (`h2load --h1 -m1` / `h2load -m1` / `h3bench -m1`). Every proxy completed **2000 / 2000** for **HTTP/1.1**, **HTTP/2**, and **HTTP/3** in this run.
+- **HTTP/1.1 cleartext** on ports **8080–8083** was **disabled** (**H1C=0**); enable with `--h1c` or `H1C=1` for plaintext H1 comparable to TLS H1.
+
+## Benchmark setup
 
 Source code:
 
 - [dev.compose.yml](https://github.com/yusing/godoxy/blob/main/dev.compose.yml)
 - [scripts/benchmark.sh](https://github.com/yusing/godoxy/blob/main/scripts/benchmark.sh)
-- [main.go](https://github.com/yusing/godoxy/blob/main/cmd/bench_server/main.go)
+- [cmd/bench_server/main.go](https://github.com/yusing/godoxy/blob/main/cmd/bench_server/main.go)
 
-Run the benchmark with:
+Run all benchmark modes:
 
 ```shell
 make benchmark
 ```
 
-or
+From the repo root, `./scripts/benchmark.sh --help` prints the full option list (same as the `usage` block in [`scripts/benchmark.sh`](https://github.com/yusing/godoxy/blob/main/scripts/benchmark.sh)). Common invocations:
 
 ```shell
-make TARGET={godoxy|traefik|nginx|caddy} benchmark
+# Profiles: smoke (default), stable, stress — CLI or BENCH_PROFILE=…
+./scripts/benchmark.sh --profile stable
+./scripts/benchmark.sh --smoke    # alias: --profile smoke
+./scripts/benchmark.sh --stable   # alias: --profile stable
+./scripts/benchmark.sh --stress   # alias: --profile stress
+
+# Protocol toggles (defaults: H1/H2/H3 on, H1C off)
+./scripts/benchmark.sh --no-h1
+./scripts/benchmark.sh --no-h2
+./scripts/benchmark.sh --no-h3
+./scripts/benchmark.sh --h1c            # cleartext HTTP/1.1 on :8080–:8083
+./scripts/benchmark.sh --no-h1c
+
+# Connection mode (default both; env CONNECTION_MODE=reused|fresh|both)
+./scripts/benchmark.sh --reused       # duration-based reused connections only
+./scripts/benchmark.sh --fresh        # fixed-request fresh connections only
+./scripts/benchmark.sh --both
+
+# Make forwards extra CLI args verbatim
+make benchmark args="--stable --no-h1 --no-h3"
 ```
 
-Results (Last updated: `2026-01-03 12:53 +0800`):
+Environment variables (defaults come from the active profile unless you override):
 
-| Proxy   | HTTP/1.1 Req/sec | HTTP/2 Req/sec | HTTP/1.1 Latency (avg) | HTTP/2 Latency (avg) | Transfer/sec (HTTP/1.1) |
-| ------- | ---------------- | -------------- | ---------------------- | -------------------- | ----------------------- |
-| Nginx   | 103,906.54       | 91,673.00      | 1.17ms                 | 1.02ms               | 424.62MB                |
-| Traefik | 68,597.99        | 56,198.30      | 1.74ms                 | 1.71ms               | 276.99MB                |
-| GoDoxy  | 77,491.50        | 59,985.00      | 1.58ms                 | 1.60ms               | 312.90MB                |
-| Caddy   | 10,541.64        | 1,431.10       | 82.72ms                | 68.17ms              | 42.73MB                 |
+```shell
+BENCH_PROFILE=smoke|stable|stress   # CLI --profile/--smoke/--stable/--stress overrides
+H1=0|1 H2=0|1 H3=0|1 H1C=0|1
+CONNECTION_MODE=both|reused|fresh
+TARGET=GoDoxy|Traefik|Caddy|Nginx    # case-insensitive; omit for all four
 
-- **Nginx** leads with the highest throughput on both HTTP/1.1 (~104k req/s) and HTTP/2 (~92k req/s)
-- **GoDoxy** performs comparably to Traefik, with higher throughput in both HTTP/1.1 (~77k req/s) and HTTP/2 (~60k req/s).
-- **Traefik** maintains solid performance (~69k req/s HTTP/1.1, ~56k req/s HTTP/2)
-- **Caddy** significantly underperforms, likely a bug (also had errors in HTTP/2 test: 1597 failed requests)
+DURATION=10s
+THREADS=4
+CONNECTIONS=32
+STREAMS=16                           # concurrent streams per H2/H3 connection
+REQUESTS=2000                       # requests per protocol in fresh mode
+FRESH_CONNECTIONS=32                 # concurrent connections for fresh runs (default: CONNECTIONS)
+
+H2LOAD_WARM_UP_TIME=3s              # reused-mode warm-up; 0 disables
+H2LOAD_DURATION=…                   # optional h2load duration token (derived from DURATION if unset)
+H3_TOOL=auto|h2load|h3bench
+LATENCY_SAMPLES=5 RUNS=1 REPEAT_DELAY=1
+
+UPLOAD_BODY_BYTES=262144
+
+BENCH_COMPOSE_FILE=dev.compose.yml
+BENCH_COMPOSE_MANAGE=0|1 BENCH_COMPOSE_CLEANUP=0|1 BENCH_COMPOSE_RECREATE=0|1
+
+HOST=bench.domain.com               # hostname for SNI and bench URLs
+```
+
+Built-in profile presets (from the script):
+
+| Profile | Duration | Connections | Streams | Fresh requests | Fresh connections | Throughput runs | Latency samples |
+| ------- | -------- | ------------: | ------: | -------------: | ----------------: | --------------: | ----------------: |
+| smoke   | 10s      | 32            | 16      | 2000           | 32                | 1               | 5                 |
+| stable  | 30s      | 64            | 16      | 20000          | 64                | 5               | 25                |
+| stress  | 30s      | 100           | 100     | 50000          | 100               | 3               | 10                |
+
+All three profiles use **4** `h2load` threads and set a non-zero warm-up before reused throughput (smoke **3s**, stable/stress **5s**). When **`RUNS` is greater than 1**, the script repeats each throughput benchmark and prints a median / coefficient-of-variation summary (`stable`, `stress`, or your own **`RUNS`**). Override profile defaults with the env vars above.
+
+### What gets tested
+
+The benchmark uses a Go upstream server that returns a 4096-byte response body. The script starts four reverse proxies and tests each through TLS listeners:
+
+| Proxy   | HTTPS URL                        |
+| ------- | -------------------------------- |
+| GoDoxy  | `https://bench.domain.com:8440/` |
+| Traefik | `https://bench.domain.com:8441/` |
+| Caddy   | `https://bench.domain.com:8442/` |
+| Nginx   | `https://bench.domain.com:8443/` |
+
+The benchmark preserves `bench.domain.com` as SNI and `:authority`, then connects to loopback with:
+
+- `h2load --connect-to=127.0.0.1:<port>` for throughput tests
+- `curl --resolve` for probe-style checks
+
+HTTP/1.1 and HTTP/2 run over HTTPS. HTTP/2 is real TLS/ALPN H2, not h2c. The compose stack also exposes cleartext HTTP on **8080–8083** (`http://bench.domain.com:<port>/`) for optional **HTTP/1.1 plaintext** baseline runs (`--h1c` / `H1C=1`); when enabled, the script exercises the same `h2load --h1 -m1` scenarios without TLS. The stack also exposes UDP listeners for HTTP/3.
+
+HTTP/3 defaults to `H3_TOOL=auto`: use `h2load --h3` when available, otherwise build and run the bundled `cmd/h3bench` client. With `h3bench`, reused throughput uses a fixed-duration run; fresh one-request-per-connection uses `h3bench -m1` (as in this capture). Force `h3bench` explicitly with:
+
+```shell
+H3_TOOL=h3bench make benchmark
+```
+
+Disable HTTP/3 with either:
+
+```shell
+H3=0 make benchmark
+./scripts/benchmark.sh --no-h3
+```
+
+## Run details
+
+| Setting               | Value              |
+| --------------------- | ------------------ |
+| Date                  | `2026-05-03`       |
+| Profile               | `smoke`            |
+| Target hostname       | `bench.domain.com` |
+| Duration              | `10s`              |
+| h2load warm-up        | `3s`               |
+| h2load threads        | `4`                |
+| TLS connections       | `32`               |
+| HTTP/2 streams        | `16` (`h2load -m16`) |
+| HTTP/3 streams/conn   | `16`               |
+| Fresh requests        | `2000`             |
+| Fresh concurrency     | `32`               |
+| Upload probe size     | `256 KiB`          |
+| Latency probe samples | `5` per scenario   |
+| HTTP/3 tool           | `h3bench`          |
+
+## HTTP/1.1 cleartext baseline
+
+Cleartext HTTP/1.1 reuses the same `h2load` reused- and fresh-connection profiles as TLS H1, but targets `http://bench.domain.com:808x/` with `--connect-to` to loopback. **This run did not enable it**, so there are no plaintext req/s or latency rows to publish here. Re-run with:
+
+```shell
+./scripts/benchmark.sh --h1c
+# or
+H1C=1 make benchmark
+```
+
+Console markers look like `[HTTP/1.1 cleartext reused] h2load --h1 -m1` and `[HTTP/1.1 cleartext fresh]`.
+
+## Reused TLS throughput
+
+Persistent/reused connection tests show steady-state proxy throughput after connection setup.
+
+- **H1/H2**: `h2load`; throughput in req/s; transfer in MB/s; latency is mean `time for request`.
+- **H3**: `h3bench`; transfer in MiB/s; latency columns are percentiles plus average.
+- **Done**: completed requests in the timed window (includes warm-up / elapsed semantics from the script).
+- **Fail / 5xx**: h2load failures and HTTP 5xx responses.
+
+| Proxy   | H1 req/s | H1 done | H1 MB/s | H1 latency | H2 req/s | H2 done | H2 fail | H2 5xx | H2 MB/s | H2 latency | H3 req/s | H3 done | H3 MiB/s | H3 p50  | H3 p90  | H3 avg  | H3 p99  |
+| ------- | -------: | ------: | ------: | ---------: | -------: | ------: | ------: | -----: | ------: | ---------: | -------: | ------: | -------: | ------: | ------: | ------: | ------: |
+| Nginx   |   71,969 | 719,689 |   294.4 |    0.44 ms |   84,965 | 849,646 |       0 |      0 |   340.9 |      5.72 ms |   31,504 | 315,708 |    123.1 | 12.1 ms | 31.3 ms | 16.2 ms | 77.8 ms |
+| GoDoxy  |   41,356 | 413,557 |   167.5 |    0.77 ms |   39,377 | 393,768 |       0 |      0 |   154.7 |     12.55 ms |   20,961 | 209,965 |     81.9 | 21.4 ms | 42.6 ms | 24.3 ms | 76.1 ms |
+| Traefik |   42,481 | 424,806 |   172.1 |    0.75 ms |   19,649 | 196,493 |       0 |      0 |    77.2 |     25.78 ms |   17,504 | 175,546 |     68.4 | 25.4 ms | 51.6 ms | 29.1 ms | 87.4 ms |
+| Caddy   |   34,598 | 345,977 |   140.6 |    0.92 ms |   31,310 | 313,104 |       0 |      0 |   123.0 |     15.99 ms |   15,852 | 159,011 |     61.9 | 27.5 ms | 57.0 ms | 32.1 ms | 108 ms  |
+
+Notes:
+
+- Compare HTTP/3 only across HTTP/3 rows. `h3bench` and `h2load` report different latency and transfer metrics.
+- HTTP/2 `mean` latency in the H1/H2 columns is h2load mean **time for request**; under multiplexed load it reflects concurrent scheduling, not single-request latency.
+- h2load sometimes prints slightly different totals for “done/succeeded” and the HTTP/2 `status codes:` summary; the **Fail** and **5xx** columns follow the explicit `failed` / `5xx` fields from the tool output in this capture.
+
+## Fresh TLS throughput
+
+Fresh connection tests use **2000** new connections with one request each (`h2load --h1 -m1` for HTTP/1.1 and `h2load -m1` for HTTP/2`). HTTP/3 uses `h3bench -m1` with the same **2000** requests / **32** connections profile. These numbers mostly reflect handshake, accept-loop, and short-lived QUIC or TCP connection behavior.
+
+`ok/fail` shows succeeded requests versus failed attempts out of **2000** (all **2000 / 0** in this run).
+
+| Proxy   | H1 req/s | H1 MB/s | H1 ok/fail | H1 done | H2 req/s | H2 MB/s | H2 ok/fail | H2 done | H3 req/s | H3 MiB/s | H3 ok/fail | H3 done |
+| ------- | -------: | ------: | ---------- | ------: | -------: | ------: | ---------- | ------: | -------: | -------: | ---------- | ------: |
+| Nginx   |   32,789 |  134.15 | 2000 / 0   |   2,000 |   34,973 |  140.34 | 2000 / 0   |   2,000 |   17,068 |    66.67 | 2000 / 0   |   2,000 |
+| GoDoxy  |   23,358 |   94.58 | 2000 / 0   |   2,000 |   24,655 |   96.90 | 2000 / 0   |   2,000 |   15,353 |    59.97 | 2000 / 0   |   2,000 |
+| Traefik |   25,014 |  101.31 | 2000 / 0   |   2,000 |   25,563 |  100.47 | 2000 / 0   |   2,000 |   13,344 |    52.13 | 2000 / 0   |   2,000 |
+| Caddy   |   25,259 |  102.67 | 2000 / 0   |   2,000 |   17,208 |   67.65 | 2000 / 0   |   2,000 |   10,665 |    41.66 | 2000 / 0   |   2,000 |
+
+## Latency probes
+
+Probe tests send five samples per route and protocol. Values below are mean TTFB in milliseconds. Bodies or first SSE chunks are about 4 KiB.
+
+| Proxy   | /json H1 | /json H2 | /json H3 | /upload H1 | /upload H2 | /upload H3 | /stream H1 | /stream H2 | /stream H3 | /sse H1 | /sse H2 | /sse H3 |
+| ------- | -------: | -------: | -------: | ---------: | ---------: | ---------: | ---------: | ---------: | ---------: | ------: | ------: | ------: |
+| Nginx   |     2.71 |     4.51 |     4.23 |       3.50 |       4.55 |       5.17 |       3.08 |       2.92 |       3.47 |    2.66 |    2.54 |    3.22 |
+| GoDoxy  |     2.30 |     3.33 |     4.88 |       2.14 |       3.19 |       4.77 |       2.58 |       2.51 |       2.29 |    3.84 |    2.70 |    2.26 |
+| Traefik |     2.74 |     3.69 |     3.78 |       3.50 |       3.37 |       4.28 |       3.46 |       2.76 |       3.56 |    3.05 |    2.83 |    3.46 |
+| Caddy   |     3.38 |     3.44 |     4.89 |       4.75 |       2.98 |       5.56 |       3.55 |       3.03 |       2.95 |    2.98 |    2.62 |    3.22 |
+
+HTTP/3 probe latency includes QUIC setup behavior from the probe client. Treat those values as probe behavior, not pure steady-state HTTP/3 request latency.
+
+## SSE probe
+
+SSE probes use `/sse?count=3&interval_ms=150`. Each result is five samples. The table shows `ok/failed` plus mean TTFB in milliseconds.
+
+| Proxy   | H1 ok/fail | H1 TTFB | H2 ok/fail | H2 TTFB | H3 ok/fail | H3 TTFB |
+| ------- | ---------- | ------: | ---------- | ------: | ---------- | ------: |
+| Nginx   | 5 / 0      |    2.66 | 5 / 0      |    2.54 | 5 / 0      |    3.22 |
+| GoDoxy  | 5 / 0      |    3.84 | 5 / 0      |    2.70 | 5 / 0      |    2.26 |
+| Traefik | 5 / 0      |    3.05 | 5 / 0      |    2.83 | 5 / 0      |    3.46 |
+| Caddy   | 5 / 0      |    2.98 | 5 / 0      |    2.62 | 5 / 0      |    3.22 |
+
+All SSE samples succeeded. Nginx had the lowest mean HTTP/1.1 SSE TTFB among the four in this run; GoDoxy was lowest on HTTP/3 SSE means in this snapshot.
+
+## WebSocket probe
+
+| Proxy   | OK / 5 | Status | Mean TTFB |
+| ------- | -----: | -----: | --------: |
+| Nginx   | 5 / 5  |    101 |   2.25 ms |
+| Traefik | 5 / 5  |    101 |   4.85 ms |
+| GoDoxy  | 5 / 5  |    101 |   3.88 ms |
+| Caddy   | 5 / 5  |    101 |   6.64 ms |
+
+## Interpretation
+
+- Reused HTTP/1.1: **Nginx** leads on req/s and mean **time for request**; **Traefik** edges **GoDoxy** slightly on this profile, with **Caddy** fourth.
+- Reused HTTP/2: **Nginx** leads by a wide margin on aggregate req/s with low reported mean **time for request**; **GoDoxy** and **Caddy** follow, then **Traefik**. This smoke profile did not show the high failure rates sometimes seen at much higher client/stream counts—re-run with heavier settings before inferring stability limits.
+- Reused HTTP/3: **Nginx** leads on req/s and transfer; **GoDoxy**, **Traefik**, and **Caddy** follow in that order here, with **Caddy** showing the highest **p99** among the four.
+- Fresh connections: **Nginx** leads on H1/H2/H3 instantaneous throughput in this harness; **GoDoxy** is second on HTTP/3 fresh, then **Traefik** and **Caddy**.
+- Latency probes: H1/H2 stay in the low-millisecond band on most routes; a single slow QUIC dial or first sample can pull HTTP/3 `/json` averages up (visible on **Caddy** and **GoDoxy** in this run).
+- Plaintext HTTP/1.1 was not exercised in this capture; set **`H1C=1`** to compare TLS vs cleartext H1 under the same script.
+
+## Resource usage
 
 ![Resource Usage](images/docker-stats.png)
