@@ -27,6 +27,12 @@ To change listening ports, modify `.env`.
 
 </Callout>
 
+<Callout type="info">
+`.env.example` lists optional runtime toggles. If GoDoxy crashes with **`SIGILL: illegal instruction`**,
+set **`USE_SONIC_JSON=false`** in `.env` (see [Configuring GoDoxy — Runtime process environment](./getting-started/Configuring-GoDoxy#runtime-process-environment)).
+
+</Callout>
+
 1. Prepare a new directory for docker compose and config files.
 
 2. Run setup script inside the directory

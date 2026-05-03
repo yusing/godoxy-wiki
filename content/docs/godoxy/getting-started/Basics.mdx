@@ -8,7 +8,6 @@ description: Basics of GoDoxy
 | Tag             | Description                                       |
 | --------------- | ------------------------------------------------- |
 | `latest`        | Stable release                                    |
-| `latest-compat` | Stable release (`godoxy` and `godoxy-agent` only) |
 | `nightly`       | Experimental release                              |
 | `vx.y.z`        | Stable release                                    |
 
@@ -21,14 +20,6 @@ no separate frontend image or container is required.
 ### Current version
 
 ![GitHub Release](https://img.shields.io/github/v/release/yusing/godoxy?style=flat-square)
-
-### Compat Image
-
-Compat image is a compatible image for old CPUs, `godoxy` and `godoxy-agent` only.
-
-If you see errors like these, you should use the `latest-compat` image:
-
-- `SIGILL: illegal instruction`
 
 ## Secure your containers
 
@@ -56,6 +47,9 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 | `GODOXY_LOCAL_API_ADDR` | Local API server listening address for unauthenticated access | -                | `[host]:port` |
 | `GODOXY_HTTP3_ENABLED`  | Enable HTTP/3                                                 | `true`           | boolean       |
 | `GODOXY_DEBUG`          | Enable debug behaviors and logging                            | `false`          | boolean       |
+| `USE_SONIC_JSON`        | \*Use "bytedance/sonic" library for efficient JSON handling   | `true `          | boolean       |
+
+\*: For ancient CPUs you may see "SIGILL: illegal instructions" error, please set `USE_SONIC_JSON` to false .
 
 ### Authentication
 
