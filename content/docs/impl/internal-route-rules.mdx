@@ -154,6 +154,7 @@ Rules run in two phases:
 
 2. **Upstream phase**
    - Upstream is called only if pre phase did not terminate.
+   - Rule sets that only perform pre-phase work use a passthrough response writer so long-lived streams (gRPC, WebSocket-adjacent HTTP streams, server streaming) can flush immediately instead of waiting for the upstream response to complete.
 
 3. **Post phase**
    - Run post-commands for rules whose pre phase executed, except rules that terminated in pre.
@@ -212,6 +213,7 @@ path regex("/api/v[0-9]+/.*")  // regex pattern
 | `error <code> <message>`       | Return HTTP error                     |
 | `redirect <url>`               | Redirect to URL                       |
 | `serve <path>`                 | Serve local files                     |
+| `handle <name>`                | Dispatch to registered in-process handler |
 | `route <name>`                 | Route to another route                |
 | `proxy <url>`                  | Proxy to upstream                     |
 | `require_basic_auth <realm>`   | Return 401 challenge                  |

@@ -88,8 +88,7 @@ The [`Init`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/config.g
 The package provides interfaces and implementations for generating deployment artifacts:
 
 - **Docker Compose**: Generates a `docker-compose.yml` for running the agent as a container via [`AgentComposeConfig.Generate()`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/docker_compose.go#L21).
-- **Bare Metal**: Generates a shell script to install and run the agent as a systemd service via [`AgentEnvConfig.Generate()`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/bare_metal.go#L27).
-
+- **Bare Metal**: Generates a one-liner that downloads and runs [`scripts/install-agent.sh`](https://github.com/yusing/godoxy/blob/main/scripts/install-agent.sh) via [`AgentEnvConfig.Generate()`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/bare_metal.go#L27).
 ### 4. Fake Docker Host
 
 The package supports a "fake" Docker host scheme (`agent://<addr>`) to identify containers managed by an agent, allowing the GoDoxy server to route requests appropriately. See [`IsDockerHostAgent`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/config.go#L90) and [`GetAgentAddrFromDockerHost`](https://github.com/yusing/godoxy/blob/main/agent/pkg/agent/config.go#L94).
