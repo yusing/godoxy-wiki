@@ -139,7 +139,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/SuccessResponse"
+              "$ref": "#/definitions/VerifyNewAgentResponse"
             }
           },
           "400": {
@@ -5435,7 +5435,6 @@
           "x-nullable": true
         },
         "lurl": {
-          "description": "private fields",
           "type": "string",
           "x-nullable": true
         },
@@ -5557,6 +5556,12 @@
         "ssl_trusted_certificate": {
           "description": "Path to trusted CA certificates",
           "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "tls_termination": {
+          "description": "TCP only: terminate inbound TLS on the shared HTTPS listener before proxying plaintext to the destination",
+          "type": "boolean",
           "x-nullable": false,
           "x-omitempty": false
         }
@@ -5934,6 +5939,11 @@
     "VerifyNewAgentRequest": {
       "type": "object",
       "properties": {
+        "add_to_config": {
+          "type": "boolean",
+          "x-nullable": false,
+          "x-omitempty": false
+        },
         "ca": {
           "$ref": "#/definitions/PEMPairResponse",
           "x-nullable": false,
@@ -5950,6 +5960,26 @@
           "x-omitempty": false
         },
         "host": {
+          "type": "string",
+          "x-nullable": false,
+          "x-omitempty": false
+        }
+      },
+      "x-nullable": false,
+      "x-omitempty": false
+    },
+    "VerifyNewAgentResponse": {
+      "type": "object",
+      "properties": {
+        "agents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Agent"
+          },
+          "x-nullable": false,
+          "x-omitempty": false
+        },
+        "message": {
           "type": "string",
           "x-nullable": false,
           "x-omitempty": false
