@@ -241,6 +241,7 @@ When a **TCP** route listens on the same address as the HTTPS entrypoint, GoDoxy
 | `bind`                    | Bind to specific IP address | `0.0.0.0`     | IP address          |
 | `no_tls_verify`           | Skip TLS verification       | `false`       | boolean             |
 | `response_header_timeout` | Response header timeout     | `60s`         | duration            |
+| `max_conns_per_host`      | Max upstream connections per host | `1000` | integer             |
 | `disable_compression`     | Disable gzip compression    | `false`       | boolean             |
 | `ssl_server_name`         | SNI server name             | Auto          | string              |
 | `ssl_trusted_certificate` | CA certificate path         | None          | file path           |
