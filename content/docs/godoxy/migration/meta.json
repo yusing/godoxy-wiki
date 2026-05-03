@@ -1,0 +1,7 @@
+{
+  "title": "Migration",
+  "description": "Upgrade guides between releases",
+  "icon": "ArrowRightLeft",
+  "pages": ["v0.29.0"],
+  "defaultOpen": true
+}

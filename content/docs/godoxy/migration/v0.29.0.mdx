@@ -1,0 +1,71 @@
+---
+title: v0.29.0
+description: Breaking changes and Docker upgrades from v0.28.1
+---
+
+## Docker Compose and images
+
+**Drop the separate WebUI container.** The example stack no longer includes a
+`frontend` service (`ghcr.io/yusing/godoxy-frontend`). The main
+`ghcr.io/yusing/godoxy` image serves the dashboard from embedded assets.
+
+1. Remove the `frontend` service and delete the old `godoxy-frontend` container.
+2. List dashboard hostnames under **`webui.aliases`** in `config/config.yml`
+   (see `config.example.yml`). If you only used **`GODOXY_FRONTEND_ALIASES`** before,
+   that still applies when `webui.aliases` is empty, but config is preferred.
+3. Drop Docker labels that existed only on the frontend (`proxy.aliases` for the UI).
+   One definition per alias. Duplicates log warnings.
+
+**Socket proxy env rename:** **`SOCKET_PROXY_LISTEN_ADDR`** is now **`LISTEN_ADDR`**
+everywhere Compose uses it (published port and `DOCKER_HOST=tcp://…` on `app`).
+
+Example (trimmed from `compose.example.yml`; there is no `frontend` service):
+
+```yaml
+services:
+  socket-proxy:
+    image: ghcr.io/yusing/socket-proxy:latest
+    ports:
+      - ${LISTEN_ADDR:-127.0.0.1:2375}:2375
+    volumes:
+      - ${DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
+    # … full env and options in compose.example.yml
+
+  app:
+    image: ghcr.io/yusing/godoxy:${TAG:-latest}
+    network_mode: host # do not change this
+    env_file: .env
+    environment:
+      - DOCKER_HOST=tcp://${LISTEN_ADDR:-127.0.0.1:2375}
+    # WebUI: set webui.aliases in config/config.yml (embedded assets in this image)
+    volumes:
+      - ./config:/app/config
+      # … logs, error_pages, data, certs: see compose.example.yml
+
+  # no more frontend service
+```
+
+**TCP on `:443`:** Optional **`GODOXY_SNI_ROUTING_FOR_TCP_ROUTES`** (default `true`).
+See [below](#tcp-on-the-same-port-as-https) before setting it to `false`.
+
+Building from the repo **`Dockerfile`**: default target is the main image (embedded UI).
+Targets **`agent`** and **`socket-proxy`** are the smaller service images.
+
+---
+
+## Compat images, Docker API client, and `USE_SONIC_JSON`
+
+GitHub Actions no longer publishes **`compat`** tags from the **`compat`** branch.
+If you used **`ghcr.io/yusing/godoxy:compat`** or **`ghcr.io/yusing/godoxy-agent:compat`**
+(or the same names on another registry), move to **`latest`**, **`nightly`**, or a
+**`v…`** tag.
+
+Those compat builds also tracked **older Docker Engine API** expectations. The
+standard images again pin an **older `github.com/docker/docker` client** module, so
+you should not need a separate image just for daemon API mismatches.
+
+`USE_SONIC_JSON` defaults to **`true`** and may use **bytedance/sonic**. On some CPUs
+the process can exit with **`SIGILL: illegal instruction`** and a **`PC=0x…`** line in
+the log whenever that JSON path runs (not only at boot). Set **`USE_SONIC_JSON=false`**
+in `.env`, Compose `environment:`, systemd, or equivalent so JSON uses the standard
+library instead. That covers the **Sonic / CPU** side of what compat images were for.

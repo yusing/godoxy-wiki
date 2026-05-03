@@ -3,6 +3,7 @@
   "description": "The reverse proxy",
   "pages": [
     "Setup",
+    "migration",
     "Benchmarks-and-Resource-Usage",
     "getting-started",
     "customization",
