@@ -228,6 +228,11 @@ labels:
 | `port`                        | Listening and proxy port               | `0:lowest_port` (random listening port) | `from:to` format |
 | `bind`                        | Bind address                           | `0.0.0.0`                               | IP address       |
 | `relay_proxy_protocol_header` | Relay PROXY protocol header (TCP only) | `false`                                 | boolean          |
+| `tls_termination`             | Terminate TLS on shared `HTTPS_ADDR`, proxy plaintext upstream (TCP only; requires `autocert`) | `false`                                 | boolean          |
+
+#### TCP on the HTTPS listener (`HTTPS_ADDR`)
+
+When a **TCP** route listens on the same address as the HTTPS entrypoint, GoDoxy uses **TLS SNI** to choose the route (short alias or FQDN, consistent with HTTP). By default the connection is **TLS passthrough**: ciphertext is copied to the upstream. Set **`tls_termination: true`** only on TCP routes listening on the configured shared `HTTPS_ADDR`; route validation rejects other listeners, and route registration rejects termination unless an **`autocert`** provider is configured. With termination enabled, GoDoxy matches ClientHello SNI, completes TLS with **`autocert`**, and forwards a plaintext stream to `host` and the proxy side of `port`.
 
 ### HTTP-Specific Properties
 

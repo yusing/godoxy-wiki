@@ -58,6 +58,7 @@ autocert:
   email: your-email@example.com
   domains:
     - *.yourdomain.com
+  # certificate_key_type: RSA2048  # optional; default EC256 (also EC384, RSA3072/4096/8192). Use RSA* if clients lack ECDSA (e.g. some IoT TLS)
 match_domains:
   - yourdomain.com
 ```

@@ -12,6 +12,7 @@ description: Configure certificates for GoDoxy
 - Bring your own certificate with `provider: local`
 - Short alias vs FQDN determines how domains match
 - `match_domains` restricts which base domains are valid
+- **TCP on HTTPS**: stream routes listening on the configured `HTTPS_ADDR` are matched by **TLS SNI** (same rules as HTTP). Without `tls_termination`, bytes are forwarded unchanged; with `tls_termination: true` and `autocert`, Godoxy terminates TLS and proxies **plaintext** to the upstream TCP port. Registration rejects TLS termination when no autocert provider is configured
 
 ## Certificates
 
@@ -29,6 +30,17 @@ description: Configure certificates for GoDoxy
   - `autocert` is enabled but no certs are present
   - The set of `autocert.domains` no longer matches the loaded certificate
   - The certificate will expire within 30 days
+
+### TCP stream routes on the HTTPS listener
+
+TCP routes whose listen address is the **HTTPS** entrypoint share the same TLS socket as the web UI and reverse proxies. GoDoxy inspects the **ClientHello SNI** to pick the stream route, using the same naming rules as HTTP routes:
+
+- **Short alias**: if SNI is `mqtt.example.com` and the route key is `mqtt`, the first label (`mqtt`) can select that route when it is registered under that name.
+- **FQDN**: the full normalized hostname can match the route when that is how the route is keyed.
+
+**Passthrough (default)** — After SNI matching, the encrypted stream is forwarded as-is to `host:port`. Use this when the upstream speaks TLS (for example the upstream terminates HTTPS).
+
+**Termination** — Set `tls_termination: true` only on a **TCP** route listening on the configured shared `HTTPS_ADDR`. Route validation rejects other listeners, and SNI route registration rejects TLS termination unless an operational **`autocert`** provider exists. GoDoxy matches ClientHello SNI, completes the TLS handshake using **`autocert`**, then proxies a **plaintext** TCP connection to the configured upstream. Leave `tls_termination` disabled for SNI passthrough when autocert is absent or when the upstream should serve its own certificate.
 
 #### Extra Certificates
 
@@ -55,8 +67,11 @@ description: Configure certificates for GoDoxy
 | `ca_certs`   | array  | -                | No                    | CA certificates to use        |
 | `eab_kid`    | string | -                | No                    | EAB Key ID                    |
 | `eab_hmac`   | string | -                | No                    | Base64 encoded EAB¹ HMAC      |
+| `certificate_key_type` | string | `EC256` | No | Private key algorithm for **ACME-issued** leaf certs (lego `Certificate.KeyType`) |
 
 1. EAB refers to External Account Binding.
+
+**`certificate_key_type`** applies only when GoDoxy obtains or renews the certificate via ACME (not for `provider: local` static files). Default is elliptic curve P-256 (`EC256`). Allowed values: `EC256`, `EC384`, `RSA2048`, `RSA3072`, `RSA4096`, `RSA8192` (case-insensitive). Aliases: `P256` / `P384` for EC, and bare sizes `2048`, `3072`, `4096`, `8192` for RSA. Invalid values are rejected during config validation. On an `extra` entry, a non-empty `certificate_key_type` overrides the main `autocert` setting for that certificate’s lego config.
 
 ### Using Existing SSL Certificate
 
@@ -70,12 +85,15 @@ autocert:
 
 ### Autocert with Cloudflare
 
+Use `certificate_key_type` when you need an RSA leaf (for example clients without ECDSA, such as some IoT TLS stacks). See the table above for all allowed values.
+
 ```yaml
 autocert:
   provider: cloudflare
   email: your-email@example.com
   domains:
     - "*.yourdomain.com"
+  # certificate_key_type: RSA2048
   options:
     auth_token: your-zone-api-token
 ```
@@ -146,6 +164,7 @@ autocert:
     - cert_path: certs/internal.crt
       key_path: certs/internal.key
       provider: custom
+      # certificate_key_type: RSA2048  # optional; overrides main autocert when set
       domains:
         - "*.internal.local"
       ca_dir_url: https://ca.internal/acme/directory

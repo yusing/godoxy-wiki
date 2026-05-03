@@ -16,10 +16,12 @@ description: Setup multi docker nodes for GoDoxy
 1. Navigate to **Servers tab** in Web UI, click **Add agent**, select **System** as agent type, fill in required information then click **Copy shell command**
 2. Run the shell command on the agent server
 
+Installer supports both systemd and Alpine/OpenRC (`rc-service`) hosts.
+
 To update the agent, run the following command on the agent server, or make it a cron job:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/yusing/godoxy/refs/heads/main/scripts/install-agent.sh)" -- update
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/yusing/godoxy/refs/heads/main/scripts/install-agent.sh)" -- update
 ```
 
 ### Why?
