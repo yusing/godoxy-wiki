@@ -36,6 +36,38 @@ description: Actions are the command lines inside `{ ... }`. In YAML, the same c
 | `log`                      | `<level> <path> <template>`             | false       | Log message                                                                                 | `log info /dev/stdout "$req_method $status_code"`       |
 | `notify`                   | `<level> <service_name> <title> <body>` | false       | Send notification                                                                           | `notify info ntfy "Request" "$req_method $status_code"` |
 
+## Named Option Blocks
+
+Every action can also be written as a command block with named YAML options. The
+option names are the same arguments shown in the table above, in positional
+order. GoDoxy flattens the mapping into the normal positional argument list and
+then runs the same action validator, so behavior is identical to the inline
+form.
+
+```sh
+path /api {
+  rewrite {
+    from: /api
+    to: /backend
+  }
+
+  notify {
+    level: info
+    provider: ntfy
+    title: API request
+    body: "$req_method $req_url $status_code"
+  }
+}
+```
+
+Rules for option blocks:
+
+- Do not mix inline arguments with named options. Use either `notify info ntfy
+  "title" "body"` or `notify { ... }`, not `notify info ntfy { ... }`.
+- All declared arguments for that command must be present.
+- Unknown or duplicate option names are rejected.
+- Option values must be scalar strings, numbers, booleans, or null.
+
 ### `log` example
 
 ```sh
@@ -46,6 +78,17 @@ log info /dev/stdout "$req_method $req_url $status_code"
 
 ```sh
 notify info ntfy "Request received" "$req_method $status_code"
+```
+
+Equivalent named-option form:
+
+```sh
+notify {
+  level: info
+  provider: ntfy
+  title: Request received
+  body: "$req_method $status_code"
+}
 ```
 
 ### `handle` example

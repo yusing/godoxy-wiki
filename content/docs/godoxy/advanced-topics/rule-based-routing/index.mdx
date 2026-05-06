@@ -70,6 +70,22 @@ path glob("/api/*") {
 }
 ```
 
+Commands inside a rule body can use either inline positional arguments or named
+option blocks:
+
+```bash
+path /api {
+  # Inline positional form
+  rewrite /api /backend
+
+  # Equivalent named-option form
+  rewrite {
+    from: /api
+    to: /backend
+  }
+}
+```
+
 ### YAML Compatibility (legacy)
 
 ```yaml
@@ -90,7 +106,14 @@ path glob("/api/*") {
 
 ## Nested Block Syntax
 
-Inside a rule body, you can nest conditional blocks with `elif` and `else`.
+Inside a rule body, a `{ ... }` block can mean either a command option block or
+a nested conditional block:
+
+- `command { key: value }` is a named option block when `command` is an action
+  and the body is a YAML mapping.
+- `<condition> { ... }` is a nested conditional block.
+
+You can nest conditional blocks with `elif` and `else`.
 
 ### Syntax
 
@@ -119,6 +142,8 @@ chain        := nested_block { "elif" on_expr "{" do_body "}" } [ "else" "{" do_
 
 - `<condition> { ... }` runs nested commands only when the condition matches.
 - Nested blocks are recognized when a logical header ends with an unquoted `{`.
+- Action option blocks do not accept inline arguments. Use `notify { ... }`,
+  not `notify info ntfy { ... }`.
 - Logical headers can continue to the next line when the current line ends with `|` or `&`.
 - `elif` and `else` must be on the **same line** as the preceding `}`.
 - Multiple `elif` branches are allowed; only one `else` is allowed.
