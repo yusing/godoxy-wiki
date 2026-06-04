@@ -30,6 +30,28 @@ services:
       proxy.idle_timeout: 1h
 ```
 
+### Wildcard Alias Example
+
+Use a quoted alias in route files when you want one route to answer for any single subdomain under a fixed suffix:
+
+```yaml
+"*.example.com":
+  host: 10.0.0.20
+  port: 8080
+```
+
+This matches:
+
+- `foo.example.com`
+- `bar.example.com`
+
+But not:
+
+- `example.com`
+- `foo.bar.example.com`
+
+Exact aliases still win before wildcard fallback.
+
 ### Network Configuration
 
 If your container uses multiple networks, specify which network GoDoxy should use:
@@ -60,6 +82,8 @@ labels:
   # Check interval
   proxy.*.healthcheck.interval: 10s
 ```
+
+Note: in Docker labels, `proxy.*.<field>` means “apply this setting to every listed alias”. It does **not** create a route alias literally named `*.domain.com`. Wildcard host aliases are currently intended for route/file-defined aliases such as `"*.example.com"`.
 
 ### Homepage Configuration
 

@@ -3,7 +3,11 @@ title: Domain Matching
 description: Configure domain matching for GoDoxy
 ---
 
-An alias is either a short alias or an FQDN (Fully Qualified Domain Name) alias.
+An alias can be:
+
+- a short alias like `app`
+- an FQDN (Fully Qualified Domain Name) alias like `app.example.com`
+- a leading-label wildcard alias like `*.example.com`
 
 ### Docker
 
@@ -23,6 +27,16 @@ Below will match route with FQDN alias `app.example.com`:
 
 - `app.example.com`
 - `app.example.com.*`
+
+Below will match route with wildcard alias `*.example.com`:
+
+- `foo.example.com`
+- `bar.example.com`
+
+And will **not** match:
+
+- `example.com`
+- `foo.bar.example.com`
 
 #### Using `match_domains`
 
@@ -44,6 +58,34 @@ Then a short alias `app` can be accessed only at:
 And a route with FQDN alias `app.example.com` can be accessed at:
 
 - `app.example.com`
+
+And a wildcard alias `*.example.com` can be accessed only at one-label subdomains such as:
+
+- `foo.example.com`
+- `bar.example.com`
+
+but not:
+
+- `foo.bar.example.com`
+
+## Priority
+
+Host resolution order is:
+
+1. existing exact/FQDN or short-alias domain match
+2. wildcard alias fallback
+
+This keeps normal exact-route matching fast while still allowing wildcard aliases.
+
+## Route file example
+
+Quote wildcard aliases in YAML route files:
+
+```yaml
+"*.example.com":
+  host: 10.0.0.20
+  port: 8080
+```
 
 #### Use case example for `match_domains`
 
