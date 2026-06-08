@@ -233,6 +233,15 @@ labels:
   proxy.#2.port: 8080
 ```
 
+### Shortcuts
+
+- `proxy.aliases: app.domain.com, app-backend.domain.com` sets the indexed aliases. Without it, the container name is used.
+- `proxy.ports: 80,8080` maps to `proxy.#1.port: 80` and `proxy.#2.port: 8080`.
+- `proxy.protos`, `proxy.protocols`, and `proxy.schemes` map to indexed `scheme` values.
+- `proxy.hosts` maps to indexed `host` values.
+- Other scalar shortcuts map by index to their singular route fields: `proxy.binds`, `proxy.roots`, `proxy.spas`, `proxy.indexes`, `proxy.no_tls_verifies`, `proxy.response_header_timeouts`, `proxy.max_conns_per_hosts`, `proxy.disable_compressions`, `proxy.ssl_server_names`, `proxy.ssl_trusted_certificates`, `proxy.ssl_certificates`, `proxy.ssl_certificate_keys`, `proxy.agents`, `proxy.inbound_mtls_profiles`, `proxy.rule_files`, `proxy.tls_terminations`, `proxy.proxy_protocol_headers`.
+- Do not combine a shortcut item with the matching full label (`proxy.ports` plus `proxy.#1.port`, `proxy.app.port`, or `proxy.*.port`); this is a configuration error.
+
 ## Property Reference
 
 ### Core Proxy Properties
