@@ -6,82 +6,81 @@ icon: Scale
 
 ## TL;DR
 
-All rows below come from one full `make benchmark` run (four proxies) on **2026-05-03** (`Profile: smoke`). They are useful for relative comparison on this machine and profile, not for universal rankings.
+All rows below come from one full `shadowtree benchmark` run (four proxies) on **2026-05-03** (`Profile: smoke`). They are useful for relative comparison on this machine and profile, not for universal rankings.
 
 - **Reused HTTP/1.1**: **Nginx** **~72k req/s**; **Traefik** **~42.5k**; **GoDoxy** **~41.4k**; **Caddy** **~34.6k**.
 - **Reused HTTP/2** (`h2load -m16`): **Nginx** **~85k req/s**; **GoDoxy** **~39.4k**; **Caddy** **~31.3k**; **Traefik** **~19.6k** — this run reported **0** h2load failures and **0** HTTP **5xx** for every proxy in the summary lines.
 - **Reused HTTP/3** (`h3bench`): **Nginx** **~31.5k req/s**; **GoDoxy** **~21.0k**; **Traefik** **~17.5k**; **Caddy** **~15.9k** (all **Failed: 0** in the h3bench summaries).
 - Fresh connection tests used **2000** requests with **32** concurrent connections (`h2load --h1 -m1` / `h2load -m1` / `h3bench -m1`). Every proxy completed **2000 / 2000** for **HTTP/1.1**, **HTTP/2**, and **HTTP/3** in this run.
-- **HTTP/1.1 cleartext** on ports **8080–8083** was **disabled** (**H1C=0**); enable with `--h1c` or `H1C=1` for plaintext H1 comparable to TLS H1.
+- **HTTP/1.1 cleartext** on ports **8080-8083** was **disabled** (`h1c=false`); enable with `h1c=true` for plaintext H1 comparable to TLS H1.
 
 ## Benchmark setup
 
 Source code:
 
 - [dev.compose.yml](https://github.com/yusing/godoxy/blob/main/dev.compose.yml)
-- [scripts/benchmark.sh](https://github.com/yusing/godoxy/blob/main/scripts/benchmark.sh)
+- [.shadowtree/benchmark.toml](https://github.com/yusing/godoxy/blob/main/.shadowtree/benchmark.toml)
 - [cmd/bench_server/main.go](https://github.com/yusing/godoxy/blob/main/cmd/bench_server/main.go)
 
 Run all benchmark modes:
 
 ```shell
-make benchmark
+shadowtree benchmark
 ```
 
-From the repo root, `./scripts/benchmark.sh --help` prints the full option list (same as the `usage` block in [`scripts/benchmark.sh`](https://github.com/yusing/godoxy/blob/main/scripts/benchmark.sh)). Common invocations:
+From the repo root, `shadowtree help benchmark` prints the full typed argument list. Common invocations:
 
 ```shell
-# Profiles: smoke (default), stable, stress — CLI or BENCH_PROFILE=…
-./scripts/benchmark.sh --profile stable
-./scripts/benchmark.sh --smoke    # alias: --profile smoke
-./scripts/benchmark.sh --stable   # alias: --profile stable
-./scripts/benchmark.sh --stress   # alias: --profile stress
+# Profiles: smoke (default), stable, stress
+shadowtree benchmark profile=stable
+shadowtree benchmark profile=smoke
+shadowtree benchmark profile=stress
 
-# Protocol toggles (defaults: H1/H2/H3 on, H1C off)
-./scripts/benchmark.sh --no-h1
-./scripts/benchmark.sh --no-h2
-./scripts/benchmark.sh --no-h3
-./scripts/benchmark.sh --h1c            # cleartext HTTP/1.1 on :8080–:8083
-./scripts/benchmark.sh --no-h1c
+# Protocol toggles (defaults: h1/h2/h3 on, h1c off)
+shadowtree benchmark h1=false
+shadowtree benchmark h2=false
+shadowtree benchmark h3=false
+shadowtree benchmark h1c=true           # cleartext HTTP/1.1 on :8080-:8083
+shadowtree benchmark h1c=false
 
-# Connection mode (default both; env CONNECTION_MODE=reused|fresh|both)
-./scripts/benchmark.sh --reused       # duration-based reused connections only
-./scripts/benchmark.sh --fresh        # fixed-request fresh connections only
-./scripts/benchmark.sh --both
+# Connection mode (default: both)
+shadowtree benchmark connection_mode=reused
+shadowtree benchmark connection_mode=fresh
+shadowtree benchmark connection_mode=both
 
-# Make forwards extra CLI args verbatim
-make benchmark args="--stable --no-h1 --no-h3"
+# Combine typed args
+shadowtree benchmark profile=stable h1=false h3=false
 ```
 
-Environment variables (defaults come from the active profile unless you override):
+Selected typed arguments (defaults come from the active profile unless you override):
 
 ```shell
-BENCH_PROFILE=smoke|stable|stress   # CLI --profile/--smoke/--stable/--stress overrides
-H1=0|1 H2=0|1 H3=0|1 H1C=0|1
-CONNECTION_MODE=both|reused|fresh
-TARGET=GoDoxy|Traefik|Caddy|Nginx    # case-insensitive; omit for all four
+profile=smoke|stable|stress
+h1=true|false h2=true|false h3=true|false h1c=true|false
+connection_mode=both|reused|fresh
+target=GoDoxy|Traefik|Caddy|Nginx    # case-insensitive; omit for all four
 
-DURATION=10s
-THREADS=4
-CONNECTIONS=32
-STREAMS=16                           # concurrent streams per H2/H3 connection
-REQUESTS=2000                       # requests per protocol in fresh mode
-FRESH_CONNECTIONS=32                 # concurrent connections for fresh runs (default: CONNECTIONS)
+duration=10s
+threads=4
+connections=32
+streams=16                           # concurrent streams per H2/H3 connection
+requests=2000                        # requests per protocol in fresh mode
+fresh_connections=32                 # concurrent connections for fresh runs; 0 uses connections
 
-H2LOAD_WARM_UP_TIME=3s              # reused-mode warm-up; 0 disables
-H2LOAD_DURATION=…                   # optional h2load duration token (derived from DURATION if unset)
-H3_TOOL=auto|h2load|h3bench
-LATENCY_SAMPLES=5 RUNS=1 REPEAT_DELAY=1
+h2load_warm_up_time=3s               # reused-mode warm-up; 0 disables
+h2load_duration=10                   # optional h2load duration seconds; derived from duration if empty
+h3_tool=auto|h2load|h3bench
+latency_samples=5 runs=1 repeat_delay=1
 
-UPLOAD_BODY_BYTES=262144
+upload_body_bytes=262144
 
-BENCH_COMPOSE_FILE=dev.compose.yml
-BENCH_COMPOSE_MANAGE=0|1 BENCH_COMPOSE_CLEANUP=0|1 BENCH_COMPOSE_RECREATE=0|1
+compose_file=dev.compose.yml
+compose_manage=true|false compose_cleanup=true|false compose_recreate=true|false
 
-HOST=bench.domain.com               # hostname for SNI and bench URLs
+host=bench.domain.com                # hostname for SNI and bench URLs
 ```
 
-Built-in profile presets (from the script):
+Built-in profile presets (from the Shadowtree recipe):
 
 | Profile | Duration | Connections | Streams | Fresh requests | Fresh connections | Throughput runs | Latency samples |
 | ------- | -------- | ------------: | ------: | -------------: | ----------------: | --------------: | ----------------: |
@@ -89,11 +88,11 @@ Built-in profile presets (from the script):
 | stable  | 30s      | 64            | 16      | 20000          | 64                | 5               | 25                |
 | stress  | 30s      | 100           | 100     | 50000          | 100               | 3               | 10                |
 
-All three profiles use **4** `h2load` threads and set a non-zero warm-up before reused throughput (smoke **3s**, stable/stress **5s**). When **`RUNS` is greater than 1**, the script repeats each throughput benchmark and prints a median / coefficient-of-variation summary (`stable`, `stress`, or your own **`RUNS`**). Override profile defaults with the env vars above.
+All three profiles use **4** `h2load` threads and set a non-zero warm-up before reused throughput (smoke **3s**, stable/stress **5s**). When **`runs` is greater than 1**, the recipe repeats each throughput benchmark and prints a median / coefficient-of-variation summary (`stable`, `stress`, or your own `runs`). Override profile defaults with the typed args above.
 
 ### What gets tested
 
-The benchmark uses a Go upstream server that returns a 4096-byte response body. The script starts four reverse proxies and tests each through TLS listeners:
+The benchmark uses a Go upstream server that returns a 4096-byte response body. The recipe starts four reverse proxies and tests each through TLS listeners:
 
 | Proxy   | HTTPS URL                        |
 | ------- | -------------------------------- |
@@ -107,19 +106,18 @@ The benchmark preserves `bench.domain.com` as SNI and `:authority`, then connect
 - `h2load --connect-to=127.0.0.1:<port>` for throughput tests
 - `curl --resolve` for probe-style checks
 
-HTTP/1.1 and HTTP/2 run over HTTPS. HTTP/2 is real TLS/ALPN H2, not h2c. The compose stack also exposes cleartext HTTP on **8080–8083** (`http://bench.domain.com:<port>/`) for optional **HTTP/1.1 plaintext** baseline runs (`--h1c` / `H1C=1`); when enabled, the script exercises the same `h2load --h1 -m1` scenarios without TLS. The stack also exposes UDP listeners for HTTP/3.
+HTTP/1.1 and HTTP/2 run over HTTPS. HTTP/2 is real TLS/ALPN H2, not h2c. The compose stack also exposes cleartext HTTP on **8080-8083** (`http://bench.domain.com:<port>/`) for optional **HTTP/1.1 plaintext** baseline runs (`h1c=true`); when enabled, the recipe exercises the same `h2load --h1 -m1` scenarios without TLS. The stack also exposes UDP listeners for HTTP/3.
 
-HTTP/3 defaults to `H3_TOOL=auto`: use `h2load --h3` when available, otherwise build and run the bundled `cmd/h3bench` client. With `h3bench`, reused throughput uses a fixed-duration run; fresh one-request-per-connection uses `h3bench -m1` (as in this capture). Force `h3bench` explicitly with:
+HTTP/3 defaults to `h3_tool=auto`: use `h2load --h3` when available, otherwise build and run the bundled `cmd/h3bench` client. With `h3bench`, reused throughput uses a fixed-duration run; fresh one-request-per-connection uses `h3bench -m1` (as in this capture). Force `h3bench` explicitly with:
 
 ```shell
-H3_TOOL=h3bench make benchmark
+shadowtree benchmark h3_tool=h3bench
 ```
 
 Disable HTTP/3 with either:
 
 ```shell
-H3=0 make benchmark
-./scripts/benchmark.sh --no-h3
+shadowtree benchmark h3=false
 ```
 
 ## Run details
@@ -146,9 +144,7 @@ H3=0 make benchmark
 Cleartext HTTP/1.1 reuses the same `h2load` reused- and fresh-connection profiles as TLS H1, but targets `http://bench.domain.com:808x/` with `--connect-to` to loopback. **This run did not enable it**, so there are no plaintext req/s or latency rows to publish here. Re-run with:
 
 ```shell
-./scripts/benchmark.sh --h1c
-# or
-H1C=1 make benchmark
+shadowtree benchmark h1c=true
 ```
 
 Console markers look like `[HTTP/1.1 cleartext reused] h2load --h1 -m1` and `[HTTP/1.1 cleartext fresh]`.
@@ -159,7 +155,7 @@ Persistent/reused connection tests show steady-state proxy throughput after conn
 
 - **H1/H2**: `h2load`; throughput in req/s; transfer in MB/s; latency is mean `time for request`.
 - **H3**: `h3bench`; transfer in MiB/s; latency columns are percentiles plus average.
-- **Done**: completed requests in the timed window (includes warm-up / elapsed semantics from the script).
+- **Done**: completed requests in the timed window (includes warm-up / elapsed semantics from the recipe).
 - **Fail / 5xx**: h2load failures and HTTP 5xx responses.
 
 | Proxy   | H1 req/s | H1 done | H1 MB/s | H1 latency | H2 req/s | H2 done | H2 fail | H2 5xx | H2 MB/s | H2 latency | H3 req/s | H3 done | H3 MiB/s | H3 p50  | H3 p90  | H3 avg  | H3 p99  |
@@ -230,7 +226,7 @@ All SSE samples succeeded. Nginx had the lowest mean HTTP/1.1 SSE TTFB among the
 - Reused HTTP/3: **Nginx** leads on req/s and transfer; **GoDoxy**, **Traefik**, and **Caddy** follow in that order here, with **Caddy** showing the highest **p99** among the four.
 - Fresh connections: **Nginx** leads on H1/H2/H3 instantaneous throughput in this harness; **GoDoxy** is second on HTTP/3 fresh, then **Traefik** and **Caddy**.
 - Latency probes: H1/H2 stay in the low-millisecond band on most routes; a single slow QUIC dial or first sample can pull HTTP/3 `/json` averages up (visible on **Caddy** and **GoDoxy** in this run).
-- Plaintext HTTP/1.1 was not exercised in this capture; set **`H1C=1`** to compare TLS vs cleartext H1 under the same script.
+- Plaintext HTTP/1.1 was not exercised in this capture; set `h1c=true` to compare TLS vs cleartext H1 under the same recipe.
 
 ## Resource usage
 
