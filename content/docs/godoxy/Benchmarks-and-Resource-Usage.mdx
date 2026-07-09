@@ -6,7 +6,7 @@ icon: Scale
 
 ## TL;DR
 
-All rows below come from one full `shadowtree benchmark` run (four proxies) on **2026-05-03** (`Profile: smoke`). They are useful for relative comparison on this machine and profile, not for universal rankings.
+All rows below come from one full `shadowtree benchmark` run (four proxies) on **2026-05-03** (`preset=smoke`). They are useful for relative comparison on this machine and preset, not for universal rankings.
 
 - **Reused HTTP/1.1**: **Nginx** **~72k req/s**; **Traefik** **~42.5k**; **GoDoxy** **~41.4k**; **Caddy** **~34.6k**.
 - **Reused HTTP/2** (`h2load -m16`): **Nginx** **~85k req/s**; **GoDoxy** **~39.4k**; **Caddy** **~31.3k**; **Traefik** **~19.6k** — this run reported **0** h2load failures and **0** HTTP **5xx** for every proxy in the summary lines.
@@ -31,10 +31,10 @@ shadowtree benchmark
 From the repo root, `shadowtree help benchmark` prints the full typed argument list. Common invocations:
 
 ```shell
-# Profiles: smoke (default), stable, stress
-shadowtree benchmark profile=stable
-shadowtree benchmark profile=smoke
-shadowtree benchmark profile=stress
+# Presets: smoke (default), stable, stress
+shadowtree benchmark preset=stable
+shadowtree benchmark preset=smoke
+shadowtree benchmark preset=stress
 
 # Protocol toggles (defaults: h1/h2/h3 on, h1c off)
 shadowtree benchmark h1=false
@@ -49,18 +49,18 @@ shadowtree benchmark connection_mode=fresh
 shadowtree benchmark connection_mode=both
 
 # Combine typed args
-shadowtree benchmark profile=stable h1=false h3=false
+shadowtree benchmark preset=stable h1=false h3=false
 ```
 
-Selected typed arguments (defaults come from the active profile unless you override):
+Selected typed arguments (defaults come from the active preset unless you override):
 
 ```shell
-profile=smoke|stable|stress
+preset=smoke|stable|stress
 h1=true|false h2=true|false h3=true|false h1c=true|false
 connection_mode=both|reused|fresh
 target=GoDoxy|Traefik|Caddy|Nginx    # case-insensitive; omit for all four
 
-duration=10s
+duration=10s                         # whole-second duration
 threads=4
 connections=32
 streams=16                           # concurrent streams per H2/H3 connection
@@ -68,7 +68,7 @@ requests=2000                        # requests per protocol in fresh mode
 fresh_connections=32                 # concurrent connections for fresh runs; 0 uses connections
 
 h2load_warm_up_time=3s               # reused-mode warm-up; 0 disables
-h2load_duration=10                   # optional h2load duration seconds; derived from duration if empty
+h2load_duration=0s                   # whole-second h2load duration; 0s derives from duration
 h3_tool=auto|h2load|h3bench
 latency_samples=5 runs=1 repeat_delay=1
 
@@ -80,15 +80,15 @@ compose_manage=true|false compose_cleanup=true|false compose_recreate=true|false
 host=bench.domain.com                # hostname for SNI and bench URLs
 ```
 
-Built-in profile presets (from the Shadowtree recipe):
+Built-in Shadowtree presets:
 
-| Profile | Duration | Connections | Streams | Fresh requests | Fresh connections | Throughput runs | Latency samples |
+| Preset | Duration | Connections | Streams | Fresh requests | Fresh connections | Throughput runs | Latency samples |
 | ------- | -------- | ------------: | ------: | -------------: | ----------------: | --------------: | ----------------: |
 | smoke   | 10s      | 32            | 16      | 2000           | 32                | 1               | 5                 |
 | stable  | 30s      | 64            | 16      | 20000          | 64                | 5               | 25                |
 | stress  | 30s      | 100           | 100     | 50000          | 100               | 3               | 10                |
 
-All three profiles use **4** `h2load` threads and set a non-zero warm-up before reused throughput (smoke **3s**, stable/stress **5s**). When **`runs` is greater than 1**, the recipe repeats each throughput benchmark and prints a median / coefficient-of-variation summary (`stable`, `stress`, or your own `runs`). Override profile defaults with the typed args above.
+All three presets use **4** `h2load` threads and set a non-zero warm-up before reused throughput (smoke **3s**, stable/stress **5s**). When **`runs` is greater than 1**, the recipe repeats each throughput benchmark and prints a median / coefficient-of-variation summary (`stable`, `stress`, or your own `runs`). Override preset defaults with the typed args above.
 
 ### What gets tested
 
@@ -125,7 +125,7 @@ shadowtree benchmark h3=false
 | Setting               | Value              |
 | --------------------- | ------------------ |
 | Date                  | `2026-05-03`       |
-| Profile               | `smoke`            |
+| Preset                | `smoke`            |
 | Target hostname       | `bench.domain.com` |
 | Duration              | `10s`              |
 | h2load warm-up        | `3s`               |
@@ -141,7 +141,7 @@ shadowtree benchmark h3=false
 
 ## HTTP/1.1 cleartext baseline
 
-Cleartext HTTP/1.1 reuses the same `h2load` reused- and fresh-connection profiles as TLS H1, but targets `http://bench.domain.com:808x/` with `--connect-to` to loopback. **This run did not enable it**, so there are no plaintext req/s or latency rows to publish here. Re-run with:
+Cleartext HTTP/1.1 reuses the same `h2load` reused- and fresh-connection settings as TLS H1, but targets `http://bench.domain.com:808x/` with `--connect-to` to loopback. **This run did not enable it**, so there are no plaintext req/s or latency rows to publish here. Re-run with:
 
 ```shell
 shadowtree benchmark h1c=true
@@ -173,7 +173,7 @@ Notes:
 
 ## Fresh TLS throughput
 
-Fresh connection tests use **2000** new connections with one request each (`h2load --h1 -m1` for HTTP/1.1 and `h2load -m1` for HTTP/2`). HTTP/3 uses `h3bench -m1` with the same **2000** requests / **32** connections profile. These numbers mostly reflect handshake, accept-loop, and short-lived QUIC or TCP connection behavior.
+Fresh connection tests use **2000** new connections with one request each (`h2load --h1 -m1` for HTTP/1.1 and `h2load -m1` for HTTP/2`). HTTP/3 uses `h3bench -m1` with the same **2000** requests / **32** connection settings. These numbers mostly reflect handshake, accept-loop, and short-lived QUIC or TCP connection behavior.
 
 `ok/fail` shows succeeded requests versus failed attempts out of **2000** (all **2000 / 0** in this run).
 
@@ -221,8 +221,8 @@ All SSE samples succeeded. Nginx had the lowest mean HTTP/1.1 SSE TTFB among the
 
 ## Interpretation
 
-- Reused HTTP/1.1: **Nginx** leads on req/s and mean **time for request**; **Traefik** edges **GoDoxy** slightly on this profile, with **Caddy** fourth.
-- Reused HTTP/2: **Nginx** leads by a wide margin on aggregate req/s with low reported mean **time for request**; **GoDoxy** and **Caddy** follow, then **Traefik**. This smoke profile did not show the high failure rates sometimes seen at much higher client/stream counts—re-run with heavier settings before inferring stability limits.
+- Reused HTTP/1.1: **Nginx** leads on req/s and mean **time for request**; **Traefik** edges **GoDoxy** slightly in this preset, with **Caddy** fourth.
+- Reused HTTP/2: **Nginx** leads by a wide margin on aggregate req/s with low reported mean **time for request**; **GoDoxy** and **Caddy** follow, then **Traefik**. This smoke preset did not show the high failure rates sometimes seen at much higher client/stream counts; re-run with heavier settings before inferring stability limits.
 - Reused HTTP/3: **Nginx** leads on req/s and transfer; **GoDoxy**, **Traefik**, and **Caddy** follow in that order here, with **Caddy** showing the highest **p99** among the four.
 - Fresh connections: **Nginx** leads on H1/H2/H3 instantaneous throughput in this harness; **GoDoxy** is second on HTTP/3 fresh, then **Traefik** and **Caddy**.
 - Latency probes: H1/H2 stay in the low-millisecond band on most routes; a single slow QUIC dial or first sample can pull HTTP/3 `/json` averages up (visible on **Caddy** and **GoDoxy** in this run).
