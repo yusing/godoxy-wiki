@@ -44,10 +44,13 @@ GoDoxy puts containers to sleep after a period of inactivity and wakes them auto
 ### Wake Behavior
 
 1. Request arrives for sleeping route
-2. Dependencies start first (if configured)
-3. Main container starts
-4. GoDoxy waits up to `wake_timeout` for readiness
-5. Request is proxied to the now-active container
+2. For an HTML navigation, GoDoxy returns the loading page immediately and starts one background wake operation
+3. Dependencies start first (if configured)
+4. Main container starts
+5. The loading page receives startup progress over server-sent events
+6. GoDoxy waits up to `wake_timeout` for readiness, then the loading page refreshes into the active service
+
+Non-HTML requests, and all requests when `no_loading_page` is enabled, wait for wake-up so GoDoxy can proxy the original request after the service becomes ready. Canceling an HTML navigation after its loading page has been returned does not cancel the shared wake operation.
 
 ## Dependency Management
 
