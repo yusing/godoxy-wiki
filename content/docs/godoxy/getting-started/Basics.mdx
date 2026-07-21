@@ -120,7 +120,7 @@ See [OIDC Configuration](OIDC) for setup instructions.
 
 Health monitoring is enabled by default for **ALL CONTAINERS**, including the excluded ones.
 
-It can be disabled by setting `healthcheck.disable: true` per route in the route file or in the docker labels.
+Docker healthchecks are preferred when available. GoDoxy's fallback probe can be disabled by setting `healthcheck.disable: true` per route in the route file or in the docker labels. Docker health monitoring remains enabled.
 
 ```yaml
 services:

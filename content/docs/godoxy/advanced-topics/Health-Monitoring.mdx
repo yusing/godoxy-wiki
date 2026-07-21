@@ -6,9 +6,9 @@ description: Configure health monitoring for GoDoxy
 ## Behaviors
 
 - Health monitoring is enabled by default for all services, including the excluded ones.
-- If docker healthcheck<sup className="font-bold">1</sup> is enabled, it will be used first. In this case, `use_get` and `path` will be ignored.
-- In case docker healthcheck is not available (not enabled / failed to fetch), **GoDoxy** healthcheck will be used.
-- You can disable health monitoring by setting `healthcheck.disable: true` in the route file<sup className="font-bold">2</sup> or in the docker labels<sup className="font-bold">3</sup>.
+- If docker healthcheck<sup className="font-bold">1</sup> is enabled, it is the only check used. In this case, `use_get` and `path` are ignored and GoDoxy does not probe the upstream.
+- If a docker healthcheck is not configured, the **GoDoxy** healthcheck is used as a fallback. Docker API and decoding failures remain visible as unhealthy and are retried instead of being masked by the fallback.
+- You can disable GoDoxy health probing by setting `healthcheck.disable: true` in the route file<sup className="font-bold">2</sup> or in the docker labels<sup className="font-bold">3</sup>. Docker health monitoring remains enabled for Docker routes.
 
 ### References
 
@@ -24,7 +24,7 @@ description: Configure health monitoring for GoDoxy
      start_interval: 5s
    ```
 
-2. Disable health monitoring in route file
+2. Disable GoDoxy health probing in route file
 
    ```yaml
    app:
@@ -55,7 +55,7 @@ description: Configure health monitoring for GoDoxy
 
 | Property | Description                                     | Default                   | Allowed Values / Syntax     |
 | -------- | ----------------------------------------------- | ------------------------- | --------------------------- |
-| disable  | Disable health monitoring                       | false                     | boolean                     |
+| disable  | Disable GoDoxy probing (Docker health remains)  | false                     | boolean                     |
 | path     | Relative path **(HTTP only)**                   | empty                     | empty or URI like `/health` |
 | use_get  | Use GET method instead of HEAD **(HTTP only)**  | false                     | boolean                     |
 | interval | Health check interval                           | 5s                        | duration                    |
