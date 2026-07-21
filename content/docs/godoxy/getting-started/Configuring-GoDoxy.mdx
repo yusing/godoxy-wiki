@@ -71,6 +71,13 @@ This section defines how GoDoxy handles incoming requests.
 
 ```yaml
 entrypoint:
+  proxy_protocol:
+    # required accepts only these proxies; mixed also permits direct clients.
+    mode: required
+    trusted_proxies:
+      - "172.18.0.10"
+      - "10.0.0.0/8"
+
   middlewares:
     - use: CIDRWhitelist
       allow:
@@ -86,6 +93,23 @@ entrypoint:
     filters: ...
     fields: ...
 ```
+
+`proxy_protocol.mode` controls PROXY protocol handling for the web entrypoint
+and TCP route listeners:
+
+- `required` accepts only listed proxies, and each connection must send a valid
+  PROXY header.
+- `mixed` requires a valid header from listed proxies but lets unlisted HTTP,
+  TLS, and TCP clients connect directly without parsing their data as a header.
+- `disabled` disables PROXY protocol parsing and ignores `trusted_proxies`.
+
+Enabled modes require at least one trusted IP address or CIDR range.
+
+`support_proxy_protocol: true` is deprecated. For compatibility it retains the
+old behavior—PROXY headers are optional and accepted from any peer—but GoDoxy
+warns at startup because clients can forge their apparent source address. Add
+a `proxy_protocol` block with mode `required` or `mixed`, add at least one
+`trusted_proxies` entry, and remove `support_proxy_protocol`.
 
 ### Setting Up Providers
 
