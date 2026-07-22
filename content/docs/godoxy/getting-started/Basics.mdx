@@ -75,10 +75,12 @@ To use WebUI without HTTPS, set `GODOXY_API_JWT_SECURE` to `false`.
 
 #### User Password Auth
 
-| Environment Variable  | Description          | Default    | Values |
-| --------------------- | -------------------- | ---------- | ------ |
-| `GODOXY_API_USER`     | WebUI login username | `admin`    | string |
-| `GODOXY_API_PASSWORD` | WebUI login password | `password` | string |
+| Environment Variable  | Description          | Default | Values |
+| --------------------- | -------------------- | ------- | ------ |
+| `GODOXY_API_USER`     | WebUI login username | none    | string |
+| `GODOXY_API_PASSWORD` | WebUI login password | none    | string |
+
+Both values must be set when using username/password authentication. GoDoxy rejects startup when either value is missing unless OIDC is enabled or authentication is explicitly disabled.
 
 #### OpenID Connect (OIDC)
 
