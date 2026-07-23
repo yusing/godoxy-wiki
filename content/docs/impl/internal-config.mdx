@@ -40,8 +40,8 @@ type ReloadResult struct {
     ActivationReport
 }
 
-func Load(ctx context.Context) ReloadResult
-func Reload(ctx context.Context) ReloadResult
+func Load(initializeRuntime func(context.Context) error) ReloadResult
+func Reload() ReloadResult
 ```
 
 The final report contains provider ready/degraded/failed counts, route
@@ -98,8 +98,8 @@ type State interface {
     Context() context.Context
     Value() *Config
 
-    ActivateProviders(context.Context) routing.ProviderActivationReport
-    ActivateAPIServers(context.Context) APIActivationReport
+    ActivateProviders(task.Parent) routing.ProviderActivationReport
+    ActivateAPIServers(task.Parent) APIActivationReport
     RuntimeSnapshot() RuntimeSnapshot
     Stop(reason any)
 }
@@ -120,24 +120,25 @@ diagnostics.
 ## Activation
 
 `state.ActivateProviders` activates providers concurrently and aggregates their
-structured reports. `state.ActivateAPIServers` reports the mandatory main API
-and optional local API separately and cleans a failed server task before
-returning. The runtime manager owns metrics as a process-lifetime service, so
-reload does not start duplicate mutable pollers.
+structured reports. On initial load, provider routes become reachable before
+the `initializeRuntime` callback performs authentication discovery and
+registers API handlers. This supports OIDC issuers routed through GoDoxy
+without exposing API listeners before authentication is ready.
 
-Authentication and static API handler registration happen in `cmd/main.go`
-before the shared initial-load lifecycle can activate API listeners.
+`state.ActivateAPIServers` then reports the mandatory main API and optional
+local API separately and cleans a failed server task before returning. The
+runtime manager owns metrics as a process-lifetime service, so reload does not
+start duplicate mutable pollers.
 
-## Hot reload and cancellation
+## Hot reload and task ownership
 
 The config watcher filters rename, delete, and managed-write suppression events,
 then calls `Reload` directly. It never panics for an expected lifecycle result.
-
-- Cancellation before acceptance stops and discards the candidate and retains
-  the current runtime.
-- Cancellation after acceptance leaves the candidate authoritative, stops its
-  incomplete work, and reports failed activation without resurrecting the old
-  runtime.
+Each candidate owns its configuration task. An accepted candidate owns one
+durable activation subtask containing its providers, routes, watchers, and API
+servers. Reload stops the previous candidate task only after the replacement
+passes preparation; process shutdown reaches candidates directly through the
+root task.
 
 ## Observability
 

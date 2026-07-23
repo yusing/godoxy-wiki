@@ -173,13 +173,13 @@ providers:
 if agent.IsDockerHostAgent(host) {
 	pool := agentpool.FromCtx(ctx)
 	a, ok := pool.Get(host)
-    if !ok {
+  if !ok {
 		return nil, fmt.Errorf("agent %q not found", host)
-    }
-    opt := []client.Opt{
-        client.WithHost(agent.DockerHost),
-        client.WithHTTPClient(a.HTTPClient()),
-    }
+  }
+  opt := []client.Opt{
+    client.WithHost(agent.DockerHost),
+    client.WithHTTPClient(a.HTTPClient()),
+  }
 }
 ```
 
@@ -221,13 +221,13 @@ No metrics are currently exposed.
 
 ```go
 agentConfig := &agent.AgentConfig{
-    Addr: "agent.example.com:443",
-    Name: "my-agent",
+  Addr: "agent.example.com:443",
+  Name: "my-agent",
 }
 
 added := agentpool.Add(agentConfig)
 if !added {
-    log.Println("Agent already exists")
+  log.Println("Agent already exists")
 }
 ```
 
@@ -237,19 +237,19 @@ if !added {
 // By address
 agent, ok := agentpool.Get("agent.example.com:443")
 if !ok {
-    log.Fatal("Agent not found")
+  log.Fatal("Agent not found")
 }
 
 // By Docker host URL
 agent, ok := agentpool.Get("http://docker-host:2375")
 if !ok {
-    log.Fatal("Agent not found")
+  log.Fatal("Agent not found")
 }
 
 // By name
 agent, ok := agentpool.GetAgent("my-agent")
 if !ok {
-    log.Fatal("Agent not found")
+  log.Fatal("Agent not found")
 }
 ```
 
@@ -257,7 +257,7 @@ if !ok {
 
 ```go
 for addr, agent := range agentpool.Iter() {
-    log.Printf("Agent: %s at %s", agent.Name, addr)
+  log.Printf("Agent: %s at %s", agent.Name, addr)
 }
 ```
 
@@ -266,14 +266,14 @@ for addr, agent := range agentpool.Iter() {
 ```go
 // When creating a Docker client with an agent host
 if agent.IsDockerHostAgent(host) {
-    a, ok := agentpool.Get(host)
-    if !ok {
-        panic(fmt.Errorf("agent %q not found", host))
-    }
-    opt := []client.Opt{
-        client.WithHost(agent.DockerHost),
-        client.WithHTTPClient(a.HTTPClient()),
-    }
-    dockerClient, err := client.New(opt...)
+  a, ok := agentpool.Get(host)
+  if !ok {
+    panic(fmt.Errorf("agent %q not found", host))
+  }
+  opt := []client.Opt{
+    client.WithHost(agent.DockerHost),
+    client.WithHTTPClient(a.HTTPClient()),
+  }
+  dockerClient, err := client.New(opt...)
 }
 ```
