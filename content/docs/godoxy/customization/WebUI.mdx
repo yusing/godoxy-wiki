@@ -46,9 +46,10 @@ Icons can be sourced from preset libraries or custom locations:
 
 ## Category Configuration
 
-Categories are automatically detected from:
+Categories and icons are automatically detected from:
 
-- Container image names
+- Container image names and aliases
+- Common service suffixes such as `-server`, `-web`, and `-app` (`immich-server` matches `immich`)
 - Alias matches against [selfh.st directory](https://cdn.jsdelivr.net/gh/selfhst/icons/index.json)
 - GoDoxy's [preset categories](https://github.com/yusing/godoxy/blob/main/internal/homepage/categories.go)
 
