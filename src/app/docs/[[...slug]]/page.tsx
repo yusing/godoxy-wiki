@@ -23,7 +23,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
       <DocsPage toc={page.data.toc} full>
         <DocsTitle>{page.data.title}</DocsTitle>
         <DocsBody className="max-w-none w-full">
-          <APIPage {...page.data.getAPIPageProps()} />
+          <APIPage {...page.data.getOpenAPIPageProps()} />
         </DocsBody>
       </DocsPage>
     );
