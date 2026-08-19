@@ -74,7 +74,9 @@ Add these to `.env`:
 
 ## Per-Application OIDC Middleware
 
-Protect individual routes with OIDC authentication using Docker labels:
+Protect individual routes with OIDC. Omitted options inherit from the global
+`GODOXY_OIDC_*` variables above. You can also configure a standalone issuer
+and credentials on the middleware; global OIDC does not need to be enabled.
 
 <Callout type="info">
   The OIDC middleware only processes GET requests. Non-GET requests and
@@ -85,8 +87,27 @@ Protect individual routes with OIDC authentication using Docker labels:
 services:
   app:
     labels:
-      # Enable OIDC middleware
+      # Inherit issuer and credentials from GODOXY_OIDC_*
       proxy.#1.middlewares.oidc:
 ```
 
-See [OIDC Middleware](../advanced-topics/middlewares/authentication-and-security/OIDC) for advanced configuration options.
+Standalone issuer (for example Authentik per-application issuer):
+
+```yaml
+services:
+  app:
+    labels:
+      proxy.#1.middlewares.oidc: |
+        issuer_url: https://auth.example.com/application/o/app-b/
+        client_id: app-b-client-id
+        client_secret: app-b-client-secret
+        allowed_users:
+          - user1
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
+```
+
+See [OIDC Middleware](../advanced-topics/middlewares/authentication-and-security/OIDC) for the full option list and more examples.

@@ -1,0 +1,68 @@
+---
+title: v0.30.3
+description: OIDC middleware standalone issuers, scopes list, and WebUI display name
+---
+
+## OIDC middleware
+
+Per-route OIDC can now set its own **`issuer_url`**, credentials, allow lists,
+and **`scopes`**. Omitted fields still inherit from `GODOXY_OIDC_*`. Global
+OIDC does not need to be enabled for the middleware to run.
+
+**`scopes` is a list.** A comma-separated string still parses, but `scope` is
+an unknown field and is rejected.
+
+```yaml
+# before: `scope` is rejected
+scope: openid, profile, email, groups
+
+# after
+scopes:
+  - openid
+  - profile
+  - email
+  - groups
+```
+
+Standalone Authentik-style issuer:
+
+```yaml
+myapp:
+  middlewares:
+    oidc:
+      issuer_url: https://auth.example.com/application/o/app-b/
+      client_id: app-b-client-id
+      client_secret: app-b-client-secret
+      allowed_users:
+        - user1
+      scopes:
+        - openid
+        - profile
+        - email
+        - groups
+```
+
+See [OIDC Middleware](../advanced-topics/middlewares/authentication-and-security/OIDC).
+
+## WebUI display name
+
+Set **`webui.display_name`** in `config.yml` to change the name shown in the
+server list and headings. Empty values become `GoDoxy`.
+
+```yaml
+webui:
+  display_name: Home lab
+  aliases:
+    - godoxy
+```
+
+See [Configuring GoDoxy](../getting-started/Configuring-GoDoxy#built-in-webui-route).
+
+## Socket-proxy image build
+
+Custom socket-proxy images now build from the shared repository `Dockerfile`
+`socket-proxy` target. `socket-proxy.Dockerfile` was removed.
+
+```shell
+docker build --target socket-proxy -t ghcr.io/yusing/socket-proxy:latest .
+```

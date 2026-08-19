@@ -5,23 +5,50 @@ description: OpenID Connect authentication
 
 ## Configuration
 
-### Middleware
+Omitted fields inherit from the matching `GODOXY_OIDC_*` environment variable.
+The middleware can run with a fully standalone issuer and credentials; global
+OIDC does not need to be enabled for the WebUI.
 
-| Option           | Description    | Default                      |
-| ---------------- | -------------- | ---------------------------- |
-| `allowed_users`  | Allowed users  | `GODOXY_OIDC_ALLOWED_USERS`  |
-| `allowed_groups` | Allowed groups | `GODOXY_OIDC_ALLOWED_GROUPS` |
-| `client_id`      | Client ID      | `GODOXY_OIDC_CLIENT_ID`      |
-| `client_secret`  | Client secret  | `GODOXY_OIDC_CLIENT_SECRET`  |
-| `scope`          | OAuth scope    | `GODOXY_OIDC_SCOPE`          |
+| Option           | Description                         | Default                                       |
+| ---------------- | ----------------------------------- | --------------------------------------------- |
+| `issuer_url`     | OIDC issuer URL                     | `GODOXY_OIDC_ISSUER_URL`                      |
+| `allowed_users`  | Allowed users                       | `GODOXY_OIDC_ALLOWED_USERS`                   |
+| `allowed_groups` | Allowed groups                      | `GODOXY_OIDC_ALLOWED_GROUPS`                  |
+| `client_id`      | Client ID                           | `GODOXY_OIDC_CLIENT_ID`                       |
+| `client_secret`  | Client secret                       | `GODOXY_OIDC_CLIENT_SECRET`                   |
+| `scopes`         | OAuth scopes                        | `GODOXY_OIDC_SCOPES` (`openid, profile, email, groups`) |
 
-See [OIDC Configuration](../../../getting-started/OIDC) for more information.
+After inheritance, `issuer_url`, `client_id`, `client_secret`, and `scopes`
+are required, and at least one of `allowed_users` or `allowed_groups` must be
+set. `scopes` accepts a YAML list or a comma-separated string.
+
+<Callout type="warn">
+  The option is `scopes` (a list). `scope` is an unknown field and is rejected.
+</Callout>
+
+<Callout type="info">
+  The OIDC middleware only processes GET requests. Non-GET requests and
+  WebSocket connections are blocked with a 403 Forbidden response.
+</Callout>
+
+See [OIDC Configuration](../../../getting-started/OIDC) for environment
+variables, callback URLs, and identity-provider setup.
+
+## Standalone issuer
+
+Use `issuer_url` when the identity provider issues a different issuer per
+application, for example Authentik
+(`https://auth.example.com/application/o/<slug>/`). Discovery and token
+verification then use that issuer instead of the global one.
+
+Providers that share the same issuer and client ID reuse discovery and verifier
+state. Route-specific secrets, scopes, and allow lists stay per middleware.
 
 ## Examples
 
 ### WebUI
 
-Enabled by default if environment variables are set.
+Enabled by default if the global OIDC environment variables are set.
 
 ### Entrypoint
 
@@ -40,12 +67,19 @@ entrypoint:
 
 ```yaml
 proxy.#1.middlewares.oidc: |
+  issuer_url: https://auth.example.com/application/o/app-b/
   allowed_users: user1, user2
   allowed_groups: group1, group2
   client_id: client1
   client_secret: secret1
-  scope: openid, profile, email, groups
+  scopes:
+    - openid
+    - profile
+    - email
+    - groups
 ```
+
+A comma-separated string is also accepted: `scopes: openid, profile, email, groups`.
 
 ### Route Files
 
@@ -53,9 +87,18 @@ proxy.#1.middlewares.oidc: |
 myapp:
   middlewares:
     oidc:
-      allowed_users: user1, user2
-      allowed_groups: group1, group2
+      issuer_url: https://auth.example.com/application/o/app-b/
+      allowed_users:
+        - user1
+        - user2
+      allowed_groups:
+        - group1
+        - group2
       client_id: client1
       client_secret: secret1
-      scope: openid, profile, email, groups
+      scopes:
+        - openid
+        - profile
+        - email
+        - groups
 ```

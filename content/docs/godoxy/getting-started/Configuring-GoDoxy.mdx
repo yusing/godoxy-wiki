@@ -35,7 +35,7 @@ The `config.yml` file is divided into several sections:
 | `match_domains`  | List of domains to match                                                         |
 | `defaults`       | Default values                                                                   |
 | `homepage`       | Configures homepage settings                                                     |
-| `webui`          | Embedded WebUI: `aliases`, optional `inbound_mtls_profile`, `middlewares`, `access_log` |
+| `webui`          | Embedded WebUI: `display_name`, `aliases`, optional `inbound_mtls_profile`, `middlewares`, `access_log` |
 
 ### Environment Variables substitution
 
@@ -254,6 +254,13 @@ These fields map to the root `webui` object in `config.yml` (see also [`WebUICon
 
 <TypeTable
   type={{
+    display_name: {
+      description:
+        "Name shown for this GoDoxy instance in the WebUI server list and headings. Empty values become `GoDoxy`.",
+      type: "string",
+      required: false,
+      default: "GoDoxy",
+    },
     aliases: {
       description:
         "Hostnames (aliases) for the embedded WebUI. Each value becomes one fileserver route. Values are lowercased and trimmed; empty strings are skipped.",
@@ -297,6 +304,7 @@ Example:
 
 ```yaml
 webui:
+  display_name: Home lab
   aliases:
     - godoxy.example.com
     - godoxy.local.app
@@ -309,6 +317,7 @@ webui:
 ```yaml
 # Example: restrict who can open the WebUI and log access separately
 webui:
+  display_name: GoDoxy
   aliases:
     - godoxy
   middlewares:
