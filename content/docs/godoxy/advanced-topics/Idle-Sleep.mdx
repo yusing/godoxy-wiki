@@ -52,6 +52,8 @@ GoDoxy puts containers to sleep after a period of inactivity and wakes them auto
 
 Non-HTML requests, and all requests when `no_loading_page` is enabled, wait for wake-up so GoDoxy can proxy the original request after the service becomes ready. Canceling an HTML navigation after its loading page has been returned does not cancel the shared wake operation.
 
+Idle start, ready, sleep, pause, and error transitions appear in the WebUI Live Activity feed.
+
 ## Dependency Management
 
 Containers with `depends_on` are managed as a group. This ensures related services start and stop together.
