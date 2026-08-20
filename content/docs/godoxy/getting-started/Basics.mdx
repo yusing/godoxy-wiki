@@ -51,9 +51,6 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 | `GODOXY_LOCAL_API_ADDR` | Local API server listening address for unauthenticated access | -                | `[host]:port` |
 | `GODOXY_HTTP3_ENABLED`  | Enable HTTP/3                                                 | `true`           | boolean       |
 | `GODOXY_DEBUG`          | Enable debug behaviors and logging                            | `false`          | boolean       |
-| `USE_SONIC_JSON`        | \*Use "bytedance/sonic" library for efficient JSON handling   | `true `          | boolean       |
-
-\*: For ancient CPUs you may see "SIGILL: illegal instructions" error, please set `USE_SONIC_JSON` to false .
 
 ### Authentication
 
