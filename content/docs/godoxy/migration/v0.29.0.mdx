@@ -53,7 +53,7 @@ Targets **`agent`** and **`socket-proxy`** are the smaller service images.
 
 ---
 
-## Compat images, Docker API client, and `USE_SONIC_JSON`
+## Compat images and Docker API client
 
 GitHub Actions no longer publishes **`compat`** tags from the **`compat`** branch.
 If you used **`ghcr.io/yusing/godoxy:compat`** or **`ghcr.io/yusing/godoxy-agent:compat`**
@@ -64,8 +64,5 @@ Those compat builds also tracked **older Docker Engine API** expectations. The
 standard images again pin an **older `github.com/docker/docker` client** module, so
 you should not need a separate image just for daemon API mismatches.
 
-`USE_SONIC_JSON` defaults to **`true`** and may use **bytedance/sonic**. On some CPUs
-the process can exit with **`SIGILL: illegal instruction`** and a **`PC=0x…`** line in
-the log whenever that JSON path runs (not only at boot). Set **`USE_SONIC_JSON=false`**
-in `.env`, Compose `environment:`, systemd, or equivalent so JSON uses the standard
-library instead. That covers the **Sonic / CPU** side of what compat images were for.
+JSON uses **`encoding/json/v2`**. The **`USE_SONIC_JSON`** toggle is gone and is ignored
+if still set.
