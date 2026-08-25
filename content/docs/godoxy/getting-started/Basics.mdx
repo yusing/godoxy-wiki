@@ -103,7 +103,7 @@ See [OIDC Configuration](OIDC) for setup instructions.
 
 **ALL CONTAINERS** are proxied by default, **unless any of the following is true**:
 
-- The label `proxy.exclude` is set to **true**
+- The label `proxy.exclude` includes **proxy** (`true`, `proxy`, or `all`)
 - The container is from a provider in **explicit only mode** (name with a trailing exclamation mark **`!`**)
 - The container is a backend service (e.g.: headless browsers, databases, etc.)
 - The container doesn't have any exposed port
@@ -121,11 +121,13 @@ Health monitoring is enabled by default for **ALL CONTAINERS**, including the ex
 
 Docker healthchecks are preferred when available. GoDoxy's fallback probe can be disabled by setting `healthcheck.disable: true` per route in the route file or in the docker labels. Docker health monitoring remains enabled.
 
+For every route of a Docker container, set `proxy.exclude: healthcheck`. Use `proxy.exclude: proxy,healthcheck` or `proxy.exclude: all` to also exclude the container from proxying. The boolean value `true` keeps its original behavior and excludes only proxying.
+
 ```yaml
 services:
   app:
     labels:
-      proxy.app.healthcheck.disable: true
+      proxy.exclude: all
 ```
 
 ## Use JSON Schema in IDEs

@@ -304,11 +304,23 @@ When a **TCP** route listens on the same address as the HTTPS entrypoint, GoDoxy
 
 ### Label-Only Properties
 
-| Property  | Description        | Default          | Values          |
-| --------- | ------------------ | ---------------- | --------------- |
-| `aliases` | Route hostnames    | `container_name` | comma-separated |
-| `exclude` | Exclude from proxy | `false`          | boolean         |
-| `network` | Docker network     | First available  | network name    |
+| Property  | Description                                      | Default          | Values                                    |
+| --------- | ------------------------------------------------ | ---------------- | ----------------------------------------- |
+| `aliases` | Route hostnames                                  | `container_name` | comma-separated                           |
+| `exclude` | Exclude proxying and/or GoDoxy health monitoring | `false`          | boolean; `proxy`, `healthcheck`, or `all` |
+| `network` | Docker network                                   | First available  | network name                              |
+
+`proxy.exclude` accepts a boolean or a comma-separated list:
+
+- `true` keeps the original behavior and is equivalent to `proxy`: the container's routes are excluded from proxying, while health monitoring remains enabled.
+- `healthcheck` applies `healthcheck.disable: true` to every route alias. Docker health monitoring remains enabled when the container defines a Docker healthcheck.
+- `proxy,healthcheck` disables both behaviors.
+- `all` is equivalent to `proxy,healthcheck` and cannot be combined with another value.
+- `false` enables neither exclusion.
+
+Unknown values and invalid combinations are reported as container configuration errors.
+
+The route details page displays **Container Exclusion** as `none`, `proxy`, `healthcheck`, or `all`.
 
 ## Docker Troubleshooting
 
