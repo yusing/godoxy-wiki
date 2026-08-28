@@ -21,6 +21,7 @@ description: Actions are the command lines inside `{ ... }`. In YAML, the same c
 | -------------------------- | --------------------------------------- | ----------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
 | `upstream`/`pass`/`bypass` |                                         | true        | Call upstream and terminate pre-phase                                                       | `bypass`                                                |
 | `require_auth`             |                                         | false       | Require authentication (handler-dependent behavior)                                         | `require_auth`                                          |
+| `middleware`               | `<name>` option block                   | conditional | Run the request phase of a built-in or composed middleware                                  | See [middleware](#middleware)                           |
 | `rewrite`                  | `<from> <to>`                           | false       | Rewrite request path                                                                        | `rewrite /api/ /backend/`                               |
 | `serve`                    | `<path>`                                | true        | Serve static files/directory                                                                | `serve /static`                                         |
 | `handle`                   | `<name>`                                | true        | Dispatch request to a registered in-process HTTP handler                                    | `handle api`                                            |
@@ -36,13 +37,52 @@ description: Actions are the command lines inside `{ ... }`. In YAML, the same c
 | `log`                      | `<level> <path> <template>`             | false       | Log message                                                                                 | `log info /dev/stdout "$req_method $status_code"`       |
 | `notify`                   | `<level> <service_name> <title> <body>` | false       | Send notification                                                                           | `notify info ntfy "Request" "$req_method $status_code"` |
 
+### `middleware`
+
+A `middleware <name> { ... }` action runs the request phase of a built-in or
+composed middleware at that point in rule execution. It continues to the next action
+when the middleware permits the request. If the middleware handles the request
+and stops the chain, later actions and the rule fallback do not run.
+
+Only middleware with a request phase is supported. Response-only middleware,
+such as `ModifyResponse`, is rejected when the rules are loaded. The name in the
+block header selects the middleware. The block contains that middleware's
+configuration properties and may include nested lists and mappings.
+
+
+Use this action only in request-phase rules and action blocks. A `status` or
+`resp_header` matcher is evaluated after the response is available. A nested
+action block containing response-phase actions is also scheduled after the
+response. Both cases are too late for request middleware and are rejected.
+
+```sh
+default {
+  middleware CloudflareRealIP {
+  }
+}
+
+```
+
+To configure middleware properties directly in a rule:
+
+```sh
+default {
+  middleware RealIP {
+    header: CF-Connecting-IP
+    from:
+      - 173.245.48.0/20
+  }
+}
+```
+
 ## Named Option Blocks
 
-Every action can also be written as a command block with named YAML options. The
-option names are the same arguments shown in the table above, in positional
-order. GoDoxy flattens the mapping into the normal positional argument list and
-then runs the same action validator, so behavior is identical to the inline
-form.
+Every action can also be written as a command block. Its header contains the
+command name followed by any header arguments owned by that command. The
+YAML-like property body is also defined and validated by the command. For
+scalar commands, the property names correspond to the arguments shown in the
+table above.
+
 
 ```sh
 path /api {
@@ -60,13 +100,15 @@ path /api {
 }
 ```
 
-Rules for option blocks:
+Rules for command blocks:
 
-- Do not mix inline arguments with named options. Use either `notify info ntfy
-  "title" "body"` or `notify { ... }`, not `notify info ntfy { ... }`.
-- All declared arguments for that command must be present.
-- Unknown or duplicate option names are rejected.
-- Option values must be scalar strings, numbers, booleans, or null.
+- Each command owns its header arguments and accepted property shapes.
+- Scalar command blocks do not take header arguments. All declared properties
+  must be present.
+- Unknown or duplicate property names are rejected.
+- Scalar property values must be strings, numbers, booleans, or null unless the
+  command accepts structured data. Middleware configuration, for example, may
+  contain nested lists and mappings.
 
 ### `log` example
 

@@ -137,13 +137,11 @@ Route-resolution failures do not run `not_found`. For example, HTTPS SNI or mTLS
 route mismatches return `421 Misdirected Request`, while other route-resolution
 failures return `500 Internal Server Error`.
 
-Entrypoint middleware does not wrap the `not_found` handler. This keeps global
-redirect, authentication, rate-limit, and response middleware from replacing
-the unknown-host behavior. It also means Real IP middleware does not rewrite
-the remote address for these requests. The access log still records the final
-`not_found` response, but its client address comes from the accepted connection
-unless an earlier connection-level feature such as trusted Proxy Protocol
-already replaced it.
+Entrypoint middleware does not automatically wrap the `not_found` handler. This
+keeps global redirect, authentication, rate-limit, and response middleware from
+replacing the unknown-host behavior. A not-found rule can explicitly run the
+request phase of a supported middleware with a `middleware <name> { ... }` action.
+This is opt-in, so unrelated entrypoint middleware remains excluded.
 
 Not-found rules use the same block syntax, conditions, actions, phases, and
 default-rule behavior as [Rule-Based Routing](../advanced-topics/rule-based-routing).
@@ -153,10 +151,10 @@ See
 references.
 
 Common terminating actions include `proxy`, `route`, `redirect`, `error`,
-`serve`, `serve_file`, `handle`, and `require_basic_auth`. Rules can also
-rewrite a request, change request or response fields, log, or send a
-notification. In this context, `upstream`, `pass`, and `bypass` continue to the
-normal 404 fallback because there is no matched route upstream.
+`serve`, `serve_file`, `handle`, and `require_basic_auth`. Rules can also invoke
+request middleware, rewrite a request, change request or response fields, log,
+or send a notification. In this context, `upstream`, `pass`, and `bypass`
+continue to the normal 404 fallback because there is no matched route upstream.
 
 Block-syntax example:
 
@@ -173,12 +171,17 @@ entrypoint:
       }
 
       default {
-        log warn /dev/stderr "No route for $req_host$req_path"
+        middleware CloudflareRealIP {
+        }
+        log warn /dev/stderr "No route for $remote_addr $req_host$req_path"
       }
 ```
 
-The non-terminating `default` rule logs the request and then allows the normal
-404 fallback. Replace it with a terminating action such as
+The non-terminating `default` rule applies `CloudflareRealIP`, writes the
+resolved client address to the log message, and then allows the normal 404
+fallback. Because entrypoint access logging runs after the response, its
+combined log entry also uses the resolved client address. Replace the
+non-terminating actions with a terminating action such as
 `proxy http://fallback-proxy:8080` when every otherwise-unmatched request should
 be handled elsewhere.
 
