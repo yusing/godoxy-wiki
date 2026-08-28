@@ -111,6 +111,77 @@ warns at startup because clients can forge their apparent source address. Add
 a `proxy_protocol` block with mode `required` or `mixed`, add at least one
 `trusted_proxies` entry, and remove `support_proxy_protocol`.
 
+#### Rules for unmatched hosts
+
+`entrypoint.rules.not_found` handles an ordinary HTTP request only when its
+`Host` does not select a configured route and it is not handled as a short link.
+Route selection matches the request host against route aliases and domains; it
+does not match the URL path. A request for an unknown path on a known host still
+belongs to that route and does not run `not_found`. See
+[Domain Matching](../advanced-topics/Domain-Matching) for the host matching
+rules.
+
+The HTTP entrypoint processes a request in this order:
+
+1. Start access-log response recording when `entrypoint.access_log` is enabled.
+2. Resolve the host route, including HTTPS SNI and inbound mTLS checks.
+3. If a route matches, run its effective entrypoint middleware chain and then
+   the route.
+4. If no route matches, try the short-link handler. Short links run entrypoint
+   middleware.
+5. Otherwise, evaluate `entrypoint.rules.not_found`. If no rule completes the
+   response, serve GoDoxy's normal 404 response or configured static 404 page.
+6. Write the final response to the access log.
+
+Route-resolution failures do not run `not_found`. For example, HTTPS SNI or mTLS
+route mismatches return `421 Misdirected Request`, while other route-resolution
+failures return `500 Internal Server Error`.
+
+Entrypoint middleware does not wrap the `not_found` handler. This keeps global
+redirect, authentication, rate-limit, and response middleware from replacing
+the unknown-host behavior. It also means Real IP middleware does not rewrite
+the remote address for these requests. The access log still records the final
+`not_found` response, but its client address comes from the accepted connection
+unless an earlier connection-level feature such as trusted Proxy Protocol
+already replaced it.
+
+Not-found rules use the same block syntax, conditions, actions, phases, and
+default-rule behavior as [Rule-Based Routing](../advanced-topics/rule-based-routing).
+See
+[Conditions](../advanced-topics/rule-based-routing/Conditions) and
+[Actions](../advanced-topics/rule-based-routing/Actions) for the complete
+references.
+
+Common terminating actions include `proxy`, `route`, `redirect`, `error`,
+`serve`, `serve_file`, `handle`, and `require_basic_auth`. Rules can also
+rewrite a request, change request or response fields, log, or send a
+notification. In this context, `upstream`, `pass`, and `bypass` continue to the
+normal 404 fallback because there is no matched route upstream.
+
+Block-syntax example:
+
+```yaml
+entrypoint:
+  rules:
+    not_found: |
+      host legacy.example.com {
+        redirect https://www.example.com
+      }
+
+      path /backend-health {
+        error 404 "Not found"
+      }
+
+      default {
+        log warn /dev/stderr "No route for $req_host$req_path"
+      }
+```
+
+The non-terminating `default` rule logs the request and then allows the normal
+404 fallback. Replace it with a terminating action such as
+`proxy http://fallback-proxy:8080` when every otherwise-unmatched request should
+be handled elsewhere.
+
 ### Setting Up Providers
 
 ```yaml
