@@ -62,6 +62,8 @@ myWhitelist:
       - 223.0.0.0/8
 ```
 
+For `CIDRWhitelist`, an omitted or empty `allow` list blocks all requests except those matching a bypass rule. A route can specify only `bypass` to extend an existing entrypoint whitelist's bypass rules without repeating its `allow` list.
+
 ### Docker Labels
 
 ```yaml
