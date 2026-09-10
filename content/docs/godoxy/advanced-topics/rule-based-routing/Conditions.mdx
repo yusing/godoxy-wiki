@@ -105,20 +105,29 @@ path /api/users # Exact match for /api/users
 
 ### Glob Patterns
 
-Glob patterns use the following syntax based on the [github.com/gobwas/glob](https://github.com/gobwas/glob) library:
+Glob patterns use [github.com/gobwas/glob](https://github.com/gobwas/glob).
+GoDoxy compiles them **without separators**, so `*` and `?` match `/` the
+same way they match any other character. `**` also matches any sequence;
+with no separators it is equivalent to `*` for `/`.
 
-| Pattern   | Description                                       | Example                       | Matches                                      | Non-matches                              |
-| --------- | ------------------------------------------------- | ----------------------------- | -------------------------------------------- | ---------------------------------------- |
-| `*`       | Any sequence of non-separator characters          | `/api/*`                      | `/api/users`, `/api/posts`                   | `/api/users/123`, `/api/v1/users`        |
-| `**`      | Any sequence of characters (including separators) | `/static/**`                  | `/static/css/style.css`, `/static/js/app.js` | -                                        |
-| `?`       | Any single non-separator character                | `/file?.txt`                  | `/file1.txt`, `/fileA.txt`                   | `/file12.txt`, `/file/abc.txt`           |
-| `[abc]`   | Character class (match any listed character)      | `/file[123].txt`              | `/file1.txt`, `/file2.txt`, `/file3.txt`     | `/file4.txt`, `/fileA.txt`               |
-| `[!abc]`  | Negated character class (match any except listed) | `/file[!123].txt`             | `/fileA.txt`, `/fileB.txt`                   | `/file1.txt`, `/file2.txt`, `/file3.txt` |
-| `[a-z]`   | Character range (match any in range)              | `/file[a-z].txt`              | `/filea.txt`, `/filem.txt`, `/filez.txt`     | `/fileA.txt`, `/file1.txt`               |
-| `[0-9]`   | Numeric range                                     | `/v[0-9]/api`                 | `/v1/api`, `/v5/api`, `/v9/api`              | `/v10/api`, `/va/api`                    |
-| `{a,b,c}` | Pattern alternatives (comma-separated)            | `/api/{users,posts,comments}` | `/api/users`, `/api/posts`, `/api/comments`  | `/api/products`, `/api/users/123`        |
-| `\*`      | Literal asterisk (escaped)                        | `/file\*.txt`                 | `/file*.txt`                                 | `/fileabc.txt`, `/file123.txt`           |
-| `\?`      | Literal question mark (escaped)                   | `/file\?.txt`                 | `/file?.txt`                                 | `/filea.txt`, `/file1.txt`               |
+| Pattern   | Description                                  | Example                       | Matches                                      | Non-matches                       |
+| --------- | -------------------------------------------- | ----------------------------- | -------------------------------------------- | --------------------------------- |
+| `*`       | Any sequence of characters, including `/`    | `/api/*`                      | `/api/users`, `/api/users/123`               | `/api`                            |
+| `**`      | Any sequence of characters, including `/`    | `/static/**`                  | `/static/css/style.css`, `/static/js/app.js` | —                                 |
+| `?`       | Any single character, including `/`          | `/file?.txt`                  | `/file1.txt`, `/fileA.txt`, `/file/.txt`     | `/file12.txt`, `/file/abc.txt`    |
+| `[abc]`   | Set: match any listed character              | `/file[123].txt`              | `/file1.txt`, `/file2.txt`, `/file3.txt`     | `/file4.txt`, `/fileA.txt`        |
+| `[!abc]`  | Negated set                                  | `/file[!123].txt`             | `/fileA.txt`, `/fileB.txt`                   | `/file1.txt`, `/file2.txt`        |
+| `[a-z]`   | Single range                                 | `/file[a-z].txt`              | `/filea.txt`, `/filem.txt`, `/filez.txt`     | `/fileA.txt`, `/file1.txt`        |
+| `[0-9]`   | Single numeric range                         | `/v[0-9]/api`                 | `/v1/api`, `/v5/api`, `/v9/api`              | `/v10/api`, `/va/api`             |
+| `{a,b,c}` | Alternatives (comma-separated, no spaces)    | `/api/{users,posts,comments}` | `/api/users`, `/api/posts`, `/api/comments`  | `/api/products`, `/api/users/123` |
+| `\*`      | Literal asterisk                             | `/file\*.txt`                 | `/file*.txt`                                 | `/fileabc.txt`                    |
+| `\?`      | Literal question mark                        | `/file\?.txt`                 | `/file?.txt`                                 | `/filea.txt`                      |
+
+A `[...]` class is **either** one range (`[a-z]`, `[0-9]`) **or** a set of
+listed characters (`[abc]`, `[!_]`, `[-abcdef0123456789]`), not both. Mixed
+forms such as `[a-f0-9]` or `[a-f0-9-]` do not compile. Put a literal `-` first
+or last in a set (`[-abc]` or `[abc-]`). Unclosed `{` / `[` and a trailing `\`
+are syntax errors.
 
 ### Advanced Glob Examples
 
@@ -126,20 +135,20 @@ Glob patterns use the following syntax based on the [github.com/gobwas/glob](htt
 # Match common web asset files
 path glob("/static/**/*.{css,js,png,jpg,jpeg,gif,svg}")
 
-# Match versioned API paths
+# Match versioned API paths (one digit; * still matches nested segments)
 path glob("/api/v[0-9]/*")
 
-# Match UUID patterns (simplified)
-path glob("/users/[a-f0-9-]*/profile")
+# Hex-and-hyphen name: list the set, do not mix ranges in one [...]
+path glob("/users/[-abcdef0123456789]*/profile")
 
-# Match date-based paths
+# Match date-based paths (each [0-9] is its own range)
 path glob("/logs/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/*")
 
 # Match file extensions with character classes
 path glob("/uploads/*.{[Pp][Dd][Ff],[Dd][Oo][Cc][Xx]}")
 
-# Exclude specific patterns with negated character classes
-path glob("/images/[!_]*")  # Exclude files starting with underscore
+# Exclude names whose first character is underscore
+path glob("/images/[!_]*")
 ```
 
 ### Regular Expressions
