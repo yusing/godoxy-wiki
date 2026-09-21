@@ -34,6 +34,24 @@ set. `scopes` accepts a YAML list or a comma-separated string.
 See [OIDC Configuration](../../../getting-started/OIDC) for environment
 variables, callback URLs, and identity-provider setup.
 
+## Reserved paths
+
+On every host protected by this middleware, GoDoxy serves two paths itself:
+
+- `/auth/callback` — where the identity provider returns after login
+- `/auth/logout`
+
+Bypass rules cannot skip these two paths, because login could not complete
+otherwise. Every other path is bypassable, including the rest of `/auth/`, so a
+backend that serves its own `/auth/login` or `/auth/realms/*` works behind a
+bypass rule.
+
+<Callout type="warn">
+  If your backend serves `/auth/callback` or `/auth/logout` itself, those two
+  requests are handled by GoDoxy and never reach the backend. Protect that route
+  with a separate hostname, or route those endpoints under a different path.
+</Callout>
+
 ## Standalone issuer
 
 Use `issuer_url` when the identity provider issues a different issuer per
