@@ -40,7 +40,9 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 ### Core
 
 <Callout type="info">
-  Also works with old prefix `GOPROXY_` or without prefix like `API_USER`.
+  App settings use the first non-empty value in this order: `GODOXY_`, legacy
+  `GOPROXY_`, then unprefixed names such as `API_USER`. Compose inputs such as
+  `TAG`, `DOCKER_SOCKET`, and `LISTEN_ADDR` use their exact names.
 </Callout>
 
 | Environment Variable    | Description                                                   | Default          | Values        |
@@ -49,8 +51,55 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 | `GODOXY_HTTPS_ADDR`     | HTTPS server listening address (if enabled)                   | `:443`           | `[host]:port` |
 | `GODOXY_API_ADDR`       | API server listening address                                  | `127.0.0.1:8888` | `[host]:port` |
 | `GODOXY_LOCAL_API_ADDR` | Local API server listening address for unauthenticated access | -                | `[host]:port` |
-| `GODOXY_HTTP3_ENABLED`  | Enable HTTP/3                                                 | `true`           | boolean       |
+| `GODOXY_HTTP3_ENABLED`  | Enable HTTP/3                                                 | `false`           | boolean       |
 | `GODOXY_DEBUG`          | Enable debug behaviors and logging                            | `false`          | boolean       |
+
+Optional app settings in `.env.example` are commented out at their built-in
+defaults. Uncomment only your overrides. The Compose example continues to use
+socket-proxy and derives `DOCKER_HOST=tcp://${LISTEN_ADDR}`; use `TZ=Etc/UTC`
+or another valid IANA timezone for log timestamps.
+
+| Environment Variable | Description | Default |
+| --- | --- | --- |
+| `GODOXY_INIT_TIMEOUT` | Initial configuration timeout | `1m` |
+| `GODOXY_SHORTLINK_PREFIX` | Short-link path prefix | `go` |
+| `GODOXY_SNI_ROUTING_FOR_TCP_ROUTES` | Route TCP over the shared HTTPS listener via SNI | `true` |
+| `GODOXY_LOCAL_API_ALLOW_NON_LOOPBACK` | Allow unauthenticated local API outside loopback | `false` |
+| `GODOXY_FORCE_RESOLVE_COUNTRY` | Always resolve client country | `false` |
+| `GODOXY_TRACE` | Trace logging, requires debug | `false` |
+| `GODOXY_SERVER_DEBUG` | HTTP server debugging, also enabled by DEBUG | `false` |
+| `GODOXY_WEBSOCKET_DEBUG` | Websocket debugging, also enabled by DEBUG | `false` |
+| `GODOXY_OIDC_RATE_LIMIT` | Login requests per rate-limit period | `10` |
+| `GODOXY_OIDC_RATE_LIMIT_PERIOD` | Login rate-limit period | `1s` |
+
+`GODOXY_TEST`, `GODOXY_API_SKIP_ORIGIN_CHECK`, and
+`GODOXY_DEBUG_DISABLE_AUTH` default to `false` and are for development only.
+`DEBUG_DISABLE_AUTH` disables authentication entirely; `TEST` enables debug by
+default unless `DEBUG` is explicitly false. Do not enable these in production.
+
+### Configuration interpolation and provider recovery
+
+Use braces for environment references in YAML, for example:
+
+```yaml
+providers:
+  docker:
+    local: unix://${DOCKER_SOCKET}
+```
+
+References work both as whole values and inside strings. Quoting the YAML value
+is optional; env contents remain literal data. Missing variables are errors.
+The exact Docker provider value `$DOCKER_HOST` is a special shorthand that uses
+the same prefixed lookup order and defaults to `unix:///var/run/docker.sock`.
+Other bare `$VAR` references in Docker endpoints are rejected with a configuration
+error. The selected `DOCKER_HOST` endpoint is treated as local for public/private
+container address discovery.
+
+Unavailable Docker and agent providers retry startup automatically, with backoff
+from 3 to 30 seconds. They are reported as degraded while retrying. A successful
+retry reloads routes without requiring a container event or config save. Initial
+activation reports remain snapshots; consult recovery logs and the current route
+inventory for later results. A config reload or shutdown cancels the old retries.
 
 ### Authentication
 
@@ -59,7 +108,7 @@ Doing this will make your host has only **one** exposed service, which is GoDoxy
 | Environment Variable       | Description                      | Default                                                           | Values                                            |
 | -------------------------- | -------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------- |
 | `GODOXY_API_JWT_SECURE`    | Secure flag for JWT cookie       | `true`                                                            | boolean                                           |
-| `GODOXY_API_JWT_SECRET`    | Base64 JWT secret for api server | random **(you will have to login again after restarting GoDoxy)** | string                                            |
+| `GODOXY_API_JWT_SECRET`    | Base64 JWT secret for api server | none; generate with `openssl rand -base64 32` | string                                            |
 | `GODOXY_API_JWT_TOKEN_TTL` | JWT Time-to-live                 | `24h`                                                             | [duration](https://pkg.go.dev/time#ParseDuration) |
 | `GODOXY_FRONTEND_ALIASES` | Legacy embedded WebUI route aliases; prefer `webui.aliases` in `config.yml` | `godoxy` | comma-separated hostnames |
 
