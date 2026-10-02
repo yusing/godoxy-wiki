@@ -3,6 +3,7 @@
   "icon": "Rocket",
   "pages": [
     "Basics",
+    "Environment-Variables",
     "Examples",
     "Configuring-GoDoxy",
     "Configuring-Routes",
