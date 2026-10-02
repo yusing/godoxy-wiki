@@ -50,4 +50,18 @@ addr, host, port, url := env.GetAddrEnv("SERVER_ADDR", "0.0.0.0:8080", "http")
 
 ## Lookup Behavior
 
-Looks for `GODOXY_` + key, then `GOPROXY_` + key, then key itself.
+Looks for `GODOXY_` + key, then `GOPROXY_` + key, then key itself. The first
+non-empty value wins; typed getters fall back to their default when all are
+empty. `LookupEnvSource` also returns the selected name without logging values.
+Invalid typed input panics without printing its value.
+
+For GoDoxy server settings, use the `env/godoxy` registry accessors rather than
+supplying another default. Its definitions drive runtime settings, the generated
+`.env.example`, and the wiki environment table. Run `shadowtree gen-env-docs`
+from the GoDoxy repository after changing definitions; `shadowtree check-env-docs`
+and CI reject drift. Derived debug/test defaults are evaluated at runtime.
+
+The GoDoxy server deprecates unprefixed app settings, but continues accepting
+them and emits a startup migration warning when one is selected. Rename these
+to `GODOXY_` names; exact-name Compose inputs are unaffected. Startup diagnostics
+never include sensitive values or unknown-variable values.
