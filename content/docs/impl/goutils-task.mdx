@@ -1,6 +1,6 @@
 ---
-title: goutils/task
-description: Hierarchical lifetimes for the goroutines and resources of a Go program. A task is a node in a tree that owns a cancellable context, cleanup callbacks, and context values. Finishing a task cancels everything below it, and `task.WaitExit` turns SIGINT, SIGTERM, or SIGHUP into one bounded, reported graceful shutdown. Use it when many components start and stop together and you want one shutdown path that waits for them and tells you which one is stuck. It does not schedule work, pool goroutines, or retry anything
+title: "goutils/task"
+description: "Hierarchical lifetimes for the goroutines and resources of a Go program. A task is a node in a tree that owns a cancellable context, cleanup callbacks, and context values. Finishing a task cancels everything below it, and `task.WaitExit` turns SIGINT, SIGTERM, or SIGHUP into one bounded, reported graceful shutdown. Use it when many components start and stop together and you want one shutdown path that waits for them and tells you which one is stuck. It does not schedule work, pool goroutines, or retry anything"
 ---
 
 ## Install

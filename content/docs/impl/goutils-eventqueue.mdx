@@ -1,6 +1,6 @@
 ---
-title: goutils/eventqueue
-description: Batches events from a channel and hands them to one callback on a timer. Bursts become a few calls instead of one call per event, flushes never overlap, and the queue lives and dies with a [`task`](/impl/goutils-task). Typical uses are coalescing file-system or container events before a reload, and batching writes to a slow sink. It does not persist, filter, deduplicate, or acknowledge events
+title: "goutils/eventqueue"
+description: "Batches events from a channel and hands them to one callback on a timer. Bursts become a few calls instead of one call per event, flushes never overlap, and the queue lives and dies with a [`task`](/impl/goutils-task). Typical uses are coalescing file-system or container events before a reload, and batching writes to a slow sink. It does not persist, filter, deduplicate, or acknowledge events"
 ---
 
 ## Install
