@@ -138,6 +138,53 @@ services:
 
 See [Proxmox Integration](/docs/godoxy/getting-started/Proxmox) for detailed configuration options.
 
+## Sleep and Wake Notifications
+
+Notifications are off by default. Configure providers under
+`providers.notification`, then opt an idle-sleep route in using
+`idlewatcher.notify`:
+
+```yaml
+# Add inside the route's existing idlewatcher configuration
+notify:
+  to: [gotify, ntfy] # Names under providers.notification
+```
+
+Naming providers enables notifications unless `enabled: false` is set or
+inherited. To send to all configured notification providers, set
+`enabled: true` and leave `to` unset, with no global targets configured.
+
+To enable notifications for all routes that use idle sleep, add this to
+`config.yml`:
+
+```yaml
+defaults:
+  idlewatcher:
+    notify:
+      enabled: true
+      to: [gotify] # Optional; omit to send to all providers
+```
+
+Routes inherit `enabled` and `to` independently. A route can select different
+providers with `to` or opt out with `enabled: false`, even when the global
+default is enabled. Global notification defaults do not enable idle sleep.
+
+For Docker, use `proxy.idle_notify_to: gotify,ntfy` to select providers, or
+`proxy.idle_notify: "true"` to enable notifications using the global targets
+(all providers if none are configured). `proxy.idle_timeout` is still required.
+For example, opt a container out of globally enabled notifications:
+
+```yaml
+labels:
+  proxy.idle_timeout: 30m
+  proxy.idle_notify: "false"
+```
+
+These info-level notifications report sleep and wake transitions, with pause
+wording for paused containers. They do not report readiness or errors, and
+dependency-only containers do not send them. Initial observation, configuration
+reload, and watcher teardown do not send notifications.
+
 ## Property Reference
 
 ### Core Properties
