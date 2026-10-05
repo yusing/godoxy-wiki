@@ -3,6 +3,67 @@ title: DNS-01 Providers
 description: Configure DNS-01 providers for GoDoxy
 ---
 
+## Supported providers
+
+[autocert-providers-start]: #
+
+Generated from the bundled provider registry with `shadowtree gen-autocert-providers`.
+
+| Provider ID | Configuration reference |
+| --- | --- |
+| `acmedns` | [lego acmedns](https://go-acme.github.io/lego/dns/acmedns/) |
+| `azuredns` | [lego azuredns](https://go-acme.github.io/lego/dns/azuredns/) |
+| `clouddns` | [lego clouddns](https://go-acme.github.io/lego/dns/clouddns/) |
+| `cloudflare` | [lego cloudflare](https://go-acme.github.io/lego/dns/cloudflare/) |
+| `cloudns` | [lego cloudns](https://go-acme.github.io/lego/dns/cloudns/) |
+| `custom` | Custom ACME CA (`ca_dir_url`) |
+| `desec` | [lego desec](https://go-acme.github.io/lego/dns/desec/) |
+| `digitalocean` | [lego digitalocean](https://go-acme.github.io/lego/dns/digitalocean/) |
+| `dnsupdate` | [lego dnsupdate](https://go-acme.github.io/lego/dns/dnsupdate/) |
+| `duckdns` | [lego duckdns](https://go-acme.github.io/lego/dns/duckdns/) |
+| `edgedns` | [lego edgedns](https://go-acme.github.io/lego/dns/edgedns/) |
+| `gcloud` | [lego gcloud](https://go-acme.github.io/lego/dns/gcloud/) |
+| `godaddy` | [lego godaddy](https://go-acme.github.io/lego/dns/godaddy/) |
+| `hetzner` | [lego hetzner](https://go-acme.github.io/lego/dns/hetzner/) |
+| `hostinger` | [lego hostinger](https://go-acme.github.io/lego/dns/hostinger/) |
+| `httpreq` | [lego httpreq](https://go-acme.github.io/lego/dns/httpreq/) |
+| `infomaniak` | [lego infomaniak](https://go-acme.github.io/lego/dns/infomaniak/) |
+| `inwx` | [lego inwx](https://go-acme.github.io/lego/dns/inwx/) |
+| `ionos` | [lego ionos](https://go-acme.github.io/lego/dns/ionos/) |
+| `linode` | [lego linode](https://go-acme.github.io/lego/dns/linode/) |
+| `local` | Existing certificate files (`cert_path` and `key_path`); no ACME |
+| `namecheap` | [lego namecheap](https://go-acme.github.io/lego/dns/namecheap/) |
+| `netcup` | [lego netcup](https://go-acme.github.io/lego/dns/netcup/) |
+| `netlify` | [lego netlify](https://go-acme.github.io/lego/dns/netlify/) |
+| `oraclecloud` | [lego oraclecloud](https://go-acme.github.io/lego/dns/oraclecloud/) |
+| `ovh` | [lego ovh](https://go-acme.github.io/lego/dns/ovh/) |
+| `porkbun` | [lego porkbun](https://go-acme.github.io/lego/dns/porkbun/) |
+| `rfc2136` | Alias for `dnsupdate` |
+| `scaleway` | [lego scaleway](https://go-acme.github.io/lego/dns/scaleway/) |
+| `spaceship` | [lego spaceship](https://go-acme.github.io/lego/dns/spaceship/) |
+| `timewebcloud` | [lego timewebcloud](https://go-acme.github.io/lego/dns/timewebcloud/) |
+| `vercel` | [lego vercel](https://go-acme.github.io/lego/dns/vercel/) |
+| `vultr` | [lego vultr](https://go-acme.github.io/lego/dns/vultr/) |
+
+`pseudo` is internal and is not offered in the picker. Only the bundled DNS providers above are supported; lego's full catalogue includes providers that GoDoxy does not bundle.
+
+[autocert-providers-end]: #
+
+## Configure a provider
+
+Choose a provider ID from the table above. AWS Route 53 (`route53`) is not bundled,
+and `googledomains` was removed in lego v5. `rfc2136` is an alias for `dnsupdate`.
+
+Set the account email and certificate domains alongside the provider and its
+options in `config/config.yml`. Option keys match the selected lego provider's
+`Config` fields in snake_case, not its environment variable names. For example,
+Spaceship's `APIKey` field is `api_key`, not `SPACESHIP_API_KEY`.
+
+In the WebUI, the main and extra certificates use the same provider picker.
+Providers without dedicated credential fields have an editable options map.
+Use the configuration references above to find the credentials your provider
+requires, then use the matching `Config` field names for YAML options.
+
 ## Cloudflare
 
 ```yaml
@@ -91,60 +152,46 @@ autocert:
     secret_api_key:
 ```
 
-## AWS Route 53
+## Spaceship
 
 ```yaml
 autocert:
-  provider: route53
+  provider: spaceship
+  email: admin@example.com
+  domains:
+    - example.com
+    - "*.example.com"
   options:
-    accesskeyid: your_key_id # AWS User Access key id on a user with Route53 permissions
-    secretaccesskey: your_secret_access_key # AWS User Access key secret on a user with Route53 permissions
-    region: us-east-1 # us-east-1 for most of the world
-    hostedzoneid: your_hosted_zone_id # The Hosted Zone ID of your domain in AWS Route53
+    api_key: your-api-key
+    api_secret: your-api-secret
 ```
+
+See [lego's Spaceship documentation](https://go-acme.github.io/lego/dns/spaceship/)
+for credential setup.
 
 ## Custom ACME CA
 
-See [Certificates and domain matching](../advanced-topics/Domain-Matching#auto-ssl-with-custom-internal-ca) for more details.
+See [Autocert with a Custom Internal CA](../advanced-topics/Certificates#autocert-with-a-custom-internal-ca) for more details.
 
-## Others
+## Other bundled providers
 
-<Callout type="info">
-A full list of provider names can be found in [dnsproviders/providers.go](https://github.com/yusing/godoxy/blob/main/internal/dnsproviders/providers.go)
+Use the table above as the supported list. Lego's full catalogue also contains
+providers that GoDoxy does not bundle. If a bundled provider fails with the
+matching configuration fields and credentials, submit an issue with the provider
+ID and error, without credentials.
 
-Full documentation of [LEGO](https://go-acme.github.io/lego/index.html) supported providers can be found in [LEGO DNS documentation](https://go-acme.github.io/lego/dns).
-
-</Callout>
-
-<Callout type="warn">
-  Anything not listed above are untested, please submit an issue if any of them
-  doesn't work.
-</Callout>
-
-**CloudDNS** as an example (from [LEGO DNS documentation](https://go-acme.github.io/lego/dns/clouddns/))
-
-### Option 1
-
-Set these in `.env`
-
-```bash
-CLOUDDNS_CLIENT_ID=bLsdFAks23429841238feb177a572aX
-CLOUDDNS_EMAIL=you@example.com
-CLOUDDNS_PASSWORD=b9841238feb177a84330f
-```
-
-### Option 2
-
-Set these in `config.yml` `autocert.options` section
-
-Turn them into:
+For example, lego documents CloudDNS credentials as `CLOUDDNS_CLIENT_ID`,
+`CLOUDDNS_EMAIL`, and `CLOUDDNS_PASSWORD`. In YAML, use the corresponding config
+fields:
 
 ```yaml
 autocert:
-  ...
   provider: clouddns
+  email: admin@example.com
+  domains:
+    - example.com
   options:
-    client_id: bLsdFAks23429841238feb177a572aX
-    email: you@example.com
-    password: b9841238feb177a84330f
+    client_id: your-client-id
+    email: your-dns-account@example.com
+    password: your-dns-password
 ```
