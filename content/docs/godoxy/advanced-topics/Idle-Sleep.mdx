@@ -138,6 +138,55 @@ services:
 
 See [Proxmox Integration](/docs/godoxy/getting-started/Proxmox) for detailed configuration options.
 
+## Sleep and Wake Notifications
+
+Notifications are off by default. Configure providers under
+`providers.notification`, then opt an idle-sleep route in using
+`idlewatcher.notify`:
+
+```yaml
+# Add inside the route's existing idlewatcher configuration
+notify:
+  to: [gotify, ntfy] # Names under providers.notification
+```
+
+Omitting the `notify` block inherits the global notification configuration, or
+stays silent when none is configured. `notify: {}` opts in and inherits global
+targets when `to` is omitted. If global targets are also omitted, notifications
+go to all current providers at send time.
+
+To enable notifications for all routes that use idle sleep, add this to
+`config.yml`:
+
+```yaml
+defaults:
+  idlewatcher:
+    notify:
+      to: [gotify] # Use notify: {} to broadcast instead
+```
+
+Use `notify: {}` instead of the target list to send to all current providers.
+A route can select different providers with `to` or opt out with
+`notify: {to: []}`, overriding global targets. Global `notify: {to: []}` also
+disables notifications, but a route can override it with a non-empty target
+list. Global notification defaults do not enable idle sleep.
+
+For Docker, use `proxy.idle_notify_to: gotify,ntfy` to select providers. A missing
+label inherits the global notification configuration. To broadcast, configure
+global `notify: {}`. `proxy.idle_timeout` is still required. An explicit empty
+string opts a container out, even when global notifications are configured:
+
+```yaml
+labels:
+  proxy.idle_timeout: 30m
+  proxy.idle_notify_to: ""
+```
+
+These info-level notifications report sleep and wake transitions, with pause
+wording for paused containers. They do not report readiness or errors, and
+dependency-only containers do not send them. Initial observation, configuration
+reload, and watcher teardown do not send notifications.
+
 ## Property Reference
 
 ### Core Properties
