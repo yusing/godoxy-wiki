@@ -59,10 +59,21 @@ options in `config/config.yml`. Option keys match the selected lego provider's
 `Config` fields in snake_case, not its environment variable names. For example,
 Spaceship's `APIKey` field is `api_key`, not `SPACESHIP_API_KEY`.
 
-In the WebUI, the main and extra certificates use the same provider picker.
-Providers without dedicated credential fields have an editable options map.
+In the WebUI, the main and extra certificates use the same schema-generated
+provider picker. Selecting any bundled DNS provider shows its concrete option
+fields, including nested sections and lists. These fields come from the
+provider's config type in the lego version bundled with GoDoxy.
 Use the configuration references above to find the credentials your provider
 requires, then use the matching `Config` field names for YAML options.
+
+Options can be strings, booleans, numbers, arrays (such as acmedns `allow_list`),
+or nested objects (such as OVH `oauth2_config`). Duration fields use Go duration
+strings, for example `30s` or `1m30s`. Named maps are supported only where the
+provider defines them, such as Azure's `environment.services`, whose entries
+have `audience` and `endpoint` fields. HTTP transports and SDK credential objects
+are excluded from editable options. Option values are redacted when GoDoxy
+serializes configuration to JSON or YAML; protect the original configuration
+file containing your credentials.
 
 ## Cloudflare
 
@@ -120,6 +131,17 @@ autocert:
     application_key:
     application_secret:
     consumer_key:
+    ttl: 120
+    propagation_timeout: 1m30s
+```
+
+Alternatively, configure OAuth2 credentials as a nested object:
+
+```yaml
+autocert:
+  provider: ovh
+  options:
+    api_endpoint:
     oauth2_config:
       client_id:
       client_secret:
