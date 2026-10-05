@@ -58,18 +58,26 @@ TCP routes whose listen address is the **HTTPS** entrypoint share the same TLS s
 | `provider`   | string | local            | Yes                   | Certificate / DNS-01 provider |
 | `email`      | string | -                | Yes                   | ACME email                    |
 | `domains`    | array  | -                | Yes                   | Certificate domains           |
-| `options`    | object | -                | `provider` != `local` | Provider-specific options     |
+| `options`    | object | -                | No                    | Provider-specific fields; requirement varies by provider |
 | `resolvers`  | array  | -                | No                    | DNS resolvers                 |
 | `cert_path`  | string | `certs/cert.crt` | No                    | Certificate file path         |
 | `key_path`   | string | `certs/priv.key` | No                    | Private key file path         |
 | `extra`      | array  | -                | No                    | Additional certificates       |
-| `ca_dir_url` | string | -                | No                    | CA directory URL              |
+| `ca_dir_url` | string | -                | Conditional            | ACME CA URL; required for `custom` |
 | `ca_certs`   | array  | -                | No                    | CA certificates to use        |
 | `eab_kid`    | string | -                | No                    | EAB Key ID                    |
 | `eab_hmac`   | string | -                | No                    | Base64 encoded EAB¹ HMAC      |
 | `certificate_key_type` | string | `EC256` | No | Private key algorithm for **ACME-issued** leaf certs (lego `Certificate.KeyType`) |
 
 1. EAB refers to External Account Binding.
+
+Whether `options` is needed depends on the provider's GoDoxy config. YAML
+values can reference GoDoxy environment variables with `${VAR}`; see the
+Spaceship example in the [DNS-01 provider guide](../getting-started/DNS-01-Providers).
+
+`ca_dir_url`, `ca_certs`, `eab_kid`, and `eab_hmac` are common ACME settings
+for DNS providers. Standard DNS providers use Lego's default ACME CA unless
+`ca_dir_url` is set; `provider: custom` requires `ca_dir_url`.
 
 **`certificate_key_type`** applies only when GoDoxy obtains or renews the certificate via ACME (not for `provider: local` static files). Default is elliptic curve P-256 (`EC256`). Allowed values: `EC256`, `EC384`, `RSA2048`, `RSA3072`, `RSA4096`, `RSA8192` (case-insensitive). Aliases: `P256` / `P384` for EC, and bare sizes `2048`, `3072`, `4096`, `8192` for RSA. Invalid values are rejected during config validation. On an `extra` entry, a non-empty `certificate_key_type` overrides the main `autocert` setting for that certificate’s lego config.
 

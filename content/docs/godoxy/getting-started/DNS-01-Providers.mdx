@@ -3,6 +3,20 @@ title: DNS-01 Providers
 description: Configure DNS-01 providers for GoDoxy
 ---
 
+## Supported provider IDs
+
+GoDoxy bundles these 30 Lego DNS integrations:
+`acmedns`, `azuredns`, `cloudflare`, `cloudns`, `clouddns`, `desec`,
+`digitalocean`, `dnsupdate`, `duckdns`, `edgedns`, `gcloud`, `godaddy`,
+`hetzner`, `hostinger`, `httpreq`, `infomaniak`, `inwx`, `ionos`, `linode`,
+`namecheap`, `netcup`, `netlify`, `oraclecloud`, `ovh`, `porkbun`, `scaleway`,
+`spaceship`, `timewebcloud`, `vercel`, and `vultr`. `rfc2136` is an alias for
+`dnsupdate`.
+
+The WebUI's searchable certificate-provider picker reads the runtime catalogue
+and lists all these IDs alongside `local` and `custom`. This is GoDoxy's
+bundled set, not the full upstream Lego catalogue.
+
 ## Cloudflare
 
 ```yaml
@@ -91,35 +105,37 @@ autocert:
     secret_api_key:
 ```
 
-## AWS Route 53
+## Spaceship
+
+Set `SPACESHIP_API_KEY` and `SPACESHIP_API_SECRET` in GoDoxy's environment and
+reference them in the provider options. This keeps the credential values out
+of the YAML file.
 
 ```yaml
 autocert:
-  provider: route53
+  provider: spaceship
+  email: admin@example.com
+  domains:
+    - example.com
+    - "*.example.com"
   options:
-    accesskeyid: your_key_id # AWS User Access key id on a user with Route53 permissions
-    secretaccesskey: your_secret_access_key # AWS User Access key secret on a user with Route53 permissions
-    region: us-east-1 # us-east-1 for most of the world
-    hostedzoneid: your_hosted_zone_id # The Hosted Zone ID of your domain in AWS Route53
+    api_key: ${SPACESHIP_API_KEY}
+    api_secret: ${SPACESHIP_API_SECRET}
 ```
+
+See [Lego's Spaceship DNS documentation](https://go-acme.github.io/lego/dns/spaceship/)
+for the provider's credentials and settings.
 
 ## Custom ACME CA
 
 See [Certificates and domain matching](../advanced-topics/Domain-Matching#auto-ssl-with-custom-internal-ca) for more details.
 
-## Others
+## Provider credentials and options
 
-<Callout type="info">
-A full list of provider names can be found in [dnsproviders/providers.go](https://github.com/yusing/godoxy/blob/main/internal/dnsproviders/providers.go)
-
-Full documentation of [LEGO](https://go-acme.github.io/lego/index.html) supported providers can be found in [LEGO DNS documentation](https://go-acme.github.io/lego/dns).
-
-</Callout>
-
-<Callout type="warn">
-  Anything not listed above are untested, please submit an issue if any of them
-  doesn't work.
-</Callout>
+Options depend on the provider. GoDoxy uses the provider's default config when
+`options` is omitted; supply the fields it needs otherwise. YAML values can
+reference GoDoxy environment variables with `${VAR}`. The CloudDNS example
+below shows credentials set in `.env` and referenced from YAML options.
 
 **CloudDNS** as an example (from [LEGO DNS documentation](https://go-acme.github.io/lego/dns/clouddns/))
 
@@ -131,6 +147,18 @@ Set these in `.env`
 CLOUDDNS_CLIENT_ID=bLsdFAks23429841238feb177a572aX
 CLOUDDNS_EMAIL=you@example.com
 CLOUDDNS_PASSWORD=b9841238feb177a84330f
+```
+
+Reference them from `config.yml`:
+
+```yaml
+autocert:
+  ...
+  provider: clouddns
+  options:
+    client_id: ${CLOUDDNS_CLIENT_ID}
+    email: ${CLOUDDNS_EMAIL}
+    password: ${CLOUDDNS_PASSWORD}
 ```
 
 ### Option 2
