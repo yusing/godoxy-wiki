@@ -44,7 +44,7 @@ type Config struct {
     Extra       []ConfigExtra                // Additional cert configs
     ACMEKeyPath string                       // ACME account private key
     Provider    string                       // DNS provider name
-    Options     map[string]strutils.Redacted // Provider options
+    Options     ProviderOptions              // Redacted provider-specific options
     Resolvers   []string                     // DNS resolvers (process-wide, see note below)
     CADirURL    string                       // Custom ACME CA directory
     CACerts     []string                     // Custom CA certificates
@@ -211,33 +211,63 @@ root:
 
 ### Provider Types
 
-| Type            | Description                                      |
-| --------------- | ------------------------------------------------ |
-| `local`         | Load an existing certificate and key            |
-| `custom`        | Use an ACME CA selected by `ca_dir_url`          |
-| DNS provider ID | Issue and renew certificates through DNS-01      |
-| `pseudo`        | Internal test provider; not for user config      |
+| Type           | Description                  | Use Case                  |
+| -------------- | ---------------------------- | ------------------------- |
+| `local`        | No ACME, use existing cert   | Pre-existing certificates |
+| `pseudo`       | Internal mock provider      | Tests; not user-selectable |
+| `custom`       | Custom ACME CA directory    | Internal ACME CAs          |
+| DNS providers  | DNS-01 via bundled lego providers | Production           |
 
-### Bundled DNS Provider IDs
+### Selectable Certificate Providers
 
-GoDoxy bundles these 30 Lego DNS providers:
-`acmedns`, `azuredns`, `cloudflare`, `cloudns`, `clouddns`, `desec`,
-`digitalocean`, `dnsupdate`, `duckdns`, `edgedns`, `gcloud`, `godaddy`,
-`hetzner`, `hostinger`, `httpreq`, `infomaniak`, `inwx`, `ionos`, `linode`,
-`namecheap`, `netcup`, `netlify`, `oraclecloud`, `ovh`, `porkbun`, `scaleway`,
-`spaceship`, `timewebcloud`, `vercel`, and `vultr`. `rfc2136` is also accepted
-as an alias for `dnsupdate`.
+[autocert-providers-start]: #
 
-The WebUI's searchable certificate-provider picker reads the runtime catalogue;
-all listed IDs appear alongside `local` and `custom`.
+Generated from the bundled provider registry with `shadowtree gen-autocert-providers`.
 
-Provider option requirements depend on the bundled provider. GoDoxy passes the
-provider's default config when `options` is omitted; include fields in
-`options` when that provider requires them. YAML values may reference GoDoxy
-environment variables with `${VAR}`. Option names follow the matching Lego
-provider config. `ca_dir_url`, `ca_certs`, `eab_kid`, and `eab_hmac` are common
-ACME settings. DNS providers use Lego's default CA unless `ca_dir_url` is set;
-`custom` requires that field.
+| Provider ID | Configuration reference |
+| --- | --- |
+| `acmedns` | [lego acmedns](https://go-acme.github.io/lego/dns/acmedns/) |
+| `azuredns` | [lego azuredns](https://go-acme.github.io/lego/dns/azuredns/) |
+| `clouddns` | [lego clouddns](https://go-acme.github.io/lego/dns/clouddns/) |
+| `cloudflare` | [lego cloudflare](https://go-acme.github.io/lego/dns/cloudflare/) |
+| `cloudns` | [lego cloudns](https://go-acme.github.io/lego/dns/cloudns/) |
+| `custom` | Custom ACME CA (`ca_dir_url`) |
+| `desec` | [lego desec](https://go-acme.github.io/lego/dns/desec/) |
+| `digitalocean` | [lego digitalocean](https://go-acme.github.io/lego/dns/digitalocean/) |
+| `dnsupdate` | [lego dnsupdate](https://go-acme.github.io/lego/dns/dnsupdate/) |
+| `duckdns` | [lego duckdns](https://go-acme.github.io/lego/dns/duckdns/) |
+| `edgedns` | [lego edgedns](https://go-acme.github.io/lego/dns/edgedns/) |
+| `gcloud` | [lego gcloud](https://go-acme.github.io/lego/dns/gcloud/) |
+| `godaddy` | [lego godaddy](https://go-acme.github.io/lego/dns/godaddy/) |
+| `hetzner` | [lego hetzner](https://go-acme.github.io/lego/dns/hetzner/) |
+| `hostinger` | [lego hostinger](https://go-acme.github.io/lego/dns/hostinger/) |
+| `httpreq` | [lego httpreq](https://go-acme.github.io/lego/dns/httpreq/) |
+| `infomaniak` | [lego infomaniak](https://go-acme.github.io/lego/dns/infomaniak/) |
+| `inwx` | [lego inwx](https://go-acme.github.io/lego/dns/inwx/) |
+| `ionos` | [lego ionos](https://go-acme.github.io/lego/dns/ionos/) |
+| `linode` | [lego linode](https://go-acme.github.io/lego/dns/linode/) |
+| `local` | Existing certificate files (`cert_path` and `key_path`); no ACME |
+| `namecheap` | [lego namecheap](https://go-acme.github.io/lego/dns/namecheap/) |
+| `netcup` | [lego netcup](https://go-acme.github.io/lego/dns/netcup/) |
+| `netlify` | [lego netlify](https://go-acme.github.io/lego/dns/netlify/) |
+| `oraclecloud` | [lego oraclecloud](https://go-acme.github.io/lego/dns/oraclecloud/) |
+| `ovh` | [lego ovh](https://go-acme.github.io/lego/dns/ovh/) |
+| `porkbun` | [lego porkbun](https://go-acme.github.io/lego/dns/porkbun/) |
+| `rfc2136` | Alias for `dnsupdate` |
+| `scaleway` | [lego scaleway](https://go-acme.github.io/lego/dns/scaleway/) |
+| `spaceship` | [lego spaceship](https://go-acme.github.io/lego/dns/spaceship/) |
+| `timewebcloud` | [lego timewebcloud](https://go-acme.github.io/lego/dns/timewebcloud/) |
+| `vercel` | [lego vercel](https://go-acme.github.io/lego/dns/vercel/) |
+| `vultr` | [lego vultr](https://go-acme.github.io/lego/dns/vultr/) |
+
+`pseudo` is internal and is not offered in the picker. Only the bundled DNS providers above are supported; lego's full catalogue includes providers that GoDoxy does not bundle.
+
+[autocert-providers-end]: #
+
+The WebUI uses the same schema-generated provider picker for the main certificate
+and extra certificates. Selecting a bundled DNS provider shows its concrete
+option fields, including nested objects and arrays, alongside the base
+certificate fields.
 
 ### Example Configuration
 
@@ -256,6 +286,20 @@ autocert:
   resolvers:
     - 1.1.1.1:53
 ```
+
+`options` keys match fields in the selected lego provider's `Config` struct,
+written in snake_case (for example, `APIKey` becomes `api_key`). They are not
+lego environment variable names. Only bundled providers are available.
+
+Each bundled DNS provider has a generated option type derived from its registered
+lego `Config` type at the pinned dependency version. Options accept strings,
+booleans, numbers, arrays (such as acmedns `allow_list`), and nested objects (such
+as OVH `oauth2_config`). Duration options use Go duration strings such as `30s`
+or `1m30s`. Named maps are available only where the provider config defines one,
+such as Azure's `environment.services` with `audience` and `endpoint` values.
+HTTP transports and SDK credential objects are excluded from editable options.
+`ProviderOptions` accepts these structured values while keeping option values
+redacted when serialized as JSON or YAML.
 
 `resolvers` sets the recursive nameservers used for the dns-01 propagation check.
 lego applies it to a process-wide DNS client, so when extra providers each set
@@ -373,6 +417,17 @@ if provider.ForceExpiryAll() {
     provider.WaitRenewalDone(ctx)
 }
 ```
+
+## Maintaining the Provider Contract
+
+`internal/dnsproviders/providers.go` is the source of the bundled DNS provider
+list. Run `shadowtree gen-autocert-providers` after changing the registry or
+updating lego to regenerate provider-specific WebUI option types, the provider
+union, the marked documentation tables, and the config/autocert schemas.
+`shadowtree check-autocert-providers` rejects stale provider lists, option types,
+option schemas, and documentation tables. CI runs this guard, Go tests, the
+WebUI type-contract test, and rendered editor tests. Preserve generated blocks
+when editing surrounding prose.
 
 ## Testing Notes
 
