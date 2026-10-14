@@ -10,6 +10,7 @@ GoDoxy puts containers to sleep after a period of inactivity and wakes them auto
 ### Supported Platforms
 
 - Docker
+- Podman through its Docker-compatible API
 - Proxmox LXCs
 
 ### Supported Protocols
@@ -25,9 +26,9 @@ GoDoxy puts containers to sleep after a period of inactivity and wakes them auto
 | Property          | Description             | Default        | Required |
 | ----------------- | ----------------------- | -------------- | -------- |
 | `idle_timeout`    | Inactivity before sleep | Disabled       | Yes      |
-| `wake_timeout`    | Wait time for wake      | `30s`          | No       |
+| `wake_timeout`    | Wait time for wake      | `3m`          | No       |
 | `stop_method`     | Container stop method   | `stop`         | No       |
-| `stop_timeout`    | Stop command timeout    | `10s`          | No       |
+| `stop_timeout`    | Stop command timeout    | `1m`          | No       |
 | `stop_signal`     | Signal for stop/kill    | Docker default | No       |
 | `start_endpoint`  | Wake trigger endpoint   | Any            | No       |
 | `no_loading_page` | Disable wake page       | `false`        | No       |
@@ -57,6 +58,19 @@ Idle start, ready, sleep, pause, and error transitions appear in the WebUI Live 
 ## Dependency Management
 
 Containers with `depends_on` are managed as a group. This ensures related services start and stop together.
+
+Podman Compose dependencies are discovered automatically through the native
+Podman inspect API, including dependencies of services without their own idle
+timeout. This works through a direct provider connection or an agent. When using
+GoDoxy's socket proxy, enable `CONTAINERS` and use a version that allows native
+Podman GET inspect requests.
+
+`proxy.depends_on` overrides automatic discovery. Podman's native API does not
+retain Compose readiness conditions, so automatically discovered dependencies
+use `service_started`. For health-based readiness, set an explicit label such as
+`proxy.depends_on: redis:service_healthy`. If native inspection fails, GoDoxy logs
+a warning and keeps the routes; restore API access and reload to discover the
+dependencies.
 
 <Callout type="warn">
   Do not set `idle_timeout` on dependency containers.
@@ -91,9 +105,7 @@ depends_on:
 
 ```yaml
 labels:
-  proxy.depends_on: |
-    - redis:service_healthy
-    - postgres:service_started
+  proxy.depends_on: redis:service_healthy,postgres:service_started
 ```
 
 ## Docker Configuration
@@ -194,7 +206,7 @@ reload, and watcher teardown do not send notifications.
 | Property         | Description              | Default  | Accepted Values           |
 | ---------------- | ------------------------ | -------- | ------------------------- |
 | `idle_timeout`   | Inactivity before sleep  | Disabled | Duration (`1h30s`, `15m`) |
-| `wake_timeout`   | Wait for wake completion | `30s`    | Duration                  |
+| `wake_timeout`   | Wait for wake completion | `3m`    | Duration                  |
 | `start_endpoint` | Wake trigger path        | Any      | Relative URI              |
 
 ### Stop Control
@@ -202,7 +214,7 @@ reload, and watcher teardown do not send notifications.
 | Property       | Description            | Default        | Accepted Values                                                          |
 | -------------- | ---------------------- | -------------- | ------------------------------------------------------------------------ |
 | `stop_method`  | Container stop action  | `stop`         | `stop`, `pause`, `kill`                                                  |
-| `stop_timeout` | Stop command wait time | `10s`          | Duration                                                                 |
+| `stop_timeout` | Stop command wait time | `1m`          | Duration                                                                 |
 | `stop_signal`  | Signal for stop/kill   | Docker default | `SIGINT`, `SIGTERM`, `SIGQUIT`, `SIGKILL` (with or without `SIG` prefix) |
 
 ### UI Options
