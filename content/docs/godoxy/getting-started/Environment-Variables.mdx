@@ -61,6 +61,7 @@ For HTTP-only deployment, set `GODOXY_HTTPS_ADDR=`. This disables shared HTTPS, 
 | `GODOXY_API_JWT_SECURE` | bool | `true` | Require HTTPS for login cookies. |
 | `GODOXY_API_JWT_SECRET` | string | empty | JWT signing key; generate with openssl rand -base64 32. Empty generates a temporary random key. |
 | `GODOXY_API_JWT_TOKEN_TTL` | duration | `24h` | Login token lifetime. |
+| `GODOXY_API_READONLY_TOKEN` | string | empty | Optional secret for read-only API Bearer authentication. Allows only HTTP GET route list/detail, no upgrades. Requires browser authentication enabled; ignored by local API. Generate with openssl rand -hex 32; restart to rotate. |
 | `GODOXY_API_USER` | string | empty | WebUI username; required with password unless OIDC or disabled authentication is used. |
 | `GODOXY_API_PASSWORD` | string | empty | WebUI password. |
 | `GODOXY_OIDC_ISSUER_URL` | string | empty | OIDC issuer URL; empty disables OIDC. |
