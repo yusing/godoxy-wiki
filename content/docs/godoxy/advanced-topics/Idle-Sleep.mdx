@@ -221,6 +221,11 @@ reload, and watcher teardown do not send notifications.
 | `stop_timeout` | Stop command wait time | `1m`          | Duration                                                                 |
 | `stop_signal`  | Signal for stop/kill   | Docker default | `SIGINT`, `SIGTERM`, `SIGQUIT`, `SIGKILL` (with or without `SIG` prefix) |
 
+With `stop_method: kill`, GoDoxy waits up to `stop_timeout` for the runtime to
+confirm that the container stopped or paused before stopping its dependencies.
+A signal such as `SIGHUP` may leave the container running. In that case, the
+operation times out and its dependencies remain running.
+
 ### UI Options
 
 | Property          | Description               | Default | Values  |
