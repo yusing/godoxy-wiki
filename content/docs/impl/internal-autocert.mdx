@@ -273,16 +273,15 @@ certificate fields.
 
 ```yaml
 autocert:
-  provider: spaceship
+  provider: cloudflare
   email: admin@example.com
   domains:
     - example.com
     - "*.example.com"
-  options:
-    api_key: ${SPACESHIP_API_KEY}
-    api_secret: ${SPACESHIP_API_SECRET}
   # Optional: RSA leaf certs for clients without ECDSA support (e.g. some embedded MQTT stacks)
   # certificate_key_type: RSA2048
+  options:
+    auth_token: ${CF_API_TOKEN}
   resolvers:
     - 1.1.1.1:53
 ```
