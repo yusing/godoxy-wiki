@@ -172,7 +172,7 @@ Timeout rules:
 
 - Each wait gives up after 3 seconds. The value is fixed and not configurable.
 - When a wait times out, the stuck report is logged at `Warn` through
-  [`logging`](/impl/goutils-logging) and the task detaches from its parent anyway.
+  [`logging`](/docs/impl/goutils-logging) and the task detaches from its parent anyway.
   Callbacks still running continue in their goroutines.
 - `WaitExit(seconds)` sets one budget for the whole shutdown. During shutdown no
   individual wait outlasts the remaining budget, and the root waits `seconds`
@@ -250,7 +250,7 @@ key type as with `context.WithValue`.
 `Context()` returns a normal `context.Context`. You can pass it to libraries or
 derive from it with `context.WithTimeout`.
 
-The [`events`](/impl/goutils-events) package uses this mechanism to carry an event
+The [`events`](/docs/impl/goutils-events) package uses this mechanism to carry an event
 history, and `events.SetCtx` accepts a `*task.Task`.
 
 ## Rules and pitfalls
@@ -275,7 +275,7 @@ history, and `events.SetCtx` accepts a `*task.Task`.
 7. `WaitExit` calls `signal.Notify` and never stops it. After it returns,
    SIGINT, SIGTERM, and SIGHUP no longer terminate the process by default.
 8. Nothing is logged unless the application installed a logger with
-   [`logging.SetLogger`](/impl/goutils-logging). Task behavior does not depend on
+   [`logging.SetLogger`](/docs/impl/goutils-logging). Task behavior does not depend on
    whether a logger is installed.
 9. The process-wide root stays canceled after shutdown, so tasks created later
    are canceled from the start.
@@ -351,4 +351,4 @@ Run `go doc -all github.com/yusing/goutils/task` for signatures and doc comments
 ## Dependencies
 
 `github.com/puzpuzpuz/xsync/v4`, plus `intern`, `errs`, and
-[`logging`](/impl/goutils-logging) from this module.
+[`logging`](/docs/impl/goutils-logging) from this module.

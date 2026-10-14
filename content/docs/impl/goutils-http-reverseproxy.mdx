@@ -20,7 +20,7 @@ Requirements:
   a `zerolog.Logger`) and `golang.org/x/net`.
 - Binaries that link the proxy, including your own test binaries, need
   `-ldflags=-checklinkname=0` because the proxy uses
-  [`httputils`](/impl/goutils-http#required-linker-flag):
+  [`httputils`](/docs/impl/goutils-http#required-linker-flag):
 
   ```sh
   go build -ldflags=-checklinkname=0 ./cmd/app
@@ -110,7 +110,7 @@ Fields on `*ReverseProxy` (set them after `NewReverseProxy`, before serving):
 | --- | --- |
 | `Transport http.RoundTripper` | Upstream transport. For `h2c://` targets it is replaced by an h2c wrapper at construction, so pass the transport to `NewReverseProxy` instead of reassigning the field. |
 | `ModifyResponse func(*http.Response) error` | Optional response hook. It also runs for the synthetic 502 response. |
-| `AccessLogger accesslog.AccessLogger` | Optional; see [accesslog](/impl/goutils-http-accesslog). |
+| `AccessLogger accesslog.AccessLogger` | Optional; see [accesslog](/docs/impl/goutils-http-accesslog). |
 | `OnSchemeMisMatch func(currentScheme string) (retryScheme string, retry bool)` | Optional scheme-mismatch hook (below). |
 | `HandlerFunc http.HandlerFunc` | The handler `ServeHTTP` calls. Wrap it to add behavior around the proxy. |
 | `TargetName`, `TargetURL` | The name and target given to the constructor. |
@@ -204,8 +204,8 @@ applications see these messages.
 
 ## Related packages
 
-- [accesslog](/impl/goutils-http-accesslog): the `AccessLogger` interface.
-- [httpheaders](/impl/goutils-http-httpheaders): the header helpers the proxy uses.
-- [httputils](/impl/goutils-http): `IsUnexpectedError`, `GetAccept`, and the required
+- [accesslog](/docs/impl/goutils-http-accesslog): the `AccessLogger` interface.
+- [httpheaders](/docs/impl/goutils-http-httpheaders): the header helpers the proxy uses.
+- [httputils](/docs/impl/goutils-http): `IsUnexpectedError`, `GetAccept`, and the required
   linker flag.
-- [websocket](/impl/goutils-http-websocket): server-side WebSocket helpers.
+- [websocket](/docs/impl/goutils-http-websocket): server-side WebSocket helpers.

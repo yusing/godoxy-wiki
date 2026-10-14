@@ -1,6 +1,6 @@
 ---
 title: "goutils/events"
-description: "A small in-memory event history with live subscription. It keeps the newest 100 structured events, lets you read them, follow new ones, or stream them as newline-delimited JSON, and can be attached to a [`task`](/impl/goutils-task) so any code with the task's context can record events without a global variable. It is a recent-activity buffer for status pages and diagnostics. It is not a durable log, a message bus, or an audit trail"
+description: "A small in-memory event history with live subscription. It keeps the newest 100 structured events, lets you read them, follow new ones, or stream them as newline-delimited JSON, and can be attached to a [`task`](/docs/impl/goutils-task) so any code with the task's context can record events without a global variable. It is a recent-activity buffer for status pages and diagnostics. It is not a durable log, a message bus, or an audit trail"
 ---
 
 ## Install
@@ -14,7 +14,7 @@ import "github.com/yusing/goutils/events"
 ```
 
 The package is in the root module and needs Go 1.27 or later. The producers
-[`events/acl`](/impl/goutils-events-acl) and [`events/http`](/impl/goutils-events-http) are separate
+[`events/acl`](/docs/impl/goutils-events-acl) and [`events/http`](/docs/impl/goutils-events-http) are separate
 modules.
 
 ## Quick start
@@ -88,9 +88,9 @@ Within goutils, these producers write to a history:
 
 | Category | Actions | Source |
 | --- | --- | --- |
-| `pool.<eventKey>` | `added`, `reloaded`, `removed` | [`pool`](/impl/goutils-pool) with `SetEventHistory` |
-| `acl_event` | `blocked` | [`events/acl`](/impl/goutils-events-acl) |
-| `http_event` | `blocked` | [`events/http`](/impl/goutils-events-http) |
+| `pool.<eventKey>` | `added`, `reloaded`, `removed` | [`pool`](/docs/impl/goutils-pool) with `SetEventHistory` |
+| `acl_event` | `blocked` | [`events/acl`](/docs/impl/goutils-events-acl) |
+| `http_event` | `blocked` | [`events/http`](/docs/impl/goutils-events-http) |
 
 ## History
 
@@ -178,9 +178,9 @@ srv := &http.Server{
 ```
 
 Without that, `events.FromCtx(r.Context())` returns nil, and helpers such as
-[`events/http`](/impl/goutils-events-http)'s `Blocked` quietly record nothing.
+[`events/http`](/docs/impl/goutils-events-http)'s `Blocked` quietly record nothing.
 
 ## Dependencies
 
 [`strings`](../strings) from this module, for UUID generation and JSON encoding.
-No logging: this package never writes through [`logging`](/impl/goutils-logging).
+No logging: this package never writes through [`logging`](/docs/impl/goutils-logging).

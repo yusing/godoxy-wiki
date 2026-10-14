@@ -1,6 +1,6 @@
 ---
 title: "goutils/events/http"
-description: "Records \"this HTTP request was blocked\" in the [event history](/impl/goutils-events) attached to the request's context. Call it from the middleware or handler that rejects a request, and a status page or event stream can show recent blocks with the remote address, host, and reason, without the middleware knowing about either. The import path is `github.com/yusing/goutils/events/http`, but the package name is `httpevents`"
+description: "Records \"this HTTP request was blocked\" in the [event history](/docs/impl/goutils-events) attached to the request's context. Call it from the middleware or handler that rejects a request, and a status page or event stream can show recent blocks with the remote address, host, and reason, without the middleware knowing about either. The import path is `github.com/yusing/goutils/events/http`, but the package name is `httpevents`"
 ---
 
 ## Install
@@ -97,7 +97,7 @@ It returns nothing and cannot fail. It is safe for concurrent use.
 The history comes from the request context. It exists only if:
 
 1. the application created one with `events.NewHistory()` and attached it with
-   `events.SetCtx(task, history)` on a [`task.Task`](/impl/goutils-task), and
+   `events.SetCtx(task, history)` on a [`task.Task`](/docs/impl/goutils-task), and
 2. the request's context descends from that task's `Context()`.
 
 A standard `http.Server` gives each request a context that descends from
@@ -109,7 +109,7 @@ reports nothing. In tests, give the request the task's context with
 check when events do not appear.
 
 The history stores only the newest 100 events across all producers, and it is
-what [`History.ListenJSON`](/impl/goutils-events#streaming-as-json) streams. A flood of
+what [`History.ListenJSON`](/docs/impl/goutils-events#streaming-as-json) streams. A flood of
 blocked requests can push other event types out of the buffer.
 
 ### Duplicate suppression
@@ -132,4 +132,4 @@ Keep secrets and request contents out of `source` and `reason`.
 ## Dependencies
 
 `github.com/yusing/goutils/events` and `golang.org/x/sync/singleflight`. The
-package does not use [`logging`](/impl/goutils-logging).
+package does not use [`logging`](/docs/impl/goutils-logging).

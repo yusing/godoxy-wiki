@@ -59,7 +59,7 @@ Output:
 | `SuccessResponse` | `{"message": "...", "details": {...}}`; `details` is omitted when empty | `Success(message, extra...)` |
 
 - `Error(message, err...)` skips nil errors and uses the first non-nil error. If it has a `Plain() []byte` method,
-  such as an [`errs`](/impl/goutils-errs) error, the plain text is used, so the response
+  such as an [`errs`](/docs/impl/goutils-errs) error, the plain text is used, so the response
   contains no ANSI color codes or Markdown; otherwise it uses `err.Error()`.
   When no non-nil error is supplied, the response contains only the message.
 - `Success(message, extra...)` uses only the first map as `details`.

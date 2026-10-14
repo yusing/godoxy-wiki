@@ -1,6 +1,6 @@
 ---
 title: "goutils/events/acl"
-description: "Records \"this IP was blocked\" in the [event history](/impl/goutils-events) attached to a context. Call it from the code that rejects a connection or request by IP, and a status page or event stream can show recent blocks without that code knowing about either. The import path is `github.com/yusing/goutils/events/acl`, but the package name is `aclevents`"
+description: "Records \"this IP was blocked\" in the [event history](/docs/impl/goutils-events) attached to a context. Call it from the code that rejects a connection or request by IP, and a status page or event stream can show recent blocks without that code knowing about either. The import path is `github.com/yusing/goutils/events/acl`, but the package name is `aclevents`"
 ---
 
 ## Install
@@ -69,7 +69,7 @@ log, write a response, or block the caller.
 The history comes from the context, not from an argument. It exists only if:
 
 1. the application created one with `events.NewHistory()` and attached it with
-   `events.SetCtx(task, history)` on a [`task.Task`](/impl/goutils-task), and
+   `events.SetCtx(task, history)` on a [`task.Task`](/docs/impl/goutils-task), and
 2. `ctx` descends from that task's `Context()`, directly or through
    `context.WithTimeout`, `WithCancel`, and similar, or through its subtasks.
 
@@ -77,10 +77,10 @@ If `ctx` carries no history, for example `context.Background()`, `Blocked` does
 nothing and reports nothing. A missing history is therefore the first thing to
 check when events do not appear. When the call comes from an HTTP handler, make
 the server's `BaseContext` return the task's context, as shown in the
-[events README](/impl/goutils-events#attaching-a-history-to-a-context).
+[events README](/docs/impl/goutils-events#attaching-a-history-to-a-context).
 
 The history stores only the newest 100 events across all producers, and it is
-what [`History.ListenJSON`](/impl/goutils-events#streaming-as-json) streams. A flood of
+what [`History.ListenJSON`](/docs/impl/goutils-events#streaming-as-json) streams. A flood of
 blocked clients can therefore push other event types out of the buffer.
 
 ### Duplicate suppression
@@ -108,4 +108,4 @@ secrets and request contents out of `reason`.
 ## Dependencies
 
 `github.com/yusing/goutils/events` and `golang.org/x/sync/singleflight`. The
-package does not use [`logging`](/impl/goutils-logging).
+package does not use [`logging`](/docs/impl/goutils-logging).

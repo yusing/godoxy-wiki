@@ -16,7 +16,7 @@ import "github.com/yusing/goutils/http/httpheaders"
 `httpheaders` lives in the `github.com/yusing/goutils/http` module (Go 1.27). It
 depends only on `golang.org/x/net` and the root `goutils` module, does not log, and
 does not need the `-checklinkname=0` linker flag that the sibling
-[`httputils`](/impl/goutils-http) package requires.
+[`httputils`](/docs/impl/goutils-http) package requires.
 
 ## Quick start
 
@@ -148,7 +148,7 @@ Run `go doc -all github.com/yusing/goutils/http/httpheaders` for the full API.
 
 ## Related packages
 
-- [reverseproxy](/impl/goutils-http-reverseproxy) uses these helpers to clean and forward
+- [reverseproxy](/docs/impl/goutils-http-reverseproxy) uses these helpers to clean and forward
   headers.
-- [websocket](/impl/goutils-http-websocket) serves WebSocket connections; `IsWebsocket`
+- [websocket](/docs/impl/goutils-http-websocket) serves WebSocket connections; `IsWebsocket`
   detects the handshake.

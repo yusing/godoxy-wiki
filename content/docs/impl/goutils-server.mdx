@@ -1,6 +1,6 @@
 ---
 title: "goutils/server"
-description: "Starts HTTP, HTTPS, and HTTP/3 servers whose lifetime is tied to a [`goutils/task`](/impl/goutils-task) task: listen, serve in the background, and shut down when the task is cancelled. It adds cleartext HTTP/2 (h2c) on the plain HTTP port, certificate-provider based TLS, optional HTTP/3 with `Alt-Svc` advertising, connection-level ACL hooks, and PROXY protocol policies. Package name: `server`"
+description: "Starts HTTP, HTTPS, and HTTP/3 servers whose lifetime is tied to a [`goutils/task`](/docs/impl/goutils-task) task: listen, serve in the background, and shut down when the task is cancelled. It adds cleartext HTTP/2 (h2c) on the plain HTTP port, certificate-provider based TLS, optional HTTP/3 with `Alt-Svc` advertising, connection-level ACL hooks, and PROXY protocol policies. Package name: `server`"
 ---
 
 ## Install
@@ -20,7 +20,7 @@ import "github.com/yusing/goutils/server"
   all in.
 - Binaries that link this package, including your own test binaries, need
   `-ldflags=-checklinkname=0` because it uses
-  [`httputils`](/impl/goutils-http#required-linker-flag):
+  [`httputils`](/docs/impl/goutils-http#required-linker-flag):
 
   ```sh
   go build -ldflags=-checklinkname=0 ./cmd/app
@@ -255,7 +255,7 @@ port, err := server.Start(root.Subtask("http", true), srv)
 
 ## Related packages
 
-- [task](/impl/goutils-task) owns the lifetime model used here.
-- [reverseproxy](/impl/goutils-http-reverseproxy) is a typical `Handler`.
-- [httputils](/impl/goutils-http) provides the diagnostics logging used for HTTP/3
+- [task](/docs/impl/goutils-task) owns the lifetime model used here.
+- [reverseproxy](/docs/impl/goutils-http-reverseproxy) is a typical `Handler`.
+- [httputils](/docs/impl/goutils-http) provides the diagnostics logging used for HTTP/3
   advertising errors and the required linker flag.

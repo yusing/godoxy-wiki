@@ -24,7 +24,7 @@ The entrypoint package implements the primary HTTP handler that receives all inc
 ### Primary Consumers
 
 - **HTTP servers**: Per-listen-addr servers dispatch requests to routes
-- **Route providers**: Register routes via [`StartAddRoute`](/impl/internal-entrypoint)
+- **Route providers**: Register routes via [`StartAddRoute`](/docs/impl/internal-entrypoint)
 - **Configuration layer**: Validates and applies middleware/access-logging config
 - **Stream routes on HTTPS**: Register shared-listener TCP routes through the SNI router when `SNI_ROUTING_FOR_TCP_ROUTES` is enabled
 
@@ -495,7 +495,7 @@ remove the legacy setting.
 
 ### Metrics
 
-Route metrics exposed via [`GetHealthInfo`](/impl/internal-entrypoint) methods:
+Route metrics exposed via [`GetHealthInfo`](/docs/impl/internal-entrypoint) methods:
 
 ```go
 // Health info for all routes
@@ -606,8 +606,8 @@ if ep := entrypoint.FromCtx(r.Context()); ep != nil {
 
 ## Testing Notes
 
-- Benchmark tests in [`entrypoint_benchmark_test.go`](/impl/internal-entrypoint) and SNI router benchmark files (`sni_passthrough*_benchmark_test.go`)
-- Integration tests in [`entrypoint_test.go`](/impl/internal-entrypoint)
+- Benchmark tests in [`entrypoint_benchmark_test.go`](/docs/impl/internal-entrypoint) and SNI router benchmark files (`sni_passthrough*_benchmark_test.go`)
+- Integration tests in [`entrypoint_test.go`](/docs/impl/internal-entrypoint)
 - Mock route pools for unit testing
-- Short link tests in [`shortlink_test.go`](/impl/internal-entrypoint)
+- Short link tests in [`shortlink_test.go`](/docs/impl/internal-entrypoint)
 - SNI passthrough tests in `sni_passthrough_test.go` and fast-path coverage in `sni_passthrough_fastpath_test.go`

@@ -1,6 +1,6 @@
 ---
 title: "goutils/pool"
-description: "A concurrent registry of keyed objects. Use it to track live things such as servers, routes, or watched containers: add by key, look up, remove, and list in a stable order, with optional logging and a bounded event history of changes. This is not an object-reuse pool. For reusable byte buffers see [`synk`](/impl/goutils-synk)"
+description: "A concurrent registry of keyed objects. Use it to track live things such as servers, routes, or watched containers: add by key, look up, remove, and list in a stable order, with optional logging and a bounded event history of changes. This is not an object-reuse pool. For reusable byte buffers see [`synk`](/docs/impl/goutils-synk)"
 ---
 
 ## Install
@@ -132,12 +132,12 @@ With `SetEventHistory(h)` the pool adds an event to `h` for every change:
 
 Events have level `info`, category `"pool." + eventKey`, and the history keeps
 only the newest 100 events across all producers; see
-[`events`](/impl/goutils-events). For `added` and `reloaded`, `Data` holds the pooled value itself. If `T` is a pointer type, later mutations
+[`events`](/docs/impl/goutils-events). For `added` and `reloaded`, `Data` holds the pooled value itself. If `T` is a pointer type, later mutations
 show up in events already recorded, so keep pooled objects effectively immutable. To stream the history as JSON, the objects must
 marshal with `encoding/json/v2`: a struct with no exported fields cannot be
 marshaled and ends the stream with an error.
 
-Log messages go through [`logging`](/impl/goutils-logging) at `Info`, and the
+Log messages go through [`logging`](/docs/impl/goutils-logging) at `Info`, and the
 package is silent until the application calls `logging.SetLogger`. `DisableLog`
 turns the pool's messages off.
 
@@ -161,4 +161,4 @@ All methods are safe for concurrent use, with these exceptions and limits:
 ## Dependencies
 
 `github.com/puzpuzpuz/xsync/v4` for the concurrent map, plus `events` and
-[`logging`](/impl/goutils-logging) from this module.
+[`logging`](/docs/impl/goutils-logging) from this module.

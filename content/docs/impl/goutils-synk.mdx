@@ -1,6 +1,6 @@
 ---
 title: "goutils/synk"
-description: "Concurrency and memory helpers: - reusable byte buffers in two process-wide pools, one for known sizes and one for data of unknown size, so hot paths allocate less; - `RefCount`, a reference counter that announces when the last reference is gone; - `Value[T]`, a type-safe `atomic.Value`; - [`synk/workerpool`](/impl/goutils-synk-workerpool), a bounded group of goroutines sharing a context"
+description: "Concurrency and memory helpers: - reusable byte buffers in two process-wide pools, one for known sizes and one for data of unknown size, so hot paths allocate less; - `RefCount`, a reference counter that announces when the last reference is gone; - `Value[T]`, a type-safe `atomic.Value`; - [`synk/workerpool`](/docs/impl/goutils-synk-workerpool), a bounded group of goroutines sharing a context"
 ---
 
 ## Install
@@ -197,7 +197,7 @@ implementations. Use a pointer or struct type, or wrap the interface in a struct
 
 | Tag | Effect |
 | --- | --- |
-| `pprof` | Starts a reporter at package initialization that logs `bytes pool stats` at `Info` every 5 seconds, with fields `sizeInUse`, `numReused`, `numDropped`, `numNonPooled`, `numGced`, and the matching `size*` fields. Messages go through [`logging`](/impl/goutils-logging) and appear only when the application installed a logger. |
+| `pprof` | Starts a reporter at package initialization that logs `bytes pool stats` at `Info` every 5 seconds, with fields `sizeInUse`, `numReused`, `numDropped`, `numNonPooled`, `numGced`, and the matching `size*` fields. Messages go through [`logging`](/docs/impl/goutils-logging) and appear only when the application installed a logger. |
 | `race` | Selected automatically by `-race`. The typed pools use locked shared queues and no private slot so the race detector can check them. Behavior is otherwise the same. |
 
 The `pprof` reporter does not install a signal handler, so Ctrl-C retains its normal behavior.

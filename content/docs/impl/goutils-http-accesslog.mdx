@@ -1,6 +1,6 @@
 ---
 title: "goutils/http/accesslog"
-description: "The `AccessLogger` interface that [`reverseproxy`](/impl/goutils-http-reverseproxy) calls to record proxied requests and proxy errors. The package contains only the interface; you supply the implementation (a file, stdout, `slog`, a metrics sink, and so on). Package name: `accesslog`"
+description: "The `AccessLogger` interface that [`reverseproxy`](/docs/impl/goutils-http-reverseproxy) calls to record proxied requests and proxy errors. The package contains only the interface; you supply the implementation (a file, stdout, `slog`, a metrics sink, and so on). Package name: `accesslog`"
 ---
 
 ## Install
@@ -17,7 +17,7 @@ import "github.com/yusing/goutils/http/accesslog"
 dependencies of its own, and does not need the `-checklinkname=0` linker flag. To
 attach a logger to a proxy you also need
 `go get github.com/yusing/goutils/http/reverseproxy@v0.8.0`, and binaries that link
-the proxy need the flag described in the [`httputils` README](/impl/goutils-http#required-linker-flag).
+the proxy need the flag described in the [`httputils` README](/docs/impl/goutils-http#required-linker-flag).
 
 ## The interface
 
@@ -90,7 +90,7 @@ func main() {
 
 ## Related packages
 
-- [reverseproxy](/impl/goutils-http-reverseproxy) holds the `AccessLogger` field and calls
+- [reverseproxy](/docs/impl/goutils-http-reverseproxy) holds the `AccessLogger` field and calls
   the methods above.
-- [httpheaders](/impl/goutils-http-httpheaders) provides header helpers for custom
+- [httpheaders](/docs/impl/goutils-http-httpheaders) provides header helpers for custom
   logging.

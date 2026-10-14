@@ -285,7 +285,7 @@ It keeps the **inner** `on` and `do` DSLs exactly the same (same matchers, same 
   - line comment: `# ...` (to end of line, for YAML familiarity)
   - block comment: `/* ... */` (may span multiple lines)
   - Comments are ignored **only when outside quotes** (`"`, `'` or backticks).
-  - Environment variable syntax: `${NAME}` is supported by the inner DSL parser in [`parse()`](/impl/internal-route-rules).
+  - Environment variable syntax: `${NAME}` is supported by the inner DSL parser in [`parse()`](/docs/impl/internal-route-rules).
     Block-syntax rule:
     - In `on` (rule header): `${...}` must be inside quotes/backticks.
     - In `do` (rule body): `${...}` may be unquoted; the outer parser must treat `${...}` as an opaque token so braces inside it are not structural.
@@ -457,7 +457,7 @@ Always log the request
     - `do`: may be unquoted
       Preferred style: always write env vars as `${NAME}` rather than a bare `$NAME`.
     - If you need literal `{` or `}` outside quotes/backticks (for example unquoted templates like `{{ ... }}`), wrap that argument in quotes/backticks so the outer parser does not treat it as structure.
-- Rule naming remains minimal: if no explicit name is provided by the syntax, it will behave like the current YAML behavior (empty name becomes `rule[index]` in [`Rules.BuildHandler()`](/impl/internal-route-rules)).
+- Rule naming remains minimal: if no explicit name is provided by the syntax, it will behave like the current YAML behavior (empty name becomes `rule[index]` in [`Rules.BuildHandler()`](/docs/impl/internal-route-rules)).
 - YAML remains supported as a fallback for backward compatibility.
 
 ### Condition Syntax

@@ -38,7 +38,7 @@ those packages use `go:linkname` into standard-library and dependency internals.
 Without it, linking fails with an `invalid reference` error. The root module and
 the `cache` module do not need the flag.
 
-Diagnostics require an installed [application logger](/impl/goutils-logging).
+Diagnostics require an installed [application logger](/docs/impl/goutils-logging).
 Nested modules may retain their own framework dependencies. HTTP logging helpers
 accept a message and optional fields instead of returning a zerolog event.
 

@@ -1,6 +1,6 @@
 ---
 title: "goutils/http"
-description: "Helpers for Go HTTP servers, proxies, and clients: pooled body reading, buffered or lazy response rewriting, a `RoundTripper` that can short-circuit responses, per-request parse caches, content-negotiation helpers, and request-scoped diagnostics. Package name: `httputils`. The Go module `github.com/yusing/goutils/http` contains three packages: | Import path | Package name | Documentation | | --- | --- | --- | | `github.com/yusing/goutils/http` | `httputils` | This file | | `github.com/yusing/goutils/http/httpheaders` | `httpheaders` | [httpheaders](/impl/goutils-http-httpheaders) | | `github.com/yusing/goutils/http/accesslog` | `accesslog` | [accesslog](/impl/goutils-http-accesslog) | The reverse proxy and WebSocket helpers are separate modules with their own `go.mod`: [reverseproxy](/impl/goutils-http-reverseproxy) and [websocket](/impl/goutils-http-websocket)"
+description: "Helpers for Go HTTP servers, proxies, and clients: pooled body reading, buffered or lazy response rewriting, a `RoundTripper` that can short-circuit responses, per-request parse caches, content-negotiation helpers, and request-scoped diagnostics. Package name: `httputils`. The Go module `github.com/yusing/goutils/http` contains three packages: | Import path | Package name | Documentation | | --- | --- | --- | | `github.com/yusing/goutils/http` | `httputils` | This file | | `github.com/yusing/goutils/http/httpheaders` | `httpheaders` | [httpheaders](/docs/impl/goutils-http-httpheaders) | | `github.com/yusing/goutils/http/accesslog` | `accesslog` | [accesslog](/docs/impl/goutils-http-accesslog) | The reverse proxy and WebSocket helpers are separate modules with their own `go.mod`: [reverseproxy](/docs/impl/goutils-http-reverseproxy) and [websocket](/docs/impl/goutils-http-websocket)"
 ---
 
 ## Install
@@ -215,7 +215,7 @@ before treating those as client cancellation.
 
 `LogDebug`, `LogInfo`, `LogWarn`, and `LogError` take `(r *http.Request, message
 string, fields ...logging.Field)`. They deliver the message to the logger installed
-with [`logging.SetLogger`](/impl/goutils-logging) and add `remote`
+with [`logging.SetLogger`](/docs/impl/goutils-logging) and add `remote`
 (`r.RemoteAddr`), `host`, and `uri` (`METHOD RequestURI`) fields. `message` is not a
 format string. Until an application installs a logger, nothing is emitted.
 
@@ -265,4 +265,4 @@ cd http && go test -ldflags=-checklinkname=0 ./...
 ```
 
 `python3 scripts/release.py test` from the repository root tests every module and
-supplies the flag; see the [repository README](/impl/goutils).
+supplies the flag; see the [repository README](/docs/impl/goutils).

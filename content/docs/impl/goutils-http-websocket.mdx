@@ -32,7 +32,7 @@ Things to know before you add it:
   ```
 
   `go vet` and compiling non-`main` packages work without it. See the
-  [`httputils` README](/impl/goutils-http#required-linker-flag).
+  [`httputils` README](/docs/impl/goutils-http#required-linker-flag).
 - Go 1.27. JSON helpers use `encoding/json/v2` (through `goutils/strings`), not
   `encoding/json`; `time.Duration` values are encoded as nanosecond numbers.
 
@@ -294,7 +294,7 @@ with other meanings must avoid collisions.
 
 ## Related packages
 
-- [reverseproxy](/impl/goutils-http-reverseproxy) proxies WebSocket upgrades to upstream
+- [reverseproxy](/docs/impl/goutils-http-reverseproxy) proxies WebSocket upgrades to upstream
   servers.
-- [httpheaders](/impl/goutils-http-httpheaders) provides `IsWebsocket` for detecting the
+- [httpheaders](/docs/impl/goutils-http-httpheaders) provides `IsWebsocket` for detecting the
   handshake.
