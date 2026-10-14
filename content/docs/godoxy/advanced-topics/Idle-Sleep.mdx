@@ -39,7 +39,7 @@ GoDoxy puts containers to sleep after a period of inactivity and wakes them auto
 
 1. Container receives no traffic for `idle_timeout` duration
 2. GoDoxy executes `stop_method` on the container
-3. Container dependencies are stopped in order
+3. Container dependencies are stopped in order unless another running watcher directly depends on them
 4. Traffic to the route triggers wake-up sequence
 
 ### Wake Behavior
@@ -57,7 +57,11 @@ Idle start, ready, sleep, pause, and error transitions appear in the WebUI Live 
 
 ## Dependency Management
 
-Containers with `depends_on` are managed as a group. This ensures related services start and stop together.
+Containers with `depends_on` wake their dependencies first, including transitive
+dependencies. When a container sleeps, its dependencies also sleep unless
+another running watcher directly depends on them. Shared dependencies remain
+available until their last running dependent sleeps. Sleeping dependents do not
+keep dependencies running; traffic wakes the required dependency chain again.
 
 Podman Compose dependencies are discovered automatically through the native
 Podman inspect API, including dependencies of services without their own idle
