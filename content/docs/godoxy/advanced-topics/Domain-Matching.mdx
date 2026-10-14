@@ -26,7 +26,6 @@ If `match_domains` is not set in `config.yml`, below will match route with short
 Below will match route with FQDN alias `app.example.com`:
 
 - `app.example.com`
-- `app.example.com.*`
 
 Below will match route with wildcard alias `*.example.com`:
 
@@ -67,6 +66,28 @@ And a wildcard alias `*.example.com` can be accessed only at one-label subdomain
 but not:
 
 - `foo.bar.example.com`
+
+## Public URLs and dashboard links
+
+The route list and detail APIs expose `public_urls` for HTTP routes. These URLs
+come from configured domains and listeners, so calling the API by IP address
+or through another hostname does not change them.
+
+With `match_domains: [example.com, example.org]`, `app.dev` produces
+`https://app.dev.example.com` and `https://app.dev.example.org`. An alias equal
+to a configured domain, or ending in that domain at a label boundary, is used
+as-is. For example, `app.example.com` is complete, while `notexample.com` still
+receives the configured domain suffix.
+
+HTTPS is used when the shared HTTPS listener is enabled; otherwise HTTP is
+used. Nondefault listener ports are included. Routes on dedicated HTTPS ports
+use those ports. External port or protocol translation is not inferred.
+Excluded routes and TCP/UDP streams do not have public HTTP URLs.
+
+The dashboard uses the first URL in configuration order unless `homepage.url`
+overrides it. With no match domains, dotted aliases are used as-is. Undotted
+aliases have no API `public_urls`, but dashboard links still use the requesting
+browser's hostname and protocol.
 
 ## Priority
 
