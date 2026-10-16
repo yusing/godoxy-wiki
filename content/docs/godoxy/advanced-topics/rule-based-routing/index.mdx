@@ -265,10 +265,12 @@ method POST {
   remove header X-Secret
 }
 
-# Post-phase log via status variable
+# Schedule post-phase logging before the terminating proxy rule
+path glob("/api/*") {
+  log info /dev/stdout "$req_method $status_code"
+}
 path glob("/api/*") {
   proxy http://backend:8080
-  log info /dev/stdout "$req_method $status_code"
 }
 
 # Dispatch to a built-in GoDoxy handler
