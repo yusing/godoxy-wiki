@@ -12,7 +12,7 @@ Conditions can be combined using logical operators.
 | Operator    | Description                         | Example                                    |
 | ----------- | ----------------------------------- | ------------------------------------------ |
 | `\|`        | **OR** - Any condition can match    | `header X-API-Key \| header Authorization` |
-| `&` or `\n` | **AND** - All conditions must match | `method GET & path /api/*`                 |
+| `&` or `\n` | **AND** - All conditions must match | `method GET & path glob(/api/*)`                 |
 
 ## Syntax
 
@@ -37,7 +37,7 @@ Conditions can be combined using logical operators.
 | `proto`       | `<http \| https \| h1 \| h2 \| h2c \| h3>` | Match when protocol equals value           | `proto h2`                                                                           |
 | `method`      | `<method>`                                 | Match when HTTP method equals value        | `method POST`                                                                        |
 | `host`        | `<pattern>`                                | Match when host matches pattern            | `host example.com`, `host glob(*.example.com)`, `host regex("^[a-z]+-prod\.com$")`   |
-| `path`        | `<pattern>`                                | Match when path matches pattern            | `path /version`, `path glob(/api/*)`, `path regex("^/api/v[0-9]+/.*)`                |
+| `path`        | `<pattern>`                                | Match when path matches pattern            | `path /version`, `path glob(/api/*)`, `path regex("^/api/v[0-9]+/.*")`                |
 | `remote`      | `<ip \| cidr>`                             | Match when client IP matches CIDR range    | `remote 192.168.1.0/24`                                                              |
 | `route`       | `<pattern>`                                | Match when route name matches pattern      | `route api`, `route glob(api-*)`                                                     |
 | `basic_auth`  | `<username> <hashed_password>`             | Match when basic auth credentials match    | `basic_auth admin $2y$10$...`                                                        |

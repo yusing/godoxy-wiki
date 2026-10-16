@@ -147,7 +147,9 @@ chain        := nested_block { "elif" on_expr "{" do_body "}" } [ "else" "{" do_
 - Logical headers can continue to the next line when the current line ends with `|` or `&`.
 - `elif` and `else` must be on the **same line** as the preceding `}`.
 - Multiple `elif` branches are allowed; only one `else` is allowed.
-- Nested commands follow the same termination and phase rules as top-level commands.
+- A nested block or `elif`/`else` chain runs entirely in post phase if any matcher
+  or action requires response data. Keep request mutations in separate pre-phase
+  blocks. `require_auth`, `require_basic_auth`, and request middleware cannot run in post phase.
 
 ## Syntax Reference
 
@@ -198,16 +200,21 @@ header Some-Header 'foo \"bar\"' # Escaped quotes inside single quotes
 Environment variables can be substituted using `${VARIABLE_NAME}` syntax:
 
 ```sh
-error 403 "Forbidden: ${CLOUDFLARE_API_KEY}"
+error 503 "${SERVICE_NAME} is unavailable"
 proxy https://${DOMAIN}/api
 set header X-Tenant "tenant-${DOMAIN}"
 ```
 
-To escape the `$` character and prevent substitution, use `$$`:
+Rule expressions own environment expansion, including inline `rules` in YAML or
+JSON configuration. Variables are expanded once while parsing the command; their
+values are not reparsed as rule syntax. To keep a literal `${...}`, use `$$`:
 
 ```sh
 error 404 "$${NON_EXISTENT}" # Results in literal "${NON_EXISTENT}"
 ```
+
+Docker Compose adds an earlier interpolation layer. Double each `$` in Compose
+labels so the rule expression reaches GoDoxy unchanged.
 
 ### Pattern Matching
 
@@ -327,12 +334,12 @@ substituting a Compose environment variable. Standalone rule files use a single
 ### Route File Rule Body (Block Syntax)
 
 ```bash
-path glob("/api/*") {
-  proxy http://api-server:8080
-}
-
 path glob("/api/v1/*") {
   handle api
+}
+
+path glob("/api/*") {
+  proxy http://api-server:8080
 }
 
 default {
@@ -340,11 +347,15 @@ default {
 }
 ```
 
+Put the more specific API rule first so the broad proxy rule does not intercept it.
 In this example, `handle api` dispatches to GoDoxy's registered in-process API handler, while `default { pass }` runs only when neither API rule matches.
 
 ## Common Use Cases (Block Syntax)
 
 ### API Gateway with Basic Auth
+
+Set `ADMIN_PASSWORD_HASH` to the admin password’s bcrypt hash, as described in
+[Basic Authentication](./Conditions#basic-authentication).
 
 ```bash
 path regex("^/api/v[0-9]+/public/.*") {
@@ -352,7 +363,7 @@ path regex("^/api/v[0-9]+/public/.*") {
 }
 
 path glob("/api/v[0-9]/admin/*") &
-basic_auth admin "$2y$10$hashed_password" {
+basic_auth admin "${ADMIN_PASSWORD_HASH}" {
   set header X-Admin true
   proxy http://admin-server:8080
 }

@@ -12,7 +12,10 @@ description: Actions are the command lines inside `{ ... }`. In YAML, the same c
   - `PhasePost` commands run in post.
   - `PhasePre|PhasePost` can happen in nested/compound bodies.
 - If a pre command terminates, later pre commands are skipped.
-- Post-only commands can still run in post phase.
+- Post-only commands in separate matched rules can still run in post phase.
+- A rule that terminates in pre phase skips its own post-phase commands.
+- `require_auth`, `require_basic_auth`, and request middleware cannot run in response-phase rules or
+  nested blocks promoted to post phase.
 - `status`/`resp_header` matcher rules are always evaluated in post phase.
 
 ## Available Actions
@@ -74,6 +77,9 @@ default {
   }
 }
 ```
+
+`error 204` and `error 304` terminate without a response body, even if a message
+template is supplied.
 
 ## Named Option Blocks
 
@@ -147,7 +153,8 @@ Use `handle` when the target is an HTTP handler already registered inside GoDoxy
 
 ## Template Variables
 
-Template variables can be used in `error`, `log`, `notify`, `set`, `add`, `body`, and `resp_body` commands. Variables are expanded at runtime using the syntax `$variable_name` or `$function_name(args)`.
+Template variables can be used in `error`, `log`, `notify`, `set`, and `add` commands, including the
+`set body` and `set resp_body` targets. Variables are expanded at runtime using the syntax `$variable_name` or `$function_name(args)`.
 
 ## Static Variables
 
@@ -163,7 +170,7 @@ Static variables provide information about the request, response, and upstream s
 | `$req_addr`                      | Request host with port     | `example.com:443`                     |
 | `$req_path`                      | Request path               | `/api/users`                          |
 | `$req_query`                     | Query string (raw)         | `id=123&sort=desc`                    |
-| `$req_url`                       | Full request URL           | `http://example.com/api/users?id=123` |
+| `$req_url`                       | Request URL as received (usually path and query) | `/api/users?id=123` |
 | `$req_uri`                       | Request URI (path + query) | `/api/users?id=123`                   |
 | `$req_content_type`              | Request content type       | `application/json`                    |
 | `$req_content_length`            | Request content length     | `1024`                                |
@@ -280,6 +287,10 @@ Mask a sensitive value, showing only the first 2 and last 2 characters with aste
   - `$redacted($header(Authorization))` → `Be************ne` (redacts the Authorization header value)
   - `$redacted($cookie(session_id))` → `ab****23`
 
+Request-body templates must use request data to run before the upstream.
+Using response variables schedules the action after the upstream, too late to
+change the forwarded request.
+
 ## Variable Examples
 
 Complete examples showing how to use variables in different commands:
@@ -302,7 +313,7 @@ set header X-Upstream-URL $upstream_url
 set header X-Request-Path $req_path
 
 # Body modifications with request info
-set body "Status: $status_code for $req_method $req_path"
+set body "Request: $req_method $req_path"
 
 # Response body with request and response info
 set resp_body "Request: $req_method $req_url\nResponse: $status_code"
