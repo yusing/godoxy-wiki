@@ -301,6 +301,27 @@ services:
         }
 ```
 
+When embedding the whole route in a label, both the label and its nested `rules`
+value need a literal block (`|`) to preserve command line breaks:
+
+```yaml
+services:
+  app:
+    labels:
+      proxy.app: |
+        port: 8080
+        rules: |
+          header Origin {
+            set resp_header Access-Control-Allow-Origin $$header(Origin)
+          }
+```
+
+Using `rules:` without `|` folds the commands into one line and can produce
+`expect 2 args` provider errors. In Docker Compose labels, escape rule variables
+as `$$header(...)` so Compose passes `$header(...)` to GoDoxy instead of
+substituting a Compose environment variable. Standalone rule files use a single
+`$`.
+
 ### Route File Rule Body (Block Syntax)
 
 ```bash
@@ -359,6 +380,14 @@ default {
 
 ### CORS Preflight
 
+Keep response-header actions in a separate rule from `error`: terminating in pre
+phase skips the terminating rule's post-phase actions. The header-only rules
+below still run for the locally generated preflight response. `error 204 ""`
+returns No Content without contacting the upstream or writing a response body.
+
+When placing this block in Docker Compose, use the [label syntax above](#docker-compose-label-yaml-container-config--block-rule-body),
+including `rules: |` for a whole-route label and `$$` for variables.
+
 ```bash
 method OPTIONS &
 header Origin &
@@ -367,6 +396,11 @@ header Access-Control-Request-Method {
   set resp_header Access-Control-Allow-Methods GET,POST,PUT,PATCH,DELETE,OPTIONS
   set resp_header Access-Control-Allow-Headers $header(Access-Control-Request-Headers)
   set resp_header Access-Control-Allow-Credentials true
+}
+
+method OPTIONS &
+header Origin &
+header Access-Control-Request-Method {
   error 204 ""
 }
 
@@ -375,6 +409,9 @@ header Origin {
   set resp_header Access-Control-Allow-Credentials true
 }
 ```
+
+This example reflects any supplied origin and allows credentials. Restrict the
+`header Origin` conditions to trusted origins before using it with private APIs.
 
 ### Request Mutation + Proxy
 
