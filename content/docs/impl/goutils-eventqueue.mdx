@@ -130,7 +130,7 @@ case <-queueTask.Context().Done():
 `OnError` receives:
 
 - every non-nil error sent on `errCh`, unchanged;
-- one error per `OnFlush` panic. It is a goutils [`errs`](../errs) error whose
+- one error per `OnFlush` panic. It is a goutils [`errs`](/docs/impl/goutils-errs) error whose
   subject is the queue task's name, prefixed to the original error when the panic
   value was an error. Its `Error()` text contains ANSI styling, so do not compare
   it as a plain string.
