@@ -9,7 +9,7 @@ console.log("root", root);
 
 /** @type {import('next').NextConfig} */
 const config = {
-  allowedDevOrigins: ['10.0.20.1'],
+  allowedDevOrigins: ["10.0.20.1"],
   reactStrictMode: true,
   turbopack: {
     root,
