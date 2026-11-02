@@ -72,3 +72,38 @@ description: Configure health monitoring for GoDoxy
 | interval | Health check interval                           | 5s                        | duration                    |
 | timeout  | Health check timeout                            | 5s                        | duration                    |
 | retries  | Health check retries before notifying unhealthy | 15s divided by `interval` | integer                     |
+| silence  | Daily windows without "service down" alerts     | empty                     | list of `HH:MM-HH:MM`       |
+
+## Silence windows
+
+Use `silence` to stop "service down" notifications during known maintenance, such as a nightly backup that stops containers.
+
+- Times use the local time of the GoDoxy container, so set `TZ` (e.g. `TZ=America/New_York`) in `.env`.
+- A window may cross midnight, e.g. `23:30-00:30`. Times must use two digits (`02:00`, not `2:00`).
+- On a daylight saving change, a window inside the skipped hour does not apply that day.
+- Health checks keep running during the window. If the service is still down when the window ends, the alert is sent on the next check.
+- A service that recovers inside the window sends no notification at all.
+- Set it globally in `config.yml` under `defaults.healthcheck.silence`. A route-level `silence` replaces the default, and `silence: []` opts a route out (with Docker labels: `proxy.#1.healthcheck.silence: "[]"`).
+
+```yaml
+# config.yml
+defaults:
+  healthcheck:
+    silence:
+      - 02:00-04:30
+```
+
+```yaml
+# route file
+app:
+  healthcheck:
+    silence: [02:00-04:30, 23:30-00:30]
+```
+
+```yaml
+# docker labels
+services:
+  app:
+    labels:
+      proxy.#1.healthcheck.silence: 02:00-04:30, 23:30-00:30
+```
