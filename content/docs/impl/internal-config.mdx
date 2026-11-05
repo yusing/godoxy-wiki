@@ -125,8 +125,8 @@ ACLs, entrypoint and WebUI rules, access logs, route files, rule files, and used
 composed middleware. Undefined references reject the candidate even if the active
 runtime defines that name. The validation API uses the edited root document's
 definitions; standalone route edits use the request's runtime definitions.
-Set names are validated. Entries must be nonempty address sources; null or
-zero-valued entries and nested sets are rejected with the set name and entry index.
+Set names are validated. Entries must be valid, nonempty address sources; null or
+malformed entries and nested sets are rejected with the set name and entry index.
 The definitions are published
 (`nettypes.PublishAddressSets`) only when the runtime manager marks the
 candidate `RuntimeActivating`, so a rejected reload never changes what the
