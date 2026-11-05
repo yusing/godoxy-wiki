@@ -24,6 +24,7 @@ Transport-layer filtering before HTTP data exchange. Blocked IPs see immediate c
 | ---------------- | ------------------ | ---------------------------- |
 | IP address       | `ip:1.2.3.4`       | No                           |
 | CIDR             | `cidr:1.2.3.4/32`  | No                           |
+| Named address set | `set:family`      | No                           |
 | Hostname         | `host:home.dyndns.example` | No                    |
 | ISO country code | `country:US`       | **Yes**                      |
 | Timezone         | `tz:Asia/Shanghai` | **Yes**                      |
@@ -48,6 +49,9 @@ Use names and resolvers you trust. A terminal DNS dot is preserved:
 `host:home.example.` is absolute, while `host:home.example` may use resolver search
 domains, so they are distinct sources. Bare IPs match exactly, including IPv6
 (`/32` for IPv4, `/128` for IPv6).
+
+Named sets reuse the root [`address_sets` definitions](../getting-started/Configuring-GoDoxy#address-sets).
+Undefined names reject configuration acceptance.
 
 ### ACL Configuration
 
@@ -125,7 +129,7 @@ HTTP-level filtering after request headers/body received. Blocked IPs see HTTP 4
 
 | Key           | Type         | Description   | Required | Default          |
 | ------------- | ------------ | ------------- | -------- | ---------------- |
-| `allow`       | IP/CIDR/hostname list | Allow list    | No       | `[]`             |
+| `allow`       | Address source list | Allow list (IP, CIDR, `host:<name>`, or `set:<name>`) | No | `[]` |
 | `status_code` | int          | Status code   | No       | `403`            |
 | `message`     | string       | Error message | No       | `IP not allowed` |
 

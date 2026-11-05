@@ -21,6 +21,7 @@ The `config.yml` file is divided into several sections:
 | Section          | Description                                                                      |
 | ---------------- | -------------------------------------------------------------------------------- |
 | `acl`            | Handles access control                                                           |
+| `address_sets`   | Named lists of IPs, CIDRs, and hostname address sources                            |
 | `autocert`       | Handles SSL certificate settings                                                 |
 | `entrypoint`     | Manages GoDoxy entrypoints (port 80 and 443)                                     |
 | ↳ `middlewares`  | Defines middleware settings                                                      |
@@ -36,6 +37,46 @@ The `config.yml` file is divided into several sections:
 | `defaults`       | Default values                                                                   |
 | `homepage`       | Configures homepage settings                                                     |
 | `webui`          | Embedded WebUI: `display_name`, `aliases`, optional `inbound_mtls_profile`, `middlewares`, `access_log` |
+
+### Address sets
+
+Define shared client or proxy address lists once at the root of `config.yml`:
+
+```yaml
+address_sets:
+  family:
+    - host:home.dyndns.example
+    - 203.0.113.0/29
+  office:
+    - 198.51.100.0/24
+
+entrypoint:
+  middlewares:
+    - use: cidr_whitelist
+      allow:
+        - set:family
+        - set:office
+```
+
+Use `set:<name>` in `cidr_whitelist.allow`, `real_ip.from`, rules and middleware
+bypass `remote` conditions, ACL `allow`/`deny`, and access-log CIDR filters. Route
+files and composed middleware can reference the same root definitions. For example,
+`remote set:family` matches any address in `family`.
+
+Names are case-sensitive and contain only letters, digits, hyphens, and underscores.
+Entries must be IPs, CIDRs, or `host:<name>` sources. Sets cannot contain other sets;
+null, empty-string, and empty-object entries are rejected. An empty set is valid and
+matches nothing. Undefined references reject configuration acceptance, including
+references in included routes. A rejected reload preserves the active definitions.
+An accepted reload updates definitions for existing references without rewriting
+each route.
+
+Hostname entries resolve A/AAAA records in the background and refresh every minute.
+They match nothing until the first successful lookup. Later failures, including
+NXDOMAIN, keep the last good addresses indefinitely until a successful refresh.
+During that time an old address can remain allowed by an allow list or denied by a
+deny list, while a new address does not match that source. Use names and resolvers
+you trust.
 
 ### Environment Variables substitution
 
