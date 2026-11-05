@@ -12,7 +12,7 @@ description: Resolve client IP from proxy headers
 | ----------- | ----------------- | ----------- | -------- |
 | `header`    | Real IP header    | `X-Real-IP` | No       |
 | `from`      | Trusted IP/CIDR/hostname sources | -           | Yes      |
-| `recursive` | Recursive mode    | `true`      | No       |
+| `recursive` | Recursive mode    | `false`     | No       |
 
 `from` accepts `host:<name>` as well as static addresses. A hostname proxy is
 not trusted before its first successful lookup. See
@@ -20,18 +20,23 @@ not trusted before its first successful lookup. See
 
 ## Recursive Mode
 
-- `true`: First IP not in `from` list
-- `false`: Last IP not in `from` list
+- `true`: Last valid address outside the `from` list, across repeated header fields.
+- `false`: Address in the last header field, including a trusted address.
+
+Multiple addresses currently require repeated header fields. A comma-separated
+list within a single header value is not parsed as separate addresses.
 
 ### Expected Behavior
 
 ```yaml
-from: 192.168.0.0/16, 10.0.0.1
+from: [192.168.0.0/16, 10.0.0.0/8]
 header: X-Forwarded-For
 ```
 
 ```text
-X-Forwarded-For: 1.2.3.4, 192.168.0.123, 10.0.0.123
+X-Forwarded-For: 1.2.3.4
+X-Forwarded-For: 192.168.0.123
+X-Forwarded-For: 10.0.0.123
 ```
 
 | Recursive | Result       |
