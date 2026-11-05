@@ -24,8 +24,30 @@ Transport-layer filtering before HTTP data exchange. Blocked IPs see immediate c
 | ---------------- | ------------------ | ---------------------------- |
 | IP address       | `ip:1.2.3.4`       | No                           |
 | CIDR             | `cidr:1.2.3.4/32`  | No                           |
+| Hostname         | `host:home.dyndns.example` | No                    |
 | ISO country code | `country:US`       | **Yes**                      |
 | Timezone         | `tz:Asia/Shanghai` | **Yes**                      |
+
+### Hostname address sources
+
+`host:<name>` matches the hostname's current A and AAAA addresses through the
+system resolver, including `/etc/hosts`. Names are shared across ACLs,
+`cidr_whitelist` `allow`, `real_ip` `from`, rules and bypass `remote`, and access
+log `filters.cidr.values`. They refresh every minute without a config reload.
+Proxy Protocol `trusted_proxies` supports only static IPs and CIDRs.
+
+New names resolve in the background and match nothing until the first success.
+In an allow list this grants no access; in a deny list it blocks nothing. A
+`real_ip` proxy is not trusted until its name resolves. After a successful lookup,
+failed refreshes, including NXDOMAIN, retain the last known addresses indefinitely.
+After an address change, an allow list can keep allowing the old address while
+not allowing the new one; a deny list can keep denying the old address while not
+denying the new one, until a successful refresh observes the change.
+
+Use names and resolvers you trust. A terminal DNS dot is preserved:
+`host:home.example.` is absolute, while `host:home.example` may use resolver search
+domains, so they are distinct sources. Bare IPs match exactly, including IPv6
+(`/32` for IPv4, `/128` for IPv6).
 
 ### ACL Configuration
 
@@ -56,6 +78,7 @@ acl:
   allow:
     - ip:1.2.3.4
     - cidr:1.2.3.4/32
+    - host:home.dyndns.example
     - country:US
     - tz:Asia/Shanghai
   deny:
@@ -102,7 +125,7 @@ HTTP-level filtering after request headers/body received. Blocked IPs see HTTP 4
 
 | Key           | Type         | Description   | Required | Default          |
 | ------------- | ------------ | ------------- | -------- | ---------------- |
-| `allow`       | IP/CIDR list | Allow list    | No       | `[]`             |
+| `allow`       | IP/CIDR/hostname list | Allow list    | No       | `[]`             |
 | `status_code` | int          | Status code   | No       | `403`            |
 | `message`     | string       | Error message | No       | `IP not allowed` |
 
@@ -185,7 +208,7 @@ Format:
 | `filters.method.values`       | string                                          | method filters                  | `GET`, `POST`, ...                  |            |
 | `filters.host.values`         | string                                          | host filters                    | hostname                            |            |
 | `filters.headers.values`      | string                                          | headers filters                 | case-sensitive `key` or `key=value` |            |
-| `filters.cidr.values`         | string                                          | CIDR filters                    | see below                           |            |
+| `filters.cidr.values`         | string                                          | IP/CIDR/hostname filters                    | see below                           |            |
 | `fields`                      | object                                          | access log fields               | see below                           |            |
 | `fields.*.default`            | string (field mode)                             | default field behavior          | `keep`, `drop`, `redact`            | See below  |
 | `fields.*.config`             | `key:value` mapping **(key is case-sensitive)** | headers fields                  | `key: field_mode`                   |            |

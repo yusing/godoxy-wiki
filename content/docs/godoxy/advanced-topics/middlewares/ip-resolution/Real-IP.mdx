@@ -11,8 +11,12 @@ description: Resolve client IP from proxy headers
 | Option      | Description       | Default     | Required |
 | ----------- | ----------------- | ----------- | -------- |
 | `header`    | Real IP header    | `X-Real-IP` | No       |
-| `from`      | Trusted CIDRs/IPs | -           | Yes      |
+| `from`      | Trusted IP/CIDR/hostname sources | -           | Yes      |
 | `recursive` | Recursive mode    | `true`      | No       |
+
+`from` accepts `host:<name>` as well as static addresses. A hostname proxy is
+not trusted before its first successful lookup. See
+[hostname resolution and failure behavior](../../Access-Control#hostname-address-sources).
 
 ## Recursive Mode
 
