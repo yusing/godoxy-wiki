@@ -148,6 +148,58 @@ proxy.#1.middlewares.cidr_whitelist: |
   message: "IP not allowed"
 ```
 
+## Explain an Access Decision
+
+Use `GET /api/v1/route/explain` to preview the peer-IP ACL, route lookup and
+supported request middleware without contacting an upstream, calling an auth
+server, consuming rate limits, or writing access logs, blocked events or
+notifications. On the authenticated API, use a browser-session cookie. The
+read-only machine token cannot call this endpoint.
+
+For a local loopback API listener at `127.0.0.1:8889`, a tunnel visitor can be
+checked with:
+
+```bash
+curl --get 'http://127.0.0.1:8889/api/v1/route/explain' \
+  --data-urlencode 'ip=127.0.0.1' \
+  --data-urlencode 'host=app.example.com' \
+  --data-urlencode 'header=CF-Connecting-IP: 198.51.100.10'
+```
+
+`ip` is the connection's peer IP before real-IP middleware. `host` is the
+request authority, including the listener port when nondefault, such as
+`app.example.com:8443`. Optional `path`, `method` and `scheme` default to `/`,
+`GET` and `https`. Repeat `header=Name: value` for multiple headers. Listener
+selection respects the scheme and port, without falling back to another
+listener that happens to contain the route. Account for any external port
+translation when describing the GoDoxy listener.
+
+The response includes `route`, `acl`, `client_ip`, middleware steps,
+`decided_by`, `detail` and applicable `notes`. Optional fields are omitted
+when unavailable.
+
+| Decision | Meaning |
+| --- | --- |
+| `allowed` | The evaluated request phases passed. Route rules and backend behavior can still change the outcome. |
+| `denied` | The ACL or an evaluated middleware denied the request. |
+| `responded` | An evaluated middleware answered directly, such as an HTTP-to-HTTPS redirect. |
+| `conditional` | Unmodeled behavior prevents a definitive answer. |
+| `not_found` | No listener or route matched; short links and not-found rules are not simulated. |
+
+Auth, CrowdSec, captcha and rate limiting are listed as `not_evaluated` after
+request bypass checks. Evaluation stops at unknown request behavior, because
+it could change later bypass rules or access decisions. Response-only modifiers
+are reported but not run, including their response-dependent bypass rules.
+Load-balancer backend selection and TLS client-certificate verification also
+produce `conditional` results; HTTPS assumes SNI equals Host. Cloudflare real-IP
+resolution uses cached or bundled CIDRs without refreshing them.
+
+Route rules are not simulated and may modify the request before route middleware
+or produce another response. Check `notes` even when a middleware denied the
+probe. Malformed inputs return HTTP 400, internal failures HTTP 500, and valid
+probes HTTP 200 regardless of their decision. Missing browser authentication
+returns 401; a read-only bearer token returns 403.
+
 ## Access Logging
 
 ### Common Fields
