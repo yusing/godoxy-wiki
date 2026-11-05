@@ -198,8 +198,16 @@ request authority, including the listener port when nondefault, such as
 `app.example.com:8443`. Optional `path`, `method` and `scheme` default to `/`,
 `GET` and `https`. Repeat `header=Name: value` for multiple headers. Listener
 selection respects the scheme and port, without falling back to another
-listener that happens to contain the route. Account for any external port
-translation when describing the GoDoxy listener.
+listener that happens to contain the route. An exact authority bind is preferred;
+a literal IP authority cannot use a listener bound to another IP. Hostname
+authorities or binds alone do not establish the connection destination, so
+selection assumes the configured default or a wildcard bind when no exact bind
+exists and reports that assumption in `notes`. No DNS lookup is performed.
+Account for any external port translation when describing the GoDoxy listener.
+
+Probes start with a normal origin-form request URL. Variables such as `$req_url`
+contain the path and query, with the authority in `Host` and HTTPS represented
+by TLS state.
 
 The response includes `route`, `acl`, `client_ip`, middleware steps,
 `decided_by`, `detail` and applicable `notes`. Optional fields are omitted
