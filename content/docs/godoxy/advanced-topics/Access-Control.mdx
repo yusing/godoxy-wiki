@@ -24,8 +24,12 @@ Transport-layer filtering before HTTP data exchange. Blocked IPs see immediate c
 | ---------------- | ------------------ | ---------------------------- |
 | IP address       | `ip:1.2.3.4`       | No                           |
 | CIDR             | `cidr:1.2.3.4/32`  | No                           |
+| Named address set | `set:family`      | No                           |
 | ISO country code | `country:US`       | **Yes**                      |
 | Timezone         | `tz:Asia/Shanghai` | **Yes**                      |
+
+Named sets reuse the root [`address_sets` definitions](../getting-started/Configuring-GoDoxy#address-sets).
+Undefined names reject configuration acceptance.
 
 ### ACL Configuration
 
@@ -102,7 +106,7 @@ HTTP-level filtering after request headers/body received. Blocked IPs see HTTP 4
 
 | Key           | Type         | Description   | Required | Default          |
 | ------------- | ------------ | ------------- | -------- | ---------------- |
-| `allow`       | IP/CIDR list | Allow list    | No       | `[]`             |
+| `allow`       | Address source list | Allow list (IP, CIDR, `host:<name>`, or `set:<name>`) | No | `[]` |
 | `status_code` | int          | Status code   | No       | `403`            |
 | `message`     | string       | Error message | No       | `IP not allowed` |
 
