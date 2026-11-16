@@ -19,7 +19,9 @@ cap_add:
   - PERFMON
 ```
 
-For a GPU on the main GoDoxy host, `cap_add` has no effect because the GoDoxy container runs as a non-root user. Set `kernel.perf_event_paranoid` to `0` on the host instead (e.g. `sysctl kernel.perf_event_paranoid=0`).
+For the main GoDoxy container, the default non-root user does not retain added capabilities. Using this approach requires overriding `user: "0:0"` as well as adding `PERFMON`. This changes the container's security posture; retain its other restrictions.
+
+The container's seccomp profile must also allow `perf_event_open`. Current Docker default profiles allow it with `PERFMON`; older or custom profiles may need a narrowly scoped allow rule. Lowering host `kernel.perf_event_paranoid` to `0` or below is an alternative to the capability check, but broadens host-wide access and does **not** bypass seccomp. Changing that sysctl alone is insufficient for the default main container, which drops all capabilities. Do not use privileged mode or disable seccomp merely for metrics. See [Docker seccomp profiles](https://docs.docker.com/engine/security/seccomp/).
 
 </Callout>
 
