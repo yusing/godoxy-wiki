@@ -346,7 +346,11 @@ defaults:
     interval: 5s
     timeout: 15s
     retries: 3
+    silence: # optional, no "service down" alerts in these local-time windows
+      - 02:00-04:30
 ```
+
+See [Health monitoring](/docs/godoxy/advanced-topics/Health-Monitoring#silence-windows) for `silence`.
 
 ### Homepage Settings
 
