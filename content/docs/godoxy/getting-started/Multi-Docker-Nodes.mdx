@@ -11,6 +11,20 @@ description: Setup multi docker nodes for GoDoxy
 2. Navigate to **Servers tab** in Web UI, click **Add agent**, fill in required information then click **Copy docker compose**
 3. Paste the docker compose into a file (e.g., `compose.yml`) on the agent server then start it with `docker compose up -d`
 
+<Callout>
+The **GPU Usage** graph (Intel GPUs on Linux) reads the i915 perf counters, which requires `CAP_PERFMON`. Add it to the agent service to enable the graph; without it, GPU metrics are skipped and the agent logs a `cannot read gpu counters` warning at startup (set `GODOXY_METRICS_DISABLE_GPU=true` to silence it).
+
+```yaml
+cap_add:
+  - PERFMON
+```
+
+For the main GoDoxy container, the default non-root user does not retain added capabilities. Using this approach requires overriding `user: "0:0"` as well as adding `PERFMON`. This changes the container's security posture; retain its other restrictions.
+
+The container's seccomp profile must also allow `perf_event_open`. Current Docker default profiles allow it with `PERFMON`; older or custom profiles may need a narrowly scoped allow rule. Lowering host `kernel.perf_event_paranoid` to `0` or below is an alternative to the capability check, but broadens host-wide access and does **not** bypass seccomp. Changing that sysctl alone is insufficient for the default main container, which drops all capabilities. Do not use privileged mode or disable seccomp merely for metrics. See [Docker seccomp profiles](https://docs.docker.com/engine/security/seccomp/).
+
+</Callout>
+
 ### System agent
 
 1. Navigate to **Servers tab** in Web UI, click **Add agent**, select **System** as agent type, fill in required information then click **Copy shell command**
@@ -30,7 +44,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/yusing/godoxy/refs/heads/m
   - Reverse proxy (http, h2c and https routes)
   - Port forwarding (tcp and udp routes)
   - Docker API
-  - System metrics (CPU, memory, disk, network)
+  - System metrics (CPU, memory, disk, network, GPU)
   - Health checks
 - Secure by default, with [mTLS](https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/) (for HTTP, TCP) and [DTLS](https://developer.mozilla.org/en-US/docs/Glossary/DTLS)+[mTLS](https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/) (for UDP)
 
