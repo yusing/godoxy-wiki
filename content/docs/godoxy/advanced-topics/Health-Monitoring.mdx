@@ -82,8 +82,9 @@ Use `silence` to stop "service down" notifications during known maintenance, suc
 - A window may cross midnight, e.g. `23:30-00:30`. Times must use two digits (`02:00`, not `2:00`).
 - On a daylight saving change, a window inside the skipped hour does not apply that day.
 - Health checks keep running during the window. If the service is still down when the window ends, the alert is sent on the next check.
-- A service that recovers inside the window sends no notification at all.
+- A service that recovers inside the window sends no notification if its down alert was suppressed. If a down alert was already sent, recovery still sends an up notification.
 - Set it globally in `config.yml` under `defaults.healthcheck.silence`. A route-level `silence` replaces the default, and `silence: []` opts a route out (with Docker labels: `proxy.#1.healthcheck.silence: "[]"`).
+- In the route editor, clear **Use default silence windows** to set route-specific windows. Leave the list empty to allow down alerts at all times; select the checkbox again to inherit the defaults.
 
 ```yaml
 # config.yml
