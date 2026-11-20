@@ -1,10 +1,6 @@
 {
   "title": "Request & Response Modification",
   "icon": "Pencil",
-  "pages": [
-    "Modify-Request",
-    "Modify-Response",
-    "X-Forwarded-Headers"
-  ],
+  "pages": ["Modify-Request", "Modify-Response", "X-Forwarded-Headers"],
   "defaultOpen": true
 }
