@@ -44,68 +44,18 @@ Remove `ports` section in your `docker-compose.yml` file.
 
 Doing this will make your host has only **one** exposed service, which is GoDoxy.
 
-## Environment variables
-
-See [Environment Variables](Environment-Variables) for the complete generated
-setting table, defaults, prefix migration, and startup diagnostics. Copy
-`.env.example` to `.env`, configure credentials, and uncomment only overrides.
-Compose uses socket-proxy and passes the configured Docker endpoint unchanged.
-
-### Configuration interpolation and provider recovery
-
-Use braces for environment references in YAML, for example:
-
-```yaml
-providers:
-  docker:
-    local: unix://${DOCKER_SOCKET}
-```
-
-References work both as whole values and inside strings. Quoting the YAML value
-is optional; env contents remain literal data. Missing variables are errors.
-The exact Docker provider value `$DOCKER_HOST` is a special shorthand that uses
-the same prefixed lookup order and defaults to `unix:///var/run/docker.sock`.
-Other bare `$VAR` references in Docker endpoints are rejected with a configuration
-error. The selected `DOCKER_HOST` endpoint is treated as local for public/private
-container address discovery.
-
-Unavailable Docker and agent providers retry startup automatically, with backoff
-from 3 to 30 seconds. They are reported as degraded while retrying. A successful
-retry reloads routes without requiring a container event or config save. Initial
-activation reports remain snapshots; consult recovery logs and the current route
-inventory for later results. A config reload or shutdown cancels the old retries.
-
-### Authentication
-
-<Callout type="warn">
-To use WebUI without HTTPS, set `GODOXY_API_JWT_SECURE` to `false`.
-
-**Not recommended**.
-
-</Callout>
-
-#### User Password Auth
-
-Both values must be set when using username/password authentication. GoDoxy rejects startup when either value is missing unless OIDC is enabled or authentication is explicitly disabled.
-
-#### OpenID Connect (OIDC)
-
-OIDC provides enterprise authentication via external identity providers.
-
-See [OIDC Configuration](OIDC) for setup instructions.
-
-## Behaviors
+## Auto-Discovery & Behaviors
 
 **Default URL: `<container_name>.yourdomain.com`**
 
 ### Container Proxying
 
-**ALL CONTAINERS** are proxied by default, **unless any of the following is true**:
+GoDoxy proxies **all running containers** by default, **unless any of the following is true**:
 
 - The label `proxy.exclude` includes **proxy** (`true`, `proxy`, or `all`)
-- The container is from a provider in **explicit only mode** (name with a trailing exclamation mark **`!`**)
-- The container is a backend service (e.g.: headless browsers, databases, etc.)
-- The container doesn't have any exposed port
+- The container belongs to a Docker provider in **explicit-only mode** (provider name with a trailing `!`, e.g. `local!: $DOCKER_HOST`)
+- The container is a backend-only service (e.g. headless browsers, databases)
+- The container has no exposed port
 - The container name starts with `buildx_`
 - The alias starts with `x-` or ends with `-old`
 
@@ -115,11 +65,9 @@ When a Docker provider is in explicit-only mode (`local!`), set **any** label st
 
 ### Health Monitoring
 
-Health monitoring is enabled by default for **ALL CONTAINERS**, including the excluded ones.
+Health monitoring is enabled by default for **all containers**, including excluded ones.
 
-Docker healthchecks are preferred when available. GoDoxy's fallback probe can be disabled by setting `healthcheck.disable: true` per route in the route file or in the docker labels. Docker health monitoring remains enabled.
-
-For every route of a Docker container, set `proxy.exclude: healthcheck`. Use `proxy.exclude: proxy,healthcheck` or `proxy.exclude: all` to also exclude the container from proxying. The boolean value `true` keeps its original behavior and excludes only proxying.
+Docker healthchecks are preferred when available. Disable GoDoxy's fallback probe per route with `healthcheck.disable: true` in a route file or Docker label, or for every route of a container with `proxy.exclude: healthcheck`. Use `proxy.exclude: proxy,healthcheck` or `proxy.exclude: all` to exclude both proxying and GoDoxy health probing (`proxy.exclude: true` excludes only proxying). See [Health Monitoring](../advanced-topics/Health-Monitoring).
 
 ```yaml
 services:
@@ -127,6 +75,42 @@ services:
     labels:
       proxy.exclude: all
 ```
+
+## Authentication
+
+<Callout type="warn">
+  To use the WebUI without HTTPS, set `GODOXY_API_JWT_SECURE=false` in `.env`.
+  **Not recommended** for production unless an external proxy terminates TLS in
+  front of GoDoxy.
+</Callout>
+
+#### User Password Auth
+
+Set both `GODOXY_API_USER` and `GODOXY_API_PASSWORD` in `.env` when using username/password authentication. GoDoxy rejects startup when either value is missing unless OIDC is enabled or authentication is explicitly disabled.
+
+#### OpenID Connect (OIDC)
+
+Use an external identity provider (Pocket ID, Authentik, Keycloak, etc.) for WebUI SSO and per-app authentication. See [OIDC Configuration](OIDC).
+
+## Environment Variables & Provider Recovery
+
+See [Environment Variables](Environment-Variables) for the complete generated setting table, defaults, prefix migration, and startup diagnostics. Copy `.env.example` to `.env`, configure credentials, and uncomment only overrides. Compose uses `socket-proxy` and passes the configured Docker endpoint unchanged.
+
+### Configuration Interpolation
+
+Use braces for environment references in YAML, for example:
+
+```yaml
+providers:
+  docker:
+    local: unix://${DOCKER_SOCKET}
+```
+
+References work both as whole values and inside strings; missing variables fail validation. The exact Docker provider value `$DOCKER_HOST` is a special shorthand that reads `GODOXY_DOCKER_HOST` (defaulting to `unix:///var/run/docker.sock`); other bare `$VAR` references in Docker endpoints are rejected.
+
+### Automatic Provider Recovery
+
+Unavailable Docker and agent providers retry startup automatically with backoff from 3 to 30 seconds and are reported as degraded while retrying. A successful retry reloads routes without requiring a container event or config save. A config reload or shutdown cancels pending retries.
 
 ## Use JSON Schema in IDEs
 

@@ -19,32 +19,38 @@ const features = [
     icon: Container,
     title: "Docker-aware",
     description:
-      "Automatically detect and configure routes from Docker containers",
+      "Automatically detect and configure routes from Docker containers and route files",
+    href: "/docs/godoxy/getting-started/Configuring-Routes",
   },
   {
     icon: Moon,
     title: "Idle-Sleep",
     description: "Put containers to sleep on idle, wake them up when needed",
+    href: "/docs/godoxy/advanced-topics/Idle-Sleep",
   },
   {
     icon: Shield,
     title: "Access Control",
     description: "Connection/Request level access control. IP/CIDR/GeoIP based",
+    href: "/docs/godoxy/advanced-topics/Access-Control",
   },
   {
     icon: Activity,
     title: "Server Monitoring",
     description: "Monitor your CPU, disk usage, memory usage, Docker logs, etc",
+    href: "/docs/godoxy/getting-started/Multi-Docker-Nodes",
   },
   {
     icon: Lock,
     title: "Certificates",
-    description: "Automatic HTTPS with Let's Encrypt",
+    description: "Automatic HTTPS with Let's Encrypt and local certificates",
+    href: "/docs/godoxy/advanced-topics/Certificates",
   },
   {
     icon: GitBranch,
     title: "Load Balancing",
     description: "Distribute traffic across containers",
+    href: "/docs/godoxy/advanced-topics/Load-Balancing",
   },
 ];
 
@@ -59,8 +65,9 @@ export default function HomePage() {
           <p
             className={`text-lg text-fd-muted-foreground max-w-2xl mx-auto ${geistMono.className}`}
           >
-            A smart reverse proxy for Docker that automatically manages routes,
-            saves resources, and keeps your services secure.
+            A smart reverse proxy for Docker, Podman, and self-hosted services
+            that automatically manages routes, saves resources, and keeps your
+            apps secure.
           </p>
         </div>
 
@@ -68,6 +75,7 @@ export default function HomePage() {
           {features.map((feature) => (
             <Card
               key={feature.title}
+              href={feature.href}
               icon={<feature.icon className="text-fd-primary" />}
               title={
                 <span className="text-fd-foreground">{feature.title}</span>

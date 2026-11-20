@@ -1,110 +1,69 @@
 ---
-title: Health monitoring
-description: Configure health monitoring for GoDoxy
+title: Health Monitoring
+description: How GoDoxy combines Docker healthchecks, fallback probes, exclusions, and maintenance silence windows
 ---
 
-## Behaviors
+GoDoxy monitors the health of **every route by default**, including containers excluded from proxying.
 
-- Health monitoring is enabled by default for all services, including the excluded ones.
-- If docker healthcheck<sup className="font-bold">1</sup> is enabled, it is the primary check. A valid Docker result is authoritative, so `use_get` and `path` are ignored and GoDoxy does not probe the upstream.
-- If a docker healthcheck is not configured or Docker cannot perform the check because of a client initialization, API, decoding, or timeout failure, the **GoDoxy** healthcheck is used as a fallback while Docker is retried on later intervals.
-- You can disable GoDoxy health probing by setting `healthcheck.disable: true` in the route file<sup className="font-bold">2</sup> or in the docker labels<sup className="font-bold">3</sup>. To disable it for every route of a Docker container, set `proxy.exclude: healthcheck`<sup className="font-bold">4</sup>. Docker health monitoring remains enabled for Docker routes.
+## How Checks Work
 
-### References
+1. **Docker `HEALTHCHECK` first**: If a container defines a Docker healthcheck (in its `Dockerfile` or `compose.yml`), GoDoxy treats Docker's status as authoritative and does **not** send its own HTTP/TCP probe (`path` and `use_get` are ignored).
+2. **GoDoxy fallback probe**: If no Docker healthcheck exists (or Docker cannot be queried due to an API/timeout error), GoDoxy probes the upstream directly:
 
-1. Health check in [Docker compose](https://docs.docker.com/reference/compose-file/services/#healthcheck) and [Dockerfile](https://docs.docker.com/engine/reference/builder/#healthcheck), e.g.
+| Route Type | Probe Method | Healthy | Unhealthy |
+| --- | --- | --- | --- |
+| **HTTP / HTTPS** | `HEAD` (or `GET` if `use_get: true`) to `path` (default `/`) | Any non-5xx HTTP response | Connection error or 5xx |
+| **TCP / UDP** | Dials upstream socket | Connection established | Connection fails |
+| **File Server** | `os.Stat` on `root` directory | Directory exists and is readable | Otherwise |
 
-   ```yaml
-   healthcheck:
-     test: ["CMD", "curl", "-f", "http://localhost"]
-     interval: 1m30s
-     timeout: 10s
-     retries: 3
-     start_period: 40s
-     start_interval: 5s
-   ```
+## Disabling Health Probes
 
-2. Disable GoDoxy health probing in route file
+- **Single route (route file or Docker label)**: Set `healthcheck.disable: true` (`proxy.#1.healthcheck.disable: true`).
+- **All routes of a Docker container**: Use `proxy.exclude`:
 
-   ```yaml
-   app:
-     host: 10.0.0.1
-     port: 8080
-     healthcheck:
-       disable: true
-   ```
+| Label Value | Proxying | GoDoxy Fallback Probe | Docker `HEALTHCHECK` |
+| --- | --- | --- | --- |
+| `false` (default) | Enabled | Enabled | Enabled |
+| `true` or `proxy` | Disabled | Enabled | Enabled |
+| `healthcheck` | Enabled | Disabled | Enabled |
+| `proxy,healthcheck` or `all` | Disabled | Disabled | Enabled |
 
-3. Docker labels
+## Property Reference
 
-   ```yaml
-   services:
-     app:
-       labels:
-         proxy.#1.healthcheck.disable: true
-   ```
+| Property | Description | Default | Values |
+| --- | --- | --- | --- |
+| `disable` | Disable GoDoxy fallback probing (Docker healthcheck remains) | `false` | boolean |
+| `path` | Probe path (**HTTP only**) | `/` | Relative URI (e.g. `/health`) |
+| `use_get` | Use `GET` instead of `HEAD` (**HTTP only**) | `false` | boolean |
+| `interval` | Time between probes | `5s` | Go duration |
+| `timeout` | Per-probe timeout | `5s` | Go duration |
+| `retries` | Consecutive failures before alerting unhealthy | `15s / interval` | integer |
+| `silence` | Daily local-time windows suppressing "service down" alerts | empty | List of `HH:MM-HH:MM` |
 
-4. Every route of a Docker container
+## Silence Windows
 
-   ```yaml
-   services:
-     app:
-       labels:
-         proxy.exclude: healthcheck
-   ```
-
-   Use `proxy.exclude: proxy,healthcheck` or `proxy.exclude: all` to exclude the routes from proxying as well. The boolean value `true` excludes only proxying for backward compatibility.
-
-## Implementations
-
-| Healthcheck Type | Method                                                                  | Healthy Condition                           | Unhealthy Condition                 |
-| ---------------- | ----------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------- |
-| HTTP             | Sends `HEAD` or `GET` request to specified `path` (default: `/`)        | Server replies with a non-5xx HTTP response | Connection failure/error, 5xx reply |
-| TCP/UDP          | Dials a TCP or UDP connection to upstream server                        | Connection is established                   | Connection cannot be established    |
-| File Server      | Checks if root directory exists and is accessible by GoDoxy (`os.Stat`) | Root directory exists and is accessible     | Otherwise                           |
-
-## Properties
-
-| Property | Description                                     | Default                   | Allowed Values / Syntax     |
-| -------- | ----------------------------------------------- | ------------------------- | --------------------------- |
-| disable  | Disable GoDoxy probing (Docker health remains)  | false                     | boolean                     |
-| path     | Relative path **(HTTP only)**                   | empty                     | empty or URI like `/health` |
-| use_get  | Use GET method instead of HEAD **(HTTP only)**  | false                     | boolean                     |
-| interval | Health check interval                           | 5s                        | duration                    |
-| timeout  | Health check timeout                            | 5s                        | duration                    |
-| retries  | Health check retries before notifying unhealthy | 15s divided by `interval` | integer                     |
-| silence  | Daily windows without "service down" alerts     | empty                     | list of `HH:MM-HH:MM`       |
-
-## Silence windows
-
-Use `silence` to stop "service down" notifications during known maintenance, such as a nightly backup that stops containers.
-
-- Times use the local time of the GoDoxy container, so set `TZ` (e.g. `TZ=America/New_York`) in `.env`.
-- A window may cross midnight, e.g. `23:30-00:30`. Times must use two digits (`02:00`, not `2:00`).
-- On a daylight saving change, a window inside the skipped hour does not apply that day.
-- Health checks keep running during the window. If the service is still down when the window ends, the alert is sent on the next check.
-- A service that recovers inside the window sends no notification if its down alert was suppressed. If a down alert was already sent, recovery still sends an up notification.
-- Set it globally in `config.yml` under `defaults.healthcheck.silence`. A route-level `silence` replaces the default, and `silence: []` opts a route out (with Docker labels: `proxy.#1.healthcheck.silence: "[]"`).
-- In the route editor, clear **Use default silence windows** to set route-specific windows. Leave the list empty to allow down alerts at all times; select the checkbox again to inherit the defaults.
+Suppress "service down" notifications during recurring maintenance (such as nightly backups) while keeping health checks running:
 
 ```yaml
-# config.yml
+# Global default in config/config.yml
 defaults:
   healthcheck:
     silence:
       - 02:00-04:30
+      - 23:30-00:30 # Midnight-crossing windows are supported
 ```
 
 ```yaml
-# route file
+# Per-route override (route file) — replaces global default; use [] to opt out
 app:
   healthcheck:
-    silence: [02:00-04:30, 23:30-00:30]
+    silence: [02:00-04:30]
+
+# Docker label (use "[]" to opt out of global silence windows)
+proxy.#1.healthcheck.silence: 02:00-04:30, 23:30-00:30
 ```
 
-```yaml
-# docker labels
-services:
-  app:
-    labels:
-      proxy.#1.healthcheck.silence: 02:00-04:30, 23:30-00:30
-```
+- Uses the GoDoxy container's local timezone — set `TZ` in `.env` (e.g. `TZ=America/New_York`).
+- Use two-digit 24-hour times (`02:00`, not `2:00`). On DST spring-forward, a window inside the skipped hour is skipped that day.
+- If a service is still down when the window ends, the alert fires on the next check. If it goes down and recovers inside the window, no alert is sent; if a down alert was already sent before the window, recovery still sends an "up" notification.
+- In the WebUI route editor, clear **Use default silence windows** to customize or opt out for a single route.

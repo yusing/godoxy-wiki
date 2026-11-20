@@ -1,17 +1,19 @@
 ---
 title: Domain Matching
-description: Configure domain matching for GoDoxy
+description: How short aliases, FQDNs, wildcard aliases, match_domains, and dashboard URLs resolve
 ---
 
-An alias can be:
+GoDoxy matches incoming `Host` headers (and HTTPS SNI) against route aliases:
 
-- a short alias like `app`
-- an FQDN (Fully Qualified Domain Name) alias like `app.example.com`
-- a leading-label wildcard alias like `*.example.com`
+| Alias Type | Example | Matches |
+| --- | --- | --- |
+| **Short alias** | `app` | `app.<matched-domain>` (or `app.*` if `match_domains` is unset) |
+| **FQDN alias** | `app.example.com` | Only `app.example.com` |
+| **Wildcard alias** | `"*.example.com"` (route files only) | One-label subdomains like `foo.example.com` — **not** `example.com` or `a.b.example.com` |
 
 ### Docker
 
-By default, the container name is used as the short alias unless `proxy.aliases` is set.
+By default, a container's short alias is its `container_name` unless `proxy.aliases` is set.
 
 ### General
 

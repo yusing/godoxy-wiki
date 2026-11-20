@@ -1,113 +1,83 @@
 ---
 title: OpenID Connect (OIDC)
-description: Configure OIDC authentication for GoDoxy and per-application middleware
+description: Set up single sign-on with Authentik, Pocket ID, or any OIDC identity provider
 ---
 
-## Overview
+Use OpenID Connect (OIDC) with an external identity provider (such as Pocket ID, Authentik, or Keycloak) for:
 
-OIDC allows users to authenticate using an external identity provider (IdP) such as Authentik, Pocket ID, or Azure AD. Use it for:
+- **WebUI SSO**: Sign in to the GoDoxy dashboard with your IdP instead of `GODOXY_API_USER`/`GODOXY_API_PASSWORD`.
+- **Per-App Protection**: Gate individual routes behind OIDC using the [OIDC Middleware](../advanced-topics/middlewares/authentication-and-security/OIDC).
 
-- **WebUI Authentication** - Single sign-on for the dashboard
-- **Per-Application Middleware** - Protect individual routes with OIDC
+## 1. Configure Your Identity Provider
 
-## Environment Variables
-
-| Variable                        | Description         | Default                       |
-| ------------------------------- | ------------------- | ----------------------------- |
-| `GODOXY_OIDC_ISSUER_URL`        | OIDC issuer URL     | empty                         |
-| `GODOXY_OIDC_CLIENT_ID`         | OIDC client ID      | empty                         |
-| `GODOXY_OIDC_CLIENT_SECRET`     | OIDC client secret  | empty                         |
-| `GODOXY_OIDC_ALLOWED_USERS`     | Allowed users list  | empty                         |
-| `GODOXY_OIDC_ALLOWED_GROUPS`    | Allowed groups list | empty                         |
-| `GODOXY_OIDC_SCOPES`            | OIDC scopes         | `openid,profile,email,groups` |
-| `GODOXY_OIDC_RATE_LIMIT`        | Rate limit          | `10`                          |
-| `GODOXY_OIDC_RATE_LIMIT_PERIOD` | Rate limit period   | `1s`                          |
-
-## Scopes
-
-| Scope            | Description    | Required |
-| ---------------- | -------------- | -------- |
-| `openid`         | OpenID Connect | Yes      |
-| `profile`        | User profile   | Yes      |
-| `email`          | User email     | No       |
-| `groups`         | User groups    | No       |
-| `offline_access` | Refresh token  | No       |
-
-## Callback URL
-
-Add this callback URL to your IdP:
+Register this callback URL in your IdP (replacing `yourdomain.com` with your domain):
 
 ```plaintext
 https://*.yourdomain.com/auth/callback
 ```
 
-Or for regex-based configuration:
+If your IdP requires a regular expression instead of a wildcard:
 
 ```plaintext
 https:\/\/([^\.]+)\.yourdomain\.com\/auth\/callback
 ```
 
-## Provider-Specific Configuration
+### Provider Notes
 
-### Authentik
+- **Authentik**:
+  1. Set **Signing Key** to `authentik Self-signed Certificate` and **Encryption Key** to `None`.
+  2. Set **Issuer mode** to *Each provider has a different issuer, based on the application slug*.
+  3. Add the scope `authentik default OAuth Mapping: OpenID 'offline_access'`.
+- **Pocket ID**:
 
-1. Set **Signing Key** to "authentik Self-signed Certificate"
-2. Set **Encryption Key** to None
-3. Set **Issuer mode** to "Each provider has a different issuer, based on the application slug"
-4. Add scope: `authentik default OAuth Mapping: OpenID 'offline_access'`
+  ![OIDC Configuration](images/oidc/pocket-id-1.png)
 
-### Example Configuration
+  ![OIDC Tokens](images/oidc/pocket-id-2.png)
 
-![OIDC Configuration](images/oidc/pocket-id-1.png)
+## 2. Add OIDC Settings to `.env`
 
-![OIDC Tokens](images/oidc/pocket-id-2.png)
+```dotenv
+GODOXY_OIDC_ISSUER_URL=https://id.yourdomain.com
+# For Authentik, use the per-app issuer: https://auth.yourdomain.com/application/o/<slug>/
+GODOXY_OIDC_CLIENT_ID=your-client-id
+GODOXY_OIDC_CLIENT_SECRET=your-client-secret
 
-Add these to `.env`:
+# At least one of ALLOWED_USERS or ALLOWED_GROUPS must be set
+GODOXY_OIDC_ALLOWED_USERS=user1,user2
+GODOXY_OIDC_ALLOWED_GROUPS=admins
+```
 
-| Variable                     | Description    | Example                                                                                            |
-| ---------------------------- | -------------- | -------------------------------------------------------------------------------------------------- |
-| `GODOXY_OIDC_ISSUER_URL`     | IdP base URL   | `https://id.domain.com` (Pocket ID) or `https://auth.domain.com/application/o/<slug>/` (Authentik) |
-| `GODOXY_OIDC_CLIENT_ID`      | Client ID      | your-client-id                                                                                     |
-| `GODOXY_OIDC_CLIENT_SECRET`  | Client secret  | your-client-secret                                                                                 |
-| `GODOXY_OIDC_ALLOWED_USERS`  | Allowed users  | `user1,user2`                                                                                      |
-| `GODOXY_OIDC_ALLOWED_GROUPS` | Allowed groups | `group1,group2`                                                                                    |
+| Variable | Description | Default |
+| --- | --- | --- |
+| `GODOXY_OIDC_ISSUER_URL` | IdP issuer URL (empty disables global OIDC) | empty |
+| `GODOXY_OIDC_CLIENT_ID` | OAuth client ID | empty |
+| `GODOXY_OIDC_CLIENT_SECRET` | OAuth client secret | empty |
+| `GODOXY_OIDC_ALLOWED_USERS` | Comma-separated allowed usernames/emails | empty |
+| `GODOXY_OIDC_ALLOWED_GROUPS` | Comma-separated allowed groups | empty |
+| `GODOXY_OIDC_SCOPES` | Requested scopes (`openid` and `profile` required; `email`, `groups`, `offline_access` optional) | `openid,profile,email,groups` |
+| `GODOXY_OIDC_RATE_LIMIT` | Login requests allowed per period | `10` |
+| `GODOXY_OIDC_RATE_LIMIT_PERIOD` | Rate-limit window | `1s` |
 
-## Per-Application OIDC Middleware
+Once these variables are set, WebUI OIDC login is active automatically.
 
-Protect individual routes with OIDC. Omitted options inherit from the global
-`GODOXY_OIDC_*` variables above. You can also configure a standalone issuer
-and credentials on the middleware; global OIDC does not need to be enabled.
+## 3. Protect Individual Apps (Optional)
 
-<Callout type="info">
-  The OIDC middleware only processes GET requests. Non-GET requests and
-  WebSocket connections are blocked with a 403 Forbidden response.
-</Callout>
+Add the `oidc` middleware to any route — omitted fields inherit from `GODOXY_OIDC_*`, or you can supply a standalone `issuer_url` per app without enabling global OIDC:
 
 ```yaml
+# Docker Compose label (inherits global GODOXY_OIDC_*)
 services:
   app:
     labels:
-      # Inherit issuer and credentials from GODOXY_OIDC_*
       proxy.#1.middlewares.oidc:
 ```
 
-Standalone issuer (for example Authentik per-application issuer):
+<Callout type="warn">
+  The OIDC middleware only handles `GET` requests (non-`GET` requests and
+  WebSockets without an existing session return `403 Forbidden`), and reserves
+  `/auth/callback` and `/auth/logout` on protected hosts. If you enable `oidc`
+  globally on `entrypoint.middlewares`, always add your IdP route to `bypass` to
+  avoid a redirect loop.
+</Callout>
 
-```yaml
-services:
-  app:
-    labels:
-      proxy.#1.middlewares.oidc: |
-        issuer_url: https://auth.example.com/application/o/app-b/
-        client_id: app-b-client-id
-        client_secret: app-b-client-secret
-        allowed_users:
-          - user1
-        scopes:
-          - openid
-          - profile
-          - email
-          - groups
-```
-
-See [OIDC Middleware](../advanced-topics/middlewares/authentication-and-security/OIDC) for the full option list and more examples.
+See [OIDC Middleware](../advanced-topics/middlewares/authentication-and-security/OIDC) for standalone per-app issuers, `scopes` list syntax, and bypass rules.

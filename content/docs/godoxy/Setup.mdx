@@ -59,3 +59,18 @@ To change listening ports, modify `.env`.
    ```shell
    wget https://raw.githubusercontent.com/yusing/godoxy/main/compose.example.yml -O compose.yml
    ```
+
+4. Edit `.env` (set `GODOXY_API_USER`, `GODOXY_API_PASSWORD`, `GODOXY_API_JWT_SECRET`, `TZ`, `GODOXY_UID`, `GODOXY_GID`) and `config/config.yml` (configure `autocert` and `match_domains`).
+
+5. Start GoDoxy:
+
+   ```shell
+   docker compose up -d
+   ```
+
+## Next Steps
+
+- [Basics](getting-started/Basics) — How container auto-discovery, labels, and health checks work
+- [Configuring GoDoxy](getting-started/Configuring-GoDoxy) — `config.yml`, entrypoints, and providers
+- [Configuring Routes](getting-started/Configuring-Routes) — Docker labels and non-Docker route files
+- [Troubleshooting & FAQ](Troubleshooting) — Common setup, DNS, certificate, and routing fixes

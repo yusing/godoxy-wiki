@@ -1,92 +1,95 @@
 ---
 title: Multi Docker Nodes
-description: Setup multi docker nodes for GoDoxy
+description: Connect remote Docker and Linux hosts to GoDoxy using godoxy-agent
 ---
 
-## Using `godoxy-agent` (recommended)
+To proxy containers and stream metrics from additional servers, run **`godoxy-agent`** on each remote host. It communicates with your main GoDoxy instance over encrypted **mTLS** (HTTP/TCP) and **DTLS+mTLS** (UDP).
 
-### Docker agent
-
-1. Create a directory for agent server, `cd` into it
-2. Navigate to **Servers tab** in Web UI, click **Add agent**, fill in required information then click **Copy docker compose**
-3. Paste the docker compose into a file (e.g., `compose.yml`) on the agent server then start it with `docker compose up -d`
-
-<Callout>
-The **GPU Usage** graph (Intel GPUs on Linux) reads the i915 perf counters, which requires `CAP_PERFMON`. Add it to the agent service to enable the graph; without it, GPU metrics are skipped and the agent logs a `cannot read gpu counters` warning at startup (set `GODOXY_METRICS_DISABLE_GPU=true` to silence it).
-
-```yaml
-cap_add:
-  - PERFMON
+```mermaid
+flowchart LR
+    M[Main GoDoxy] <-->|mTLS / DTLS| A1[Node 1: godoxy-agent]
+    M <-->|mTLS / DTLS| A2[Node 2: godoxy-agent]
+    A1 --> C1[Docker / Local Services]
+    A2 --> C2[Docker / Local Services]
 ```
 
-For the main GoDoxy container, the default non-root user does not retain added capabilities. Using this approach requires overriding `user: "0:0"` as well as adding `PERFMON`. This changes the container's security posture; retain its other restrictions.
+`godoxy-agent` handles reverse proxying (HTTP, h2c, HTTPS), TCP/UDP forwarding, Docker API access, health checks, and host metrics (CPU, memory, disk, network, GPU).
 
-The container's seccomp profile must also allow `perf_event_open`. Current Docker default profiles allow it with `PERFMON`; older or custom profiles may need a narrowly scoped allow rule. Lowering host `kernel.perf_event_paranoid` to `0` or below is an alternative to the capability check, but broadens host-wide access and does **not** bypass seccomp. Changing that sysctl alone is insufficient for the default main container, which drops all capabilities. Do not use privileged mode or disable seccomp merely for metrics. See [Docker seccomp profiles](https://docs.docker.com/engine/security/seccomp/).
+## Option 1: Docker Agent (Recommended)
 
+1. In the GoDoxy WebUI, open the **Servers** tab and click **Add agent**.
+2. Choose **Docker**, fill in the agent details, and click **Copy docker compose**.
+3. On the remote server, save that snippet to `compose.yml` in a new directory and start it:
+
+```shell
+docker compose up -d
+```
+
+<Callout type="info" title="Intel GPU metrics on Linux">
+  The **GPU Usage** graph reads Linux `i915` perf counters, which requires
+  `CAP_PERFMON`. Add `cap_add: [PERFMON]` to the agent service (and ensure your
+  seccomp profile allows `perf_event_open`, which current Docker defaults do).
+  Without it, GPU metrics are skipped and a startup warning is logged — set
+  `GODOXY_METRICS_DISABLE_GPU=true` to silence it. Do not use `privileged: true`
+  just for metrics.
 </Callout>
 
-### System agent
+## Option 2: System Agent (Bare-Metal / LXC)
 
-1. Navigate to **Servers tab** in Web UI, click **Add agent**, select **System** as agent type, fill in required information then click **Copy shell command**
-2. Run the shell command on the agent server
+The system agent runs directly on Linux hosts without Docker and supports both `systemd` and Alpine/OpenRC (`rc-service`).
 
-Installer supports both systemd and Alpine/OpenRC (`rc-service`) hosts.
+1. In the GoDoxy WebUI, open **Servers** → **Add agent** → select **System**.
+2. Fill in the details, click **Copy shell command**, and run it on the remote host.
 
-To update the agent, run the following command on the agent server, or make it a cron job:
+### Update or Uninstall
 
-```bash
+```shell
+# Update (safe to run from cron)
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/yusing/godoxy/refs/heads/main/scripts/install-agent.sh)" -- update
+
+# Uninstall
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/yusing/godoxy/refs/heads/main/scripts/install-agent.sh)" -- uninstall
 ```
 
-### Why?
-
-- `godoxy-agent` is a light-weight agent that handles
-  - Reverse proxy (http, h2c and https routes)
-  - Port forwarding (tcp and udp routes)
-  - Docker API
-  - System metrics (CPU, memory, disk, network, GPU)
-  - Health checks
-- Secure by default, with [mTLS](https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/) (for HTTP, TCP) and [DTLS](https://developer.mozilla.org/en-US/docs/Glossary/DTLS)+[mTLS](https://www.cloudflare.com/learning/access-management/what-is-mutual-tls/) (for UDP)
-
-## Using `docker-socket-proxy`
+## Legacy Alternative: `docker-socket-proxy`
 
 <Callout type="warn">
-**Not recommended**
-
-This exposes docker socket and maintain unencrypted connection
-
+  **Not recommended.** Exposing a raw `docker-socket-proxy` over TCP is
+  unencrypted and lacks host metrics and proxying. Use `godoxy-agent` unless you
+  have a specific constraint.
 </Callout>
 
-run the following docker compose file on the other node:
+On the remote host:
 
 ```yaml
-docker-proxy:
-  container_name: docker-proxy
-  image: lscr.io/linuxserver/socket-proxy:latest
-  environment:
-    - ALLOW_START=1
-    - ALLOW_STOP=1
-    - ALLOW_RESTARTS=1
-    - CONTAINERS=1
-    - EVENTS=1
-    - INFO=1
-    - PING=1
-    - POST=1
-    - VERSION=1
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-  restart: always
-  tmpfs:
-    - /run
-  ports:
-    - <ip>:2375:2375
+services:
+  docker-proxy:
+    container_name: docker-proxy
+    image: lscr.io/linuxserver/socket-proxy:latest
+    environment:
+      - ALLOW_START=1
+      - ALLOW_STOP=1
+      - ALLOW_RESTARTS=1
+      - CONTAINERS=1
+      - EVENTS=1
+      - INFO=1
+      - PING=1
+      - POST=1
+      - VERSION=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    tmpfs:
+      - /run
+    ports:
+      - <remote-ip>:2375:2375
 ```
 
-Add this to your `config.yml` under `providers.docker`:
+Then register the node in `config/config.yml`:
 
 ```yaml
 providers:
   docker:
-    local: ${DOCKER_HOST}
-    server-1: tcp://<ip>:2375 # add it here
+    local: $DOCKER_HOST
+    server-1: tcp://<remote-ip>:2375
 ```

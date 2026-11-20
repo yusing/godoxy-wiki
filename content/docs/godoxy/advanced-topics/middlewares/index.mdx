@@ -1,144 +1,103 @@
 ---
 title: Middlewares
-description: Configure middlewares for GoDoxy
+description: Built-in middleware catalog, syntax across entrypoint/route files/Docker labels, bypass rules, and entrypoint overlays
 ---
 
-## Quick Start
+Middlewares inspect or transform HTTP/HTTPS traffic globally on the entrypoint or per route. Middleware names and option keys are **case-insensitive** and snake/camel-agnostic (`redirectHTTP`, `redirect_http`, and `RedirectHttp` are equivalent).
 
-| Method                 | Order       | Use Case           | Configuration              |
-| ---------------------- | ----------- | ------------------ | -------------------------- |
-| **Entrypoint**         | Ordered     | Global middlewares | `config.yml`               |
-| **Middleware Compose** | Ordered     | Reusable configs   | `config/middlewares/*.yml` |
-| **Docker Labels**      | Unordered\* | Per-route          | Container labels           |
-| **Route Files**        | Unordered\* | Per-route          | Route files                |
+## Built-in Middleware Catalog
+
+| Category | Middleware | What It Does |
+| --- | --- | --- |
+| **Access Control** | [CIDR Whitelist](access-control/CIDR-Whitelist) (`cidr_whitelist`) | Allow only listed IPs, CIDRs, `host:<name>`, or `set:<name>` |
+| | [Rate Limiter](access-control/Rate-Limiter) (`rate_limit`) | Limit requests per client (`average`, `burst`, `periods`) |
+| **Auth & Security** | [OIDC](authentication-and-security/OIDC) (`oidc`) | Protect routes with OpenID Connect (global or per-app issuer) |
+| | [Forward Auth](authentication-and-security/Forward-Auth) (`forward_auth`) | Delegate auth to an external service (e.g. TinyAuth, Authelia) |
+| | [CrowdSec AppSec](authentication-and-security/Crowdsec-AppSec) (`crowdsec`) | Inspect requests against CrowdSec AppSec WAF |
+| | [hCaptcha](authentication-and-security/hCaptcha) (`hcaptcha`) | Gate routes behind a per-session hCaptcha challenge |
+| **IP Resolution** | [Cloudflare Real IP](ip-resolution/Cloudflare-Real-IP) (`cloudflare_real_ip`) | Resolve client IP from `CF-Connecting-IP` (recommended on entrypoint) |
+| | [Real IP](ip-resolution/Real-IP) (`real_ip`) | Resolve client IP from a custom header and trusted proxy list |
+| **Headers & Paths** | [Modify Request](request-response-modification/Modify-Request) (`modify_request` / `request`) | Set/add/hide request headers and add path prefixes |
+| | [Modify Response](request-response-modification/Modify-Response) (`modify_response` / `response`) | Set/add/hide response headers (e.g. security & CORS headers) |
+| | [X-Forwarded Headers](request-response-modification/X-Forwarded-Headers) (`hide_x_forwarded` / `set_x_forwarded`) | Strip or override `X-Forwarded-*` headers |
+| **Content** | [Modify HTML](content-modification/Modify-HTML) (`modify_html`) | Append or replace HTML elements by CSS selector |
+| | [Themed](content-modification/Themed) (`themed`) | Inject preset dark themes, Google Fonts, or Theme Park CSS |
+| **Traffic Control** | [Redirect HTTP](traffic-control/Redirect-HTTP) (`redirect_http`) | Redirect HTTP (`:80`) traffic to HTTPS (`:443`) |
+| | [Custom Error Pages](traffic-control/Custom-Error-Pages) (`custom_error_pages`) | Serve custom HTML error pages (enabled on entrypoint by default) |
+
+## Where & How to Configure Middlewares
+
+| Location | Execution Order | YAML Shape | Best For |
+| --- | --- | --- | --- |
+| **Entrypoint** (`config/config.yml`) | Ordered (list) | `- use: <name>` | Global policies (`CloudflareRealIP`, `RedirectHTTP`, global `oidc`) |
+| **Middleware Compose** (`config/middlewares/*.yml`) | Ordered (list) | `<preset>:\n  - use: <name>` | Reusable bundles referenced via `<preset>@file` |
+| **Route Files** (`config/*.yml`) | Unordered (use `priority`) | `middlewares:\n  <name>:` | Non-Docker per-route rules |
+| **Docker Labels** (`compose.yml`) | Unordered (use `priority`) | `proxy.#1.middlewares.<name>:` | Container per-route rules |
 
 <Callout type="info">
-  Set `priority` for unordered methods when order matters. Note the syntax
-  difference across locations: `entrypoint.middlewares` and middleware compose
-  files use an ordered YAML **list** (`- use: <name>`), whereas route files and
-  Docker labels use a **map** keyed by middleware name. In Docker Compose
-  labels, escape runtime variables like `$remote_host` as `$$remote_host`.
+  In Docker Compose labels, escape runtime variables like `$remote_host` as
+  `$$remote_host` so Compose does not strip them before Docker sees the label.
+  Route files (`config/*.yml`) use a single `$`.
 </Callout>
 
-### Basic Example
+### Side-by-Side Syntax
 
 ```yaml
-# Global middleware (entrypoint)
-entrypoint:
-  middlewares:
-    - use: real_ip
-      header: X-Real-IP
-      from: [127.0.0.1, 192.168.0.0/16]
-
-# Per-service (Docker labels)
-services:
-  app:
-    labels:
-      proxy.myapp.middlewares.redirect_http.priority: 1
-      proxy.myapp.middlewares.cidr_whitelist.priority: 2
-      proxy.myapp.middlewares.cidr_whitelist.allow: 127.0.0.1, 192.168.0.0/16
-```
-
-### Naming Convention
-
-Middleware names and options are **case-insensitive**: `redirectHTTP`, `redirect_http`, `RedirectHttp` are equivalent.
-
-## Applying Middlewares
-
-### Entrypoint & Middleware Compose
-
-```yaml
-# Entrypoint (config.yml)
+# 1. Entrypoint (config/config.yml) — ordered list with `- use:`
 entrypoint:
   middlewares:
     - use: CloudflareRealIP
     - use: CIDRWhitelist
       allow:
         - 127.0.0.1
-        - 223.0.0.0/8
+        - 192.168.0.0/16
 
-# Middleware Compose (config/middlewares/whitelist.yml)
+# 2. Middleware Compose (config/middlewares/whitelist.yml) — reusable named list
 myWhitelist:
   - use: CloudflareRealIP
   - use: CIDRWhitelist
     allow:
       - 127.0.0.1
-      - 223.0.0.0/8
-```
+      - 192.168.0.0/16
 
-For `CIDRWhitelist`, an omitted or empty `allow` list blocks all requests except those matching a bypass rule. A route can specify only `bypass` to extend an existing entrypoint whitelist's bypass rules without repeating its `allow` list.
-
-### Docker Labels
-
-```yaml
-# Single line
-proxy.#1.middlewares.{name}.{option}: { value }
-
-# YAML block
-proxy.#1.middlewares.{name}: |
-  {option}: {value}
-```
-
-### Route Files
-
-```yaml
+# 3. Route File (config/services.yml) — map keyed by middleware name
 myapp:
   middlewares:
-    { name }:
-      { option }: { value }
-```
+    myWhitelist@file: # Reuse the composition above
+    cidr_whitelist:
+      priority: 2
+      allow: [10.0.0.0/8]
 
-### Reusing Compositions
-
-```yaml
-# Docker labels
-proxy.#1.middlewares.myWhitelist@file:
-
-# Route file
-myapp:
-  middlewares:
-    myWhitelist@file:
-
-# Entrypoint
-entrypoint:
-  middlewares:
-    - use: myWhitelist@file
+# 4. Docker Labels (compose.yml) — flat or inline YAML block
+services:
+  app:
+    labels:
+      proxy.#1.middlewares.myWhitelist@file:
+      proxy.#1.middlewares.redirect_http.priority: 1
+      proxy.#1.middlewares.cidr_whitelist: |
+        priority: 2
+        allow:
+          - 127.0.0.1
+          - 192.168.0.0/16
 ```
 
 ## Bypass Rules
 
-Bypass rules are used for bypassing middlewares in specific cases.
-
-## Examples
-
-See [Rules syntax](../rule-based-routing#syntax-reference) for complete documentation.
-
-### Entrypoint Example
+Every middleware accepts a `bypass` list using [Rule Conditions](../rule-based-routing/Conditions) to skip that middleware for specific routes, paths, or client IPs:
 
 ```yaml
+# Entrypoint example
 entrypoint:
   middlewares:
     - use: oidc
       bypass:
         - route pocket-id
         - route immich & path glob(/api/*)
-        - route dockmon & path /api/agent/ws
         - remote 192.168.0.0/16
 ```
 
-### Docker Labels Example
-
 ```yaml
-proxy.#1.middlewares.oidc.bypass: |
-  - route pocket-id
-  - route immich & path glob(/api/*)
-  - route dockmon & path /api/agent/ws
-  - remote 192.168.0.0/16
-```
-
-### Route File Example
-
-```yaml
+# Route file example
 myapp:
   middlewares:
     oidc:
@@ -149,59 +108,20 @@ myapp:
 
 ## Entrypoint Overlay Promotion
 
-When an entrypoint middleware is active (e.g. `oidc`), you can add **per-route bypass rules** that are promoted into the entrypoint middleware for that specific route. This avoids the middleware being evaluated twice — once at the entrypoint level and again at the route level.
-
-### How It Works
-
-A route-local middleware entry that contains **only `bypass`** and matches an existing entrypoint middleware name (case-insensitive, snake-agnostic) is treated as an **overlay**:
-
-1. The route's bypass rules are qualified with the route name and appended to the matching entrypoint middleware's bypass list for that route only
-2. The route-local overlay is consumed — it is not evaluated again as a separate middleware
-3. If the route entry has options beyond `bypass`, it is **not** treated as an overlay and works as a normal route middleware instead
-
-### Entrypoint Configuration Example
+If a middleware (such as `oidc` or `cidr_whitelist`) is already active on `entrypoint.middlewares`, you can add **per-route bypass rules** without duplicating or re-evaluating the middleware:
 
 ```yaml
+# config/config.yml
 entrypoint:
   middlewares:
     - use: oidc
-```
 
-### Docker Labels Example
-
-```yaml
-# Entrypoint has OIDC enabled
-# This route adds bypass rules for the entrypoint OIDC middleware
+# Docker label (or route file) containing ONLY `bypass`
 proxy.myapp.middlewares.oidc.bypass: |
   - path glob(/public/*)
   - path /health
 ```
 
-### Route File Example
-
-```yaml
-myapp:
-  middlewares:
-    oidc:
-      bypass:
-        - path glob(/public/*)
-        - path /health
-```
-
-With the above configuration, requests to `myapp` matching `/public/*` or `/health` will bypass the entrypoint's OIDC middleware. The route-local `oidc` entry is consumed and not applied again.
-
-### Mixed Options (Not an Overlay)
-
-If the route middleware entry contains options other than `bypass`, it is **not** promoted and works as a regular route middleware:
-
-```yaml
-myapp:
-  middlewares:
-    oidc:
-      allowed_groups:
-        - admins
-      bypass:
-        - path glob(/public/*)
-```
-
-In this case, `oidc` is applied as a normal route middleware with both `allowed_groups` and `bypass`. The entrypoint OIDC middleware still applies separately.
+**How it works:**
+1. When a route-local middleware entry contains **only `bypass`** and matches an entrypoint middleware name, GoDoxy promotes those bypass rules into the entrypoint middleware (scoped to that route) and consumes the route-local entry so it does not run twice.
+2. If the route-local entry includes any option besides `bypass` (for example `allowed_groups`), it is **not** promoted — it runs as a separate route middleware in addition to the entrypoint middleware.

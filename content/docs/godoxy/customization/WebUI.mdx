@@ -1,68 +1,41 @@
 ---
 title: Dashboard Configuration
-description: Customize how applications appear on the GoDoxy dashboard. Configure display names, icons, categories, and descriptions
+description: Customize app names, icons, categories, descriptions, and visibility on the GoDoxy WebUI dashboard
 ---
 
 <Callout type="info">
-Starting from v0.9, you can edit and hide/unhide apps directly from the WebUI by right-clicking.
-
-WebUI edits override labels and route file settings.
-
+  You can edit, hide, or unhide any app directly in the WebUI by right-clicking
+  its card, or double-click a category header to rename it. WebUI edits take
+  precedence over Docker labels and route files.
 </Callout>
 
-## Overview
+## Properties
 
-This configures how routes are displayed on the dashboard. You can configure these settings via Docker labels, route files, or directly in the WebUI.
+Configure dashboard metadata in Docker labels (`proxy.<alias>.homepage`), route files (`homepage:`), or via the WebUI right-click menu:
 
-## Configuration Methods
+| Property | Description | Default | Values |
+| --- | --- | --- | --- |
+| `show` | Show or hide the card on the dashboard | `true` | boolean |
+| `name` | Display name | Sanitized alias | string |
+| `icon` | Icon reference (see below) | Auto-detected | preset, URL, or relative path |
+| `url` | Override click target URL | First public URL | absolute URL |
+| `category` | Dashboard section name | Auto-detected (`Docker` / `Others` fallback) | string |
+| `description` | Short subtitle | Empty | string |
 
-| Method        | Description                                     |
-| ------------- | ----------------------------------------------- |
-| Docker Labels | Configure per-container in `docker-compose.yml` |
-| Route Files   | Configure for non-Docker apps in `config/*.yml` |
-| WebUI         | Right-click menu for quick edits                |
+Click URLs default to the route's first computed public URL — see [Public URLs and dashboard links](../advanced-topics/Domain-Matching#public-urls-and-dashboard-links).
 
-## Property Reference
+## Icons & Auto-Detection
 
-| Property      | Description          | Default         | Values         |
-| ------------- | -------------------- | --------------- | -------------- |
-| `show`        | Display on dashboard | `true`          | boolean        |
-| `name`        | Display name         | Sanitized alias | string         |
-| `icon`        | Dashboard icon       | Auto-detected   | icon reference |
-| `url`         | Override app URL     | Dynamic         | absolute URL   |
-| `category`    | Dashboard category   | Auto-detected   | string         |
-| `description` | Short description    | Empty           | string         |
+GoDoxy automatically picks icons and categories from container image names, aliases (stripping common suffixes like `-server`, `-web`, `-app`), the [selfh.st icon directory](https://cdn.jsdelivr.net/gh/selfhst/icons/index.json), and GoDoxy's [preset categories](https://github.com/yusing/godoxy/blob/main/internal/homepage/categories.go).
 
-## Application links
+To set an icon manually:
 
-Application links use the first configured public URL unless `homepage.url`
-is set. See [public URLs and dashboard links](/docs/godoxy/advanced-topics/Domain-Matching#public-urls-and-dashboard-links)
-for domain matching, listener ports, and behavior without match domains.
-
-## Icon Reference
-
-Icons can be sourced from preset libraries or custom locations:
-
-| Source            | Format                      | Example                        |
-| ----------------- | --------------------------- | ------------------------------ |
-| Walkxcode presets | `@walkxcode/<filename>.png` | `@walkxcode/nginx.png`         |
-| Selfhst presets   | `@selfhst/<filename>.svg`   | `@selfhst/adguard-home.png`    |
-| Absolute URL      | `https://...`               | `https://example.com/icon.png` |
-| Relative path     | `/path/to/icon.png`         | `/-/pwa-icons/logo-192.png`    |
-
-## Category Configuration
-
-Categories and icons are automatically detected from:
-
-- Container image names and aliases
-- Common service suffixes such as `-server`, `-web`, and `-app` (`immich-server` matches `immich`)
-- Alias matches against [selfh.st directory](https://cdn.jsdelivr.net/gh/selfhst/icons/index.json)
-- GoDoxy's [preset categories](https://github.com/yusing/godoxy/blob/main/internal/homepage/categories.go)
-
-Fallback categories:
-
-- `Docker` for Docker containers without matches
-- `Others` for unmatched routes
+| Source | Format | Example |
+| --- | --- | --- |
+| Selfh.st presets | `@selfhst/<filename>.<ext>` | `@selfhst/adguard-home.png` |
+| Walkxcode presets | `@walkxcode/<filename>.<ext>` | `@walkxcode/nginx.png` |
+| Absolute URL | `https://...` | `https://example.com/icon.png` |
+| Relative path on the app | `/path/to/icon.png` | `/-/pwa-icons/logo-192.png` |
 
 ## Examples
 
@@ -73,28 +46,23 @@ services:
   gitlab:
     image: gitlab/gitlab-ce:latest
     container_name: gitlab
-    restart: always
     labels:
       proxy.aliases: gitlab, gitlab-reg, gitlab-ssh
-      # Main GitLab instance
       proxy.gitlab: |
         port: 80
         homepage:
           name: GitLab
           icon: "/-/pwa-icons/logo-192.png"
           description: GitLab CE instance
-          category: dev
-      # Registry (hidden from dashboard)
+          category: Dev
       proxy.gitlab-reg: |
         port: 5050
         homepage:
           show: false
-      # SSH gateway (hidden from dashboard)
       proxy.gitlab-ssh: |
         port: "22223:22"
         homepage:
           show: false
-    shm_size: 256m
 ```
 
 ### Route File
@@ -107,34 +75,5 @@ adgh:
     name: AdGuard Home
     icon: "@selfhst/adguard-home.png"
     description: DNS filtering and ad blocking
-    category: network
-
-pihole:
-  host: 10.0.2.2
-  homepage:
-    name: Pi-hole
-    icon: "@selfhst/pihole.png"
-    description: Network-wide ad blocking
-    category: network
+    category: Network
 ```
-
-## WebUI Interaction Guide
-
-### Editing Applications
-
-1. Right-click on any application card
-2. Select `Edit App` from the context menu
-3. Modify display settings as needed
-4. Changes apply immediately
-
-### Hiding Applications
-
-1. Right-click on the application
-2. Select `Hide App`
-3. To unhide, right-click again and select `Show App`
-
-### Renaming Categories
-
-1. Double-click the category header
-2. Enter the new name
-3. Press `Enter` to save

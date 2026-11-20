@@ -1,46 +1,156 @@
 ---
 title: Configuring GoDoxy
+description: Structure of config/config.yml, request flow, entrypoints, providers, address sets, and embedded WebUI
 ---
 
 import { TypeTable } from "fumadocs-ui/components/type-table";
 
-## Basic Config File
-
-Here's a simple example of a configuration file:
+GoDoxy reads its main configuration from `config/config.yml` and hot-reloads changes automatically. Most users start with just a `providers` block and add `autocert`, `match_domains`, and `entrypoint` settings as needed.
 
 ```yaml
+# Minimal config/config.yml
 providers:
   docker:
     local: $DOCKER_HOST
 ```
 
-### Understanding the Config File
+## Request Lifecycle
 
-The `config.yml` file is divided into several sections:
+Understanding how GoDoxy processes an incoming HTTP/HTTPS request makes it much easier to decide where to put ACLs, middlewares, and rules:
 
-| Section          | Description                                                                      |
-| ---------------- | -------------------------------------------------------------------------------- |
-| `acl`            | Handles access control                                                           |
-| `address_sets`   | Named lists of IPs, CIDRs, and hostname address sources                            |
-| `autocert`       | Handles SSL certificate settings                                                 |
-| `entrypoint`     | Manages GoDoxy entrypoints (port 80 and 443)                                     |
-| ↳ `middlewares`  | Defines middleware settings                                                      |
-| ↳ `access_log`   | Configures access logs                                                           |
-| `providers`      | Sets up orchestrators (<span className="font-bold text-red-500">required</span>) |
-| ↳ `include`      | Includes route configuration files                                               |
-| ↳ `docker`       | Configures Docker providers                                                      |
-| ↳ `agents`       | GoDoxy agents                                                                    |
-| ↳ `proxmox`      | Proxmox credentials                                                              |
-| ↳ `notification` | Configures notifications for health monitoring                                   |
-| ↳ `maxmind`      | MaxMind credentials                                                              |
-| `match_domains`  | List of domains to match                                                         |
-| `defaults`       | Default values                                                                   |
-| `homepage`       | Configures homepage settings                                                     |
-| `webui`          | Embedded WebUI: `display_name`, `aliases`, optional `inbound_mtls_profile`, `middlewares`, `access_log` |
+```mermaid
+flowchart LR
+    A[Client Request] --> B[Layer 4 ACL]
+    B --> C[SNI & Route Match]
+    C -->|Matched| D[Entrypoint Middlewares]
+    D --> E[Route Middlewares & Rules]
+    E --> F[Upstream Service]
+    C -->|Unmatched| G{Short Link?}
+    G -->|Yes| H[Redirect]
+    G -->|No| I[entrypoint.rules.not_found / 404]
+```
 
-### Address sets
+## Top-Level Sections
 
-Define shared client or proxy address lists once at the root of `config.yml`:
+| Section | Purpose | Required |
+| --- | --- | --- |
+| `providers` | Where routes, alerts, and integrations come from (`docker`, `include`, `agents`, `proxmox`, `notification`, `maxmind`) | **Yes** |
+| `autocert` | Automatic ACME/DNS-01 TLS certificates or local static certificates | No |
+| `match_domains` | Base domains allowed for short aliases (e.g. `app` → `app.example.com`) | No |
+| `entrypoint` | Global HTTP/HTTPS behavior: `proxy_protocol`, `strict_sni`, `middlewares`, `access_log`, `rules.not_found` | No |
+| `acl` | Connection-level (Layer 4) IP/CIDR/hostname/GeoIP access control | No |
+| `address_sets` | Reusable named lists of IPs, CIDRs, and dynamic hostnames (`set:<name>`) | No |
+| `inbound_mtls_profiles` | Reusable CA trust profiles for HTTPS client-certificate authentication | No |
+| `defaults` | Global defaults for `healthcheck` and `idlewatcher.notify` | No |
+| `webui` | Hostnames, display name, middlewares, and logging for the embedded WebUI | No |
+| `homepage` | App dashboard category behavior | No |
+
+### Environment Variable Substitution
+
+Any YAML string in `config.yml` and route files supports `${VAR_NAME}` interpolation:
+
+```yaml
+autocert:
+  provider: cloudflare
+  options:
+    auth_token: ${CF_API_TOKEN}
+```
+
+Missing variables fail config validation. The bare `$DOCKER_HOST` shorthand is supported only under `providers.docker`.
+
+## Providers
+
+`providers` tells GoDoxy where to discover routes and connect external integrations:
+
+```yaml
+providers:
+  # Standalone route files under config/ (for non-Docker VMs, LXCs, bare-metal)
+  include:
+    - services.yml
+    - proxmox.yml
+
+  # Local or remote Docker / Podman daemons
+  docker:
+    local: $DOCKER_HOST          # Proxies all containers by default
+    # local!: $DOCKER_HOST       # Append "!" for explicit-only mode (requires a proxy.* label)
+    # remote: tcp://10.0.2.1:2375
+    # ssh-host: ssh://root:1234@10.0.2.2
+
+  # Remote GoDoxy agents (recommended over raw TCP Docker sockets)
+  agents:
+    - 10.0.0.1:8899
+
+  # Alerting targets (Gotify, Ntfy, Discord, custom webhooks)
+  notification:
+    - name: gotify
+      provider: gotify
+      url: https://gotify.example.com
+      token: ${GOTIFY_TOKEN}
+
+  # Proxmox VE integration (LXC discovery, lifecycle, logs, idle sleep)
+  proxmox:
+    - url: https://pve.domain.com:8006
+      token_id: root@pam!godoxy
+      secret: ${PVE_SECRET}
+      no_tls_verify: true
+
+  # GeoIP database for country/timezone ACL rules
+  maxmind:
+    account_id: 123456
+    license_key: ${MAXMIND_KEY}
+    database: geolite # or geoip2
+```
+
+### Secured Docker Providers (TLS)
+
+A Docker provider value can be a URL string or a structured object for TLS-secured daemons:
+
+```yaml
+providers:
+  docker:
+    local: $DOCKER_HOST
+    remote_secured:
+      scheme: https
+      host: 10.0.2.1
+      port: 2375
+      tls:
+        ca_file: /path/to/ca.pem
+        cert_file: /path/to/cert.pem
+        key_file: /path/to/key.pem
+```
+
+<TypeTable
+  type={{
+    scheme: { description: "Connection scheme", type: "string", required: true, default: "https" },
+    host: { description: "Docker daemon host", type: "string", required: true, default: "localhost" },
+    port: { description: "Docker daemon port", type: "number", required: true, default: 2375 },
+    tls: { description: "Client TLS object (`ca_file`, `cert_file`, `key_file`)", type: "TLSConfig", required: false, default: null },
+  }}
+/>
+
+## Auto SSL & Domain Matching
+
+Configure `autocert` to issue/load TLS certificates and `match_domains` to restrict which base domains match short aliases:
+
+```yaml
+autocert:
+  provider: cloudflare
+  email: you@example.com
+  domains:
+    - "*.yourdomain.com"
+  # certificate_key_type: RSA2048  # optional; default EC256 (also EC384, RSA3072/4096/8192)
+  options:
+    auth_token: ${CF_API_TOKEN}
+
+match_domains:
+  - yourdomain.com
+```
+
+See [Certificates](../advanced-topics/Certificates) and [Domain Matching](../advanced-topics/Domain-Matching) for multi-cert SNI, local certificates, and wildcard aliases.
+
+## Address Sets
+
+Define shared IP, CIDR, and dynamic DNS lists once at the root of `config.yml`, then reference them as `set:<name>` in `cidr_whitelist.allow`, `real_ip.from`, rule/bypass `remote` conditions, ACL `allow`/`deny`, and access-log CIDR filters:
 
 ```yaml
 address_sets:
@@ -58,146 +168,56 @@ entrypoint:
         - set:office
 ```
 
-Use `set:<name>` in `cidr_whitelist.allow`, `real_ip.from`, rules and middleware
-bypass `remote` conditions, ACL `allow`/`deny`, and access-log CIDR filters. Route
-files and composed middleware can reference the same root definitions. For example,
-`remote set:family` matches any address in `family`.
+Key rules:
+- Names are case-sensitive (`[A-Za-z0-9_-]+`); sets cannot nest other sets.
+- Undefined `set:<name>` references reject the config reload (preserving the previous working config).
+- `host:<name>` entries resolve A/AAAA records in the background every minute. They match nothing until the first successful lookup; later lookup failures (including `NXDOMAIN`) retain the last known addresses until a refresh succeeds.
 
-Names are case-sensitive and contain only letters, digits, hyphens, and underscores.
-Entries must be IPs, CIDRs, or `host:<name>` sources. Sets cannot contain other sets;
-null, empty-string, and empty-object entries are rejected. An empty set is valid and
-matches nothing. Undefined references reject configuration acceptance, including
-references in included routes. A rejected reload preserves the active definitions.
-An accepted reload updates definitions for existing references without rewriting
-each route.
+## Entrypoint
 
-Hostname entries resolve A/AAAA records in the background and refresh every minute.
-They match nothing until the first successful lookup. Later failures, including
-NXDOMAIN, keep the last good addresses indefinitely until a successful refresh.
-During that time an old address can remain allowed by an allow list or denied by a
-deny list, while a new address does not match that source. Use names and resolvers
-you trust.
-
-### Environment Variables substitution
-
-Environment variables can be substituted in **every YAML string** using the `${VAR_NAME}` syntax.
-
-```yaml
-autocert:
-  ...
-  options:
-    auth_token: ${AUTH_TOKEN}
-```
-
-### Auto SSL and Domain matching
-
-Specify which domains your application should respond to.
-
-```yaml
-autocert:
-  provider: cloudflare
-  email: your-email@example.com
-  domains:
-    - *.yourdomain.com
-  # certificate_key_type: RSA2048  # optional; default EC256 (also EC384, RSA3072/4096/8192). Use RSA* if clients lack ECDSA (e.g. some IoT TLS)
-match_domains:
-  - yourdomain.com
-```
-
-See [Certificates and domain matching](../advanced-topics/Certificates)
-
-### Entrypoint Configuration
-
-This section defines how GoDoxy handles incoming requests.
+`entrypoint` controls global HTTP/HTTPS handling on ports 80 and 443:
 
 ```yaml
 entrypoint:
+  # Optional: reject HTTPS requests whose Host header and TLS SNI resolve to different routes (421)
+  strict_sni: true
+
+  # Optional: PROXY protocol for upstream load balancers / tunnels
   proxy_protocol:
-    # required accepts only these proxies; mixed also permits direct clients.
-    mode: required
+    mode: required # required | mixed | disabled
     trusted_proxies:
       - "172.18.0.10"
       - "10.0.0.0/8"
 
+  # Global middlewares (executed in listed order)
   middlewares:
-    - use: CIDRWhitelist
-      allow:
-        - "127.0.0.1"
-        - "10.0.0.0/8"
-        - "192.168.0.0/16"
-      status: 403
-      message: "Forbidden"
+    - use: CloudflareRealIP
+    - use: RedirectHTTP
 
+  # Global HTTP access log
   access_log:
     format: combined
     path: /app/logs/access.log
-    filters: ...
-    fields: ...
 ```
 
-`proxy_protocol.mode` controls PROXY protocol handling for the web entrypoint
-and TCP route listeners:
+### PROXY Protocol Modes
 
-- `required` accepts only listed proxies, and each connection must send a valid
-  PROXY header.
-- `mixed` requires a valid header from listed proxies but lets unlisted HTTP,
-  TLS, and TCP clients connect directly without parsing their data as a header.
-- `disabled` disables PROXY protocol parsing and ignores `trusted_proxies`.
+- **`required`**: Accepts connections only from `trusted_proxies`, and every connection must send a valid PROXY header.
+- **`mixed`**: Requires a valid PROXY header from `trusted_proxies`, while allowing unlisted peers to connect directly.
+- **`disabled`**: Disables PROXY protocol parsing and ignores `trusted_proxies`.
 
-Enabled modes require at least one trusted IP address or CIDR range.
+<Callout type="warn">
+  `support_proxy_protocol: true` is deprecated because it accepts PROXY headers
+  from any peer (allowing IP spoofing). Migrate to `proxy_protocol` with
+  explicit `trusted_proxies`.
+</Callout>
 
-`support_proxy_protocol: true` is deprecated. For compatibility it retains the
-old behavior—PROXY headers are optional and accepted from any peer—but GoDoxy
-warns at startup because clients can forge their apparent source address. Add
-a `proxy_protocol` block with mode `required` or `mixed`, add at least one
-`trusted_proxies` entry, and remove `support_proxy_protocol`.
+### Unmatched Host Rules (`entrypoint.rules.not_found`)
 
-#### Rules for unmatched hosts
+When an HTTP request's `Host` matches neither a route nor a short link (and did not fail SNI/mTLS resolution with `421` or `500`), GoDoxy evaluates `entrypoint.rules.not_found` before serving the default 404 page.
 
-`entrypoint.rules.not_found` handles an ordinary HTTP request only when its
-`Host` does not select a configured route and it is not handled as a short link.
-Route selection matches the request host against route aliases and domains; it
-does not match the URL path. A request for an unknown path on a known host still
-belongs to that route and does not run `not_found`. See
-[Domain Matching](../advanced-topics/Domain-Matching) for the host matching
-rules.
-
-The HTTP entrypoint processes a request in this order:
-
-1. Start access-log response recording when `entrypoint.access_log` is enabled.
-2. Resolve the host route, including HTTPS SNI and inbound mTLS checks.
-3. If a route matches, run its effective entrypoint middleware chain and then
-   the route.
-4. If no route matches, try the short-link handler. Short links run entrypoint
-   middleware.
-5. Otherwise, evaluate `entrypoint.rules.not_found`. If no rule completes the
-   response, serve GoDoxy's normal 404 response or configured static 404 page.
-6. Write the final response to the access log.
-
-Route-resolution failures do not run `not_found`. For example, HTTPS SNI or mTLS
-route mismatches return `421 Misdirected Request`, while other route-resolution
-failures return `500 Internal Server Error`.
-
-Entrypoint middleware does not automatically wrap the `not_found` handler. This
-keeps global redirect, authentication, rate-limit, and response middleware from
-replacing the unknown-host behavior. A not-found rule can explicitly run the
-request phase of a supported middleware with a `middleware <name> { ... }` action.
-This is opt-in, so unrelated entrypoint middleware remains excluded.
-
-Not-found rules use the same block syntax, conditions, actions, phases, and
-default-rule behavior as [Rule-Based Routing](../advanced-topics/rule-based-routing).
-See
-[Conditions](../advanced-topics/rule-based-routing/Conditions) and
-[Actions](../advanced-topics/rule-based-routing/Actions) for the complete
-references.
-
-Common terminating actions include `proxy`, `route`, `redirect`, `error`,
-`serve`, `serve_file`, `handle`, and `require_basic_auth`. Rules can also invoke
-request middleware, rewrite a request, change request or response fields, log,
-or send a notification. In this context, `upstream`, `pass`, and `bypass`
-continue to the normal 404 fallback because there is no matched route upstream.
-
-Block-syntax example:
+- Entrypoint middlewares do **not** automatically wrap `not_found` (so global auth/redirects don't hijack unknown hosts). You can opt in to request-phase middleware inside a rule with `middleware <name> { ... }`.
+- Uses the same block syntax as [Rule-Based Routing](../advanced-topics/rule-based-routing). Common terminating actions are `proxy`, `route`, `redirect`, `error`, `serve`, `serve_file`, `handle`, and `require_basic_auth`. (`upstream`/`pass`/`bypass` fall through to 404.)
 
 ```yaml
 entrypoint:
@@ -207,10 +227,6 @@ entrypoint:
         redirect https://www.example.com
       }
 
-      path /backend-health {
-        error 404 "Not found"
-      }
-
       default {
         middleware CloudflareRealIP {
         }
@@ -218,127 +234,9 @@ entrypoint:
       }
 ```
 
-The non-terminating `default` rule applies `CloudflareRealIP`, writes the
-resolved client address to the log message, and then allows the normal 404
-fallback. Because entrypoint access logging runs after the response, its
-combined log entry also uses the resolved client address. Replace the
-non-terminating actions with a terminating action such as
-`proxy http://fallback-proxy:8080` when every otherwise-unmatched request should
-be handled elsewhere.
+## Defaults & Homepage
 
-### Setting Up Providers
-
-```yaml
-providers:
-  include:
-    - file1.yml
-    - file2.yml
-
-  docker:
-    local: ${DOCKER_HOST}
-    remote-1: tcp://10.0.2.1:2375
-    remote-2: ssh://root:1234@10.0.2.2
-
-  agents:
-    - 10.0.0.1:8899
-    - 10.0.0.2:8899
-
-  notification:
-    - name: gotify
-      provider: gotify
-      url: https://gotify.example.com
-      token: your-token
-
-  proxmox:
-    - url: https://pve.domain.com:8006/api2/json
-      token_id: root@pam!abcdef
-      secret: aaaa-bbbb-cccc-dddd
-      no_tls_verify: true
-
-  maxmind:
-    account_id: 123456
-    license_key: your-license-key
-    database: geolite # or geoip2 if you have subscription
-```
-
-### Docker Providers
-
-A docker provider can be either:
-
-- An URL string (e.g. `tcp://10.0.2.1:2375`)
-- A structured object
-
-#### Provider Configuration
-
-<TypeTable
-  type={{
-    scheme: {
-      description: "The scheme to use for the connection",
-      type: "string",
-      required: true,
-      default: "https",
-    },
-    host: {
-      description: "The host to connect to",
-      type: "string",
-      required: true,
-      default: "localhost",
-    },
-    port: {
-      description: "The port to connect to",
-      type: "number",
-      required: true,
-      default: 2375,
-    },
-    tls: {
-      description: "The TLS configuration",
-      type: "TLSConfig",
-      required: false,
-      default: null,
-    },
-  }}
-/>
-
-#### TLS Configuration
-
-<TypeTable
-  type={{
-    ca_file: {
-      description: "The path to the CA certificate",
-      type: "string",
-      required: true,
-      default: null,
-    },
-    cert_file: {
-      description: "The path to the client certificate",
-      type: "string",
-      required: true,
-      default: null,
-    },
-    key_file: {
-      description: "The path to the client certificate key",
-      type: "string",
-      required: true,
-      default: null,
-    },
-  }}
-/>
-
-```yaml
-providers:
-  docker:
-    local: ${DOCKER_HOST}
-    remote_secured:
-      scheme: https
-      host: 10.0.2.1
-      port: 2375
-      tls:
-        ca_file: /path/to/ca.pem
-        cert_file: /path/to/cert.pem
-        key_file: /path/to/key.pem
-```
-
-### Default Values
+Set global defaults for health checks, idle-sleep notifications, and dashboard categories:
 
 ```yaml
 defaults:
@@ -346,112 +244,49 @@ defaults:
     interval: 5s
     timeout: 15s
     retries: 3
-    silence: # optional, no "service down" alerts in these local-time windows
+    silence: # Local-time windows (set TZ in .env) that suppress down alerts
       - 02:00-04:30
-```
+  idlewatcher:
+    notify:
+      to: [gotify] # Use notify: {} to broadcast to all notification providers
 
-See [Health monitoring](/docs/godoxy/advanced-topics/Health-Monitoring#silence-windows) for `silence`.
-
-### Homepage Settings
-
-Configure how GoDoxy handles the app dashboard content shown inside the WebUI.
-
-```yaml
 homepage:
   use_default_categories: true
 ```
 
-See [Dashboard Configurations](../customization/WebUI)
+See [Health Monitoring](../advanced-topics/Health-Monitoring#silence-windows), [Idle Sleep](../advanced-topics/Idle-Sleep#sleep-and-wake-notifications), and [Dashboard Configuration](../customization/WebUI).
 
-### Built-in WebUI Route
+## Built-in WebUI Route
 
-GoDoxy serves the WebUI from embedded build assets (`fileserver` with SPA and `embed://webui` rules). A separate WebUI container is not required for normal use. The built-in WebUI is registered as a provider named `webui` after your configured providers are loaded.
-
-#### `webui` field reference
-
-These fields map to the root `webui` object in `config.yml` (see also [`WebUIConfig`](https://github.com/yusing/godoxy/blob/main/internal/config/types/config.go) in the repository).
-
-<TypeTable
-  type={{
-    display_name: {
-      description:
-        "Name shown for this GoDoxy instance in the WebUI server list and headings. Empty values become `GoDoxy`.",
-      type: "string",
-      required: false,
-      default: "GoDoxy",
-    },
-    aliases: {
-      description:
-        "Hostnames (aliases) for the embedded WebUI. Each value becomes one fileserver route. Values are lowercased and trimmed; empty strings are skipped.",
-      type: "string[]",
-      required: false,
-      default: 'falls back to env (see below); default "godoxy"',
-    },
-    inbound_mtls_profile: {
-      description:
-        "Name of a profile from top-level `inbound_mtls_profiles` for HTTPS client-certificate validation on the WebUI routes. Ignored when a global `entrypoint.inbound_mtls_profile` is set.",
-      type: "string",
-      required: false,
-      default: null,
-    },
-    middlewares: {
-      description:
-        "Per-route middleware map (named chains). Keys are chain names; values are the same label-style options as other routes. Use this to protect the WebUI (for example a CIDR allowlist) without changing entrypoint defaults.",
-      type: "Record<string, object>",
-      required: false,
-      default: null,
-    },
-    access_log: {
-      description:
-        "Access logging for the embedded WebUI routes (format, path, filters, fields, rotation, and retention). Same shape as `entrypoint.access_log`.",
-      type: "RequestLogConfig",
-      required: false,
-      default: null,
-    },
-  }}
-/>
-
-#### Aliases and environment fallback
-
-If `webui.aliases` is **omitted** or **empty** after parsing, GoDoxy uses the legacy comma-separated env lookup (via `goutils/env` prefixes: `GODOXY_`, `GOPROXY_`, or unprefixed). The key is `FRONTEND_ALIASES`; default is `godoxy`.
-
-| Variable (any matching prefix) | Role |
-| ----------------------------- | ---- |
-| `…FRONTEND_ALIASES` | Comma-separated hostnames for the embedded WebUI when `webui.aliases` is not set |
-
-Example:
+GoDoxy serves the WebUI from embedded assets — no separate frontend container is needed. Configure its hostnames, display name, hardening, and logging under the root `webui` key:
 
 ```yaml
 webui:
-  display_name: Home lab
-  aliases:
-    - godoxy.example.com
-    - godoxy.local.app
-```
-
-#### Per-route hardening and logging
-
-`inbound_mtls_profile`, `middlewares`, and `access_log` apply to every alias under `webui` (each hostname gets the same settings). For inbound mTLS, define `inbound_mtls_profiles` at the root of `config.yml` and reference a profile by name. See [Inbound mTLS](../advanced-topics/Inbound-MTLS).
-
-```yaml
-# Example: restrict who can open the WebUI and log access separately
-webui:
-  display_name: GoDoxy
+  display_name: Home Lab
   aliases:
     - godoxy
   middlewares:
     cidr_whitelist:
-      status: 403
+      status_code: 403
       message: IP not allowed
       allow:
         - 127.0.0.1
         - 10.0.0.0/8
+        - 172.16.0.0/12
         - 192.168.0.0/16
   access_log:
     format: combined
     path: /app/logs/webui-access.log
 ```
 
-#### Conflicts and precedence
+<TypeTable
+  type={{
+    display_name: { description: "Instance name shown in the WebUI server list and headings", type: "string", required: false, default: "GoDoxy" },
+    aliases: { description: "Hostnames for the embedded WebUI (falls back to `GODOXY_FRONTEND_ALIASES`, default `godoxy`)", type: "string[]", required: false, default: '["godoxy"]' },
+    inbound_mtls_profile: { description: "Profile from `inbound_mtls_profiles` (ignored when `entrypoint.inbound_mtls_profile` is set)", type: "string", required: false, default: null },
+    middlewares: { description: "Per-route middleware map applied to all WebUI aliases", type: "Record<string, object>", required: false, default: null },
+    access_log: { description: "Dedicated access log for WebUI routes (same shape as `entrypoint.access_log`)", type: "RequestLogConfig", required: false, default: null },
+  }}
+/>
 
-If an embedded WebUI alias collides with another route, GoDoxy logs a warning and **the embedded WebUI route takes precedence** for that alias.
+If a `webui.aliases` entry collides with another route, GoDoxy logs a warning and **the embedded WebUI takes precedence**.

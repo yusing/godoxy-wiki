@@ -1,56 +1,42 @@
 ---
 title: Inbound mTLS
-description: Require client certificates on HTTPS using named trust profiles
+description: Require HTTPS client certificates globally or per route using named trust profiles
 ---
 
-## What it is
+Inbound mTLS makes GoDoxy verify **client certificates** during the HTTPS TLS handshake. Server certificates are still configured separately under [`autocert`](./Certificates).
 
-Inbound mTLS makes the proxy verify **client certificates** on HTTPS. You define **trust profiles** (which CAs may issue those clients), then either require a profile for **all** HTTPS on the entrypoint or only for **specific routes** (selected by TLS SNI).
+## Choose Scope
 
-Server certificates are still configured separately via [`autocert`](./Certificates). Inbound mTLS only controls **client** trust.
+| Scope | Where to Set | Behavior |
+| --- | --- | --- |
+| **Entrypoint-wide** | `entrypoint.inbound_mtls_profile` | Every HTTPS route requires a matching client cert. Per-route profiles cannot be set. |
+| **Per-route** | `inbound_mtls_profile` on specific HTTP/HTTPS/h2c/fileserver routes (or `webui`) | Only routes with a profile require a client cert (selected by TLS SNI). `Host` and SNI must resolve to the same route (`421 Misdirected Request` otherwise). |
 
-## Trust profiles
+## 1. Define a Trust Profile
 
-At the **root** of your config:
+Declare reusable CA profiles at the root of `config/config.yml` (each profile requires `use_system_cas: true`, at least one `ca_files` PEM path, or both):
 
 ```yaml
 inbound_mtls_profiles:
   corp:
-    use_system_cas: false        # optional: include OS trust store
+    use_system_cas: false # Prefer a dedicated internal CA chain over the broad OS trust store
     ca_files:
-      - /path/to/ca-chain.pem    # PEM CA certs; at least one of use_system_cas or ca_files
+      - /app/certs/corp-ca.pem
 ```
 
-Each profile must have at least one of `use_system_cas` or `ca_files`. Paths must be readable and contain valid PEM CAs.
+## 2. Apply Globally or Per Route
 
-## Entrypoint-wide (all HTTPS)
+### Entrypoint-wide (all HTTPS)
 
 ```yaml
 entrypoint:
   inbound_mtls_profile: corp
 ```
 
-Every HTTPS listener on that entrypoint then requires a client cert that chains to the `corp` pool.
-
-You **cannot** set `inbound_mtls_profile` on individual routes when this is set.
-
-## Per-route (no entrypoint profile)
-
-Omit `entrypoint.inbound_mtls_profile`. On **HTTP-based** routes (`http`, `https`, `h2c`, `fileserver`), set `inbound_mtls_profile` to a name from `inbound_mtls_profiles`.
-
-For those routes, the TLS handshake requires a client cert when **SNI** matches that route. Hostnames without a profile stay optional client certs. The HTTP **`Host`** and TLS **SNI** must resolve to the **same** route for secured routes; otherwise the server responds with **421 Misdirected Request**.
-
-See [Configuring Routes](../getting-started/Configuring-Routes) for how route files and Docker labels are structured.
-
-### Route file
+### Per-route (route file or Docker Compose)
 
 ```yaml
-# config.yml
-inbound_mtls_profiles:
-  corp:
-    ca_files:
-      - /path/to/client-ca.pem
-
+# config/config.yml
 providers:
   include:
     - api.yml
@@ -64,9 +50,8 @@ api.example.com:
   inbound_mtls_profile: corp
 ```
 
-### Docker Compose
-
 ```yaml
+# Docker Compose
 services:
   api:
     image: myapp
@@ -76,9 +61,8 @@ services:
       proxy.#1.inbound_mtls_profile: corp
 ```
 
-## Practical notes
+## Practical Notes
 
-- Wrong or missing client cert: **TLS handshake fails** (no HTTP response).
-- `use_system_cas: true` alone can trust very broad issuers; for internal mTLS, prefer a dedicated `ca_files` chain.
-- Go’s TLS stack does not check CRL/OCSP for client certs here.
-- After changing CA files, **reload or restart** so pools are rebuilt.
+- A missing or untrusted client certificate fails during the **TLS handshake** (no HTTP response is returned).
+- Go's TLS stack does not perform CRL/OCSP revocation checks here.
+- After rotating CA files on disk, **reload or restart** GoDoxy so the CA trust pools rebuild.

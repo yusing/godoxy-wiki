@@ -89,7 +89,7 @@ labels:
   proxy.#1.port: 8080
 ```
 
-If you need multiple routes on the same container, see [Multiple-port apps](getting-started/Examples#multiple-port-apps).
+If you need multiple routes on the same container, see [Multi-Port Docker App](getting-started/Examples#multi-port-docker-app).
 
 ### Why do I get a configuration error when combining `proxy.ports` and `proxy.#1.port`?
 
@@ -113,7 +113,7 @@ If you already manage certificates externally (for example with Certbot, Caddy, 
 
 ### Multiple local certificates: why is `domains` ignored?
 
-When `provider: local`, SNI certificate selection reads the certificate's own Common Name (CN) and Subject Alternative Names (SANs) rather than the `domains` field. Put additional certificates under `autocert.extra` with unique `cert_path` and `key_path` values. See [Multiple Certificates with SNI](advanced-topics/Certificates#multiple-certificates-with-sni).
+When `provider: local`, SNI certificate selection reads the certificate's own Common Name (CN) and Subject Alternative Names (SANs) rather than the `domains` field. Put additional certificates under `autocert.extra` with unique `cert_path` and `key_path` values. See [Multiple Certificates with SNI](advanced-topics/Certificates#4-multiple-certificates-with-sni-extra).
 
 ---
 

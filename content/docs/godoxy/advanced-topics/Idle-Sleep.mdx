@@ -1,288 +1,96 @@
 ---
 title: Idle Sleep
-description: Automatically sleep idle containers and wake them on traffic. Saves resources for infrequently used services
+description: Automatically stop idle Docker, Podman, and Proxmox LXC containers and wake them on incoming traffic
 ---
 
-## Overview
+Idle sleep stops or pauses infrequently used containers after a period of inactivity and wakes them automatically when a request arrives. Works across **Docker**, **Podman** (Docker-compatible API), and **Proxmox LXCs** for **HTTP**, **TCP**, and **UDP** routes.
 
-GoDoxy puts containers to sleep after a period of inactivity and wakes them automatically when traffic arrives. This feature is ideal for development environments, staging servers, or services with unpredictable usage patterns.
+## Lifecycle
 
-### Supported Platforms
-
-- Docker
-- Podman through its Docker-compatible API
-- Proxmox LXCs
-
-### Supported Protocols
-
-| Protocol | Description             |
-| -------- | ----------------------- |
-| HTTP     | Standard web traffic    |
-| TCP      | Generic TCP connections |
-| UDP      | Generic UDP connections |
-
-## Quick Reference
-
-| Property          | Description             | Default        | Required |
-| ----------------- | ----------------------- | -------------- | -------- |
-| `idle_timeout`    | Inactivity before sleep | Disabled       | Yes      |
-| `wake_timeout`    | Wait time for wake      | `3m`          | No       |
-| `stop_method`     | Container stop method   | `stop`         | No       |
-| `stop_timeout`    | Stop command timeout    | `1m`          | No       |
-| `stop_signal`     | Signal for stop/kill    | Docker default | No       |
-| `start_endpoint`  | Wake trigger endpoint   | Any            | No       |
-| `no_loading_page` | Disable wake page       | `false`        | No       |
-
-## How It Works
-
-### Sleep Behavior
-
-1. Container receives no traffic for `idle_timeout` duration
-2. GoDoxy executes `stop_method` on the container
-3. Container dependencies are stopped in order unless another running watcher directly depends on them
-4. Traffic to the route triggers wake-up sequence
-
-### Wake Behavior
-
-1. Request arrives for sleeping route
-2. For an HTML navigation, GoDoxy returns the loading page immediately and starts one background wake operation
-3. Dependencies start first (if configured)
-4. Main container starts
-5. The loading page receives startup progress over server-sent events
-6. GoDoxy waits up to `wake_timeout` for readiness, then the loading page refreshes into the active service
-
-Non-HTML requests, and all requests when `no_loading_page` is enabled, wait for wake-up so GoDoxy can proxy the original request after the service becomes ready. Canceling an HTML navigation after its loading page has been returned does not cancel the shared wake operation.
-
-Idle start, ready, sleep, pause, and error transitions appear in the WebUI Live Activity feed.
-
-## Dependency Management
-
-Containers with `depends_on` wake their dependencies first, including transitive
-dependencies. When a container sleeps, its dependencies also sleep unless
-another running watcher directly depends on them. Shared dependencies remain
-available until their last running dependent sleeps. Sleeping dependents do not
-keep dependencies running; traffic wakes the required dependency chain again.
-
-Podman Compose dependencies are discovered automatically through the native
-Podman inspect API, including dependencies of services without their own idle
-timeout. This works through a direct provider connection or an agent. When using
-GoDoxy's socket proxy, enable `CONTAINERS` and use a version that allows native
-Podman GET inspect requests.
-
-`proxy.depends_on` overrides automatic discovery. Podman's native API does not
-retain Compose readiness conditions, so automatically discovered dependencies
-use `service_started`. For health-based readiness, set an explicit label such as
-`proxy.depends_on: redis:service_healthy`. If native inspection fails, GoDoxy logs
-a warning and keeps the routes; restore API access and reload to discover the
-dependencies.
-
-<Callout type="warn">
-  Do not set `idle_timeout` on dependency containers.
-</Callout>
-
-### Condition Types
-
-Control when dependencies are considered ready:
-
-| Condition         | Description                   |
-| ----------------- | ----------------------------- |
-| `service_started` | Dependency process started    |
-| `service_healthy` | Dependency healthcheck passes |
-
-### Docker Compose Example
-
-```yaml
-# Without conditions (implies service_started)
-depends_on:
-  - redis
-  - postgres
-
-# With explicit conditions
-depends_on:
-  redis:
-    condition: service_healthy
-  postgres:
-    condition: service_started
+```mermaid
+flowchart LR
+    A[Running] -->|No traffic for idle_timeout| B[Stop / Pause + Dependencies]
+    B -->|Incoming request| C{HTML navigation?}
+    C -->|Yes & loading page enabled| D[Return SSE loading page + wake in background]
+    C -->|No / API / TCP / no_loading_page| E[Hold request until ready]
+    D --> F[Start dependencies → Start container]
+    E --> F
+    F -->|Ready within wake_timeout| A
 ```
 
-### Label Syntax
+- **HTML navigations**: GoDoxy immediately serves a loading page that streams wake progress over Server-Sent Events (SSE) and refreshes once the app is ready. Closing the browser tab does not cancel the in-progress wake.
+- **Non-HTML requests (APIs, webhooks, TCP/UDP) or `no_loading_page: true`**: GoDoxy holds the connection until the container is ready (up to `wake_timeout`) and then proxies the original request.
+- All start, ready, sleep, pause, and error transitions appear in the WebUI **Live Activity** feed.
 
-```yaml
-labels:
-  proxy.depends_on: redis:service_healthy,postgres:service_started
-```
+## Quick Setup (Docker Compose)
 
-## Docker Configuration
-
-Enable idle sleep by adding labels to your container:
+Add `proxy.idle_timeout` to the main app container:
 
 ```yaml
 services:
   app:
-    image: nginx:latest
-    container_name: my-app
-    labels:
-      # Required
-      proxy.idle_timeout: 1h30s
-      # Optional
-      proxy.wake_timeout: 30s
-      proxy.stop_method: stop
-      proxy.stop_timeout: 10s
-      proxy.stop_signal: SIGINT
-      proxy.start_endpoint: /start
-      proxy.no_loading_page: true
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-
-  redis:
-    image: redis:alpine
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  postgres:
-    image: postgres:16
-    # Healthcheck configured via GoDoxy health monitoring
-```
-
-## Proxmox LXC Configuration
-
-See [Proxmox Integration](/docs/godoxy/getting-started/Proxmox) for detailed configuration options.
-
-## Sleep and Wake Notifications
-
-Notifications are off by default. Configure providers under
-`providers.notification`, then opt an idle-sleep route in using
-`idlewatcher.notify`:
-
-```yaml
-# Add inside the route's existing idlewatcher configuration
-notify:
-  to: [gotify, ntfy] # Names under providers.notification
-```
-
-Omitting the `notify` block inherits the global notification configuration, or
-stays silent when none is configured. `notify: {}` opts in and inherits global
-targets when `to` is omitted. If global targets are also omitted, notifications
-go to all current providers at send time.
-
-To enable notifications for all routes that use idle sleep, add this to
-`config.yml`:
-
-```yaml
-defaults:
-  idlewatcher:
-    notify:
-      to: [gotify] # Use notify: {} to broadcast instead
-```
-
-Use `notify: {}` instead of the target list to send to all current providers.
-A route can select different providers with `to` or opt out with
-`notify: {to: []}`, overriding global targets. Global `notify: {to: []}` also
-disables notifications, but a route can override it with a non-empty target
-list. Global notification defaults do not enable idle sleep.
-
-For Docker, use `proxy.idle_notify_to: gotify,ntfy` to select providers. A missing
-label inherits the global notification configuration. To broadcast, configure
-global `notify: {}`. `proxy.idle_timeout` is still required. An explicit empty
-string opts a container out, even when global notifications are configured:
-
-```yaml
-labels:
-  proxy.idle_timeout: 30m
-  proxy.idle_notify_to: ""
-```
-
-These info-level notifications report sleep and wake transitions, with pause
-wording for paused containers. They do not report readiness or errors, and
-dependency-only containers do not send them. Initial observation, configuration
-reload, and watcher teardown do not send notifications.
-
-## Property Reference
-
-### Core Properties
-
-| Property         | Description              | Default  | Accepted Values           |
-| ---------------- | ------------------------ | -------- | ------------------------- |
-| `idle_timeout`   | Inactivity before sleep  | Disabled | Duration (`1h30s`, `15m`) |
-| `wake_timeout`   | Wait for wake completion | `3m`    | Duration                  |
-| `start_endpoint` | Wake trigger path        | Any      | Relative URI              |
-
-### Stop Control
-
-| Property       | Description            | Default        | Accepted Values                                                          |
-| -------------- | ---------------------- | -------------- | ------------------------------------------------------------------------ |
-| `stop_method`  | Container stop action  | `stop`         | `stop`, `pause`, `kill`                                                  |
-| `stop_timeout` | Stop command wait time | `1m`          | Duration                                                                 |
-| `stop_signal`  | Signal for stop/kill   | Docker default | `SIGINT`, `SIGTERM`, `SIGQUIT`, `SIGKILL` (with or without `SIG` prefix) |
-
-With `stop_method: kill`, GoDoxy waits up to `stop_timeout` for the runtime to
-confirm that the container stopped or paused before stopping its dependencies.
-A signal such as `SIGHUP` may leave the container running. In that case, the
-operation times out and its dependencies remain running.
-
-### UI Options
-
-| Property          | Description               | Default | Values  |
-| ----------------- | ------------------------- | ------- | ------- |
-| `no_loading_page` | Disable wake loading page | `false` | boolean |
-
-### Duration Format
-
-Use standard duration notation:
-
-| Unit    | Description | Example    |
-| ------- | ----------- | ---------- |
-| `s`     | Seconds     | `30s`      |
-| `m`     | Minutes     | `15m`      |
-| `h`     | Hours       | `1h`       |
-| `h m s` | Combined    | `1h30m15s` |
-
-## Examples
-
-### Development Environment
-
-```yaml
-services:
-  dev-api:
-    image: myapp/api:latest
+    image: myorg/app:latest
     labels:
       proxy.idle_timeout: 30m
-      proxy.wake_timeout: 60s
-      proxy.stop_method: kill
-      proxy.stop_timeout: 5s
+      # Optional tuning:
+      # proxy.wake_timeout: 1m
+      # proxy.stop_method: stop        # stop | pause | kill
+      # proxy.stop_timeout: 1m
+      # proxy.stop_signal: SIGTERM
+      # proxy.start_endpoint: /wake    # Only wake when this path is hit
+      # proxy.no_loading_page: false
     depends_on:
-      dev-db:
+      db:
         condition: service_healthy
-  dev-db:
+
+  db:
     image: postgres:16
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 3s
+      retries: 5
 ```
 
-### Staging with Specific Wake Endpoint
+For Proxmox LXCs, configure `idlewatcher:` in your route file — see [Proxmox Integration](../getting-started/Proxmox#idle-sleep-integration).
+
+## Dependency Management
+
+<Callout type="warn">
+  Do **not** set `idle_timeout` on dependency containers (like `db` or `redis`).
+  GoDoxy starts and stops them automatically through `depends_on`.
+</Callout>
+
+- **Wake order**: Transitive dependencies start first; GoDoxy waits for `service_started` or `service_healthy` before starting the main container.
+- **Shared dependencies**: When a container sleeps, its dependencies stop **unless** another running watched route still depends on them.
+- **Podman**: Compose dependencies are auto-discovered via Podman's native inspect API (enable `CONTAINERS` on GoDoxy's socket-proxy). Because Podman's API does not store Compose health conditions, discovered dependencies default to `service_started` — override with `proxy.depends_on: redis:service_healthy,postgres:service_started` if needed.
+
+## Sleep and Wake Notifications
+
+Notifications are off by default. Configure providers under `providers.notification`, then enable them globally or per route:
 
 ```yaml
-services:
-  staging-app:
-    image: myapp/staging:latest
-    labels:
-      proxy.idle_timeout: 2h
-      proxy.start_endpoint: /api/wake
-      proxy.no_loading_page: false
+# Global default in config/config.yml (does not enable idle sleep by itself)
+defaults:
+  idlewatcher:
+    notify:
+      to: [gotify] # Use notify: {} to broadcast to all notification providers
 ```
 
-## Best Practices
+- **Per-route override (route file)**: Set `idlewatcher.notify.to: [ntfy]`, or opt a single route out with `idlewatcher.notify.to: []`.
+- **Per-container override (Docker labels)**: Set `proxy.idle_notify_to: gotify,ntfy`, or opt out with `proxy.idle_notify_to: ""`.
+- Notifications fire for sleep/pause and wake transitions only (not initial discovery, reloads, readiness, errors, or dependency-only containers).
 
-1. **Use healthchecks** with `service_healthy` condition for reliable dependencies
-2. **Set appropriate timeouts** based on your service startup time
-3. **Test wake behavior** before deploying to production
-4. **Monitor container logs** during initial setup
-5. **Use consistent stop signals** that match your application
+## Property Reference
+
+| Property | Description | Default | Values |
+| --- | --- | --- | --- |
+| `idle_timeout` | Inactivity duration before sleeping (**required**) | Disabled | Go duration (`15m`, `1h30s`) |
+| `wake_timeout` | Max wait for container readiness on wake | `3m` | Go duration |
+| `stop_method` | Action used to sleep the container | `stop` | `stop`, `pause`, `kill` |
+| `stop_timeout` | Max wait for stop/kill confirmation | `1m` | Go duration |
+| `stop_signal` | Signal for `stop`/`kill` | Docker default | `SIGINT`, `SIGTERM`, `SIGQUIT`, `SIGKILL` (with or without `SIG`) |
+| `start_endpoint` | Restrict wake triggers to a specific path | Any path | Relative URI (e.g. `/api/wake`) |
+| `no_loading_page` | Wait inline instead of showing the SSE loading page | `false` | boolean |
+
+With `stop_method: kill`, GoDoxy waits up to `stop_timeout` for the runtime to confirm the container stopped before stopping dependencies. Signals that don't stop the process (like `SIGHUP`) time out and leave dependencies running.

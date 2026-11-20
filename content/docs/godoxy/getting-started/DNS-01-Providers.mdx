@@ -75,13 +75,22 @@ are excluded from editable options. Option values are redacted when GoDoxy
 serializes configuration to JSON or YAML; protect the original configuration
 file containing your credentials.
 
+<Callout type="info">
+  Every ACME provider below also requires `email` and `domains` under `autocert`
+  (omitted in shorter snippets for brevity; see the Spaceship example below for
+  a full block).
+</Callout>
+
 ## Cloudflare
 
 ```yaml
 autocert:
   provider: cloudflare
+  email: admin@example.com
+  domains:
+    - "*.example.com"
   options:
-    auth_token:
+    auth_token: your-zone-api-token
 ```
 
 `auth_token` your zone API token
@@ -197,7 +206,7 @@ for the provider's credentials and settings.
 
 ## Custom ACME CA
 
-See [Autocert with a Custom Internal CA](../advanced-topics/Certificates#autocert-with-a-custom-internal-ca) for more details.
+See [Custom Internal ACME CA](../advanced-topics/Certificates#custom-internal-acme-ca) for more details.
 
 ## Other bundled providers
 

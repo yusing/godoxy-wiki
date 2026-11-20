@@ -1,14 +1,14 @@
 ---
 title: Access Control
-description: Configure access control for GoDoxy
+description: Layer 4 connection ACLs, Layer 7 HTTP whitelists, access logging, and decision debugging
 ---
 
-GoDoxy implements access control at two distinct network layers, each operating at different points in the request lifecycle:
+GoDoxy supports access control at two layers — choose based on whether you want silent connection drops or HTTP error responses:
 
-| Layer                 | Description                                      | Blocking Behavior              |
-| --------------------- | ------------------------------------------------ | ------------------------------ |
-| **Layer 4 (TCP/UDP)** | IP filtering when connection is established      | Connection dropped immediately |
-| **Layer 7 (HTTP)**    | IP filtering when HTTP request is fully received | HTTP error response returned   |
+| Layer | Where to Configure | Applies To | Blocked Client Sees |
+| --- | --- | --- | --- |
+| **Layer 4 (TCP/UDP)** | Root `acl:` in `config.yml` | All HTTP, HTTPS, TCP, and UDP connections | Connection dropped immediately (no HTTP response) |
+| **Layer 7 (HTTP)** | `cidr_whitelist` middleware (entrypoint or per-route) | HTTP/HTTPS requests (works after `CloudflareRealIP` / `RealIP`) | HTTP `403` (or custom status/message) |
 
 ## Layer 4
 
