@@ -4,8 +4,7 @@
   "pages": [
     "Modify-Request",
     "Modify-Response",
-    "Hide-X-Forwarded",
-    "Set-X-Forwarded"
+    "X-Forwarded-Headers"
   ],
   "defaultOpen": true
 }

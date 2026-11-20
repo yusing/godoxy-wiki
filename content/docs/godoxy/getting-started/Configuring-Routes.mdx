@@ -118,14 +118,14 @@ config/
 
 ### Include Route Files
 
-Add route files to `providers.include` in your `config.yml`:
+Add route files (relative to the `config/` directory) to `providers.include` in `config/config.yml`:
 
 ```yaml
 providers:
   include:
-    - config/pve.yml
-    - config/lxc.yml
-    - config/custom.yml
+    - pve.yml
+    - lxc.yml
+    - custom.yml
 ```
 
 ### Basic Route File
@@ -295,9 +295,9 @@ When a **TCP** route listens on the same address as the HTTPS entrypoint, GoDoxy
 | Property          | Description               | Default        | Values                   |
 | ----------------- | ------------------------- | -------------- | ------------------------ |
 | `idle_timeout`    | Inactivity before sleep   | Disabled       | duration (e.g., `1h30s`) |
-| `wake_timeout`    | Wait time for wake        | `30s`          | duration                 |
+| `wake_timeout`    | Wait time for wake        | `3m`           | duration                 |
 | `stop_method`     | Stop method after idle    | `stop`         | `stop`, `pause`, `kill`  |
-| `stop_timeout`    | Timeout for stop command  | `10s`          | duration                 |
+| `stop_timeout`    | Timeout for stop command  | `1m`           | duration                 |
 | `stop_signal`     | Signal for stop/kill      | Docker default | Signal name              |
 | `start_endpoint`  | Required wake endpoint    | Any            | relative path            |
 | `no_loading_page` | Disable wake loading page | `false`        | boolean                  |

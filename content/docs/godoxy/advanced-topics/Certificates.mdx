@@ -116,7 +116,7 @@ Use `step-ca` as an example:
 export ACME_URL=https://acme.internal
 # get root certs and save to `certs/roots.pem`
 # assume that `certs/` is mounted to `/app/certs` (by default)
-curl -k https://${ACME_URL}/roots.pem > certs/roots.pem
+curl -k ${ACME_URL}/roots.pem > certs/roots.pem
 ```
 
 ```yaml
@@ -177,22 +177,20 @@ autocert:
         - "*.internal.local"
       ca_dir_url: https://ca.internal/acme/directory
 
-    # Extra cert 3: Local/static certificate
+    # Extra cert 3: Local/static certificate (SNI uses CN/SAN from the cert; `domains` is ignored)
     - cert_path: certs/static.crt
       key_path: certs/static.key
       provider: local
-      domains:
-        - "*.services.internal"
       # Static certificate, no ACME obtain/renew
 ```
 
 **SNI Selection Behavior:**
 
-Based on the example above, certificate selection works as follows:
+Based on the example above (assuming `certs/static.crt` covers `*.services.internal`), certificate selection works as follows:
 
 | Hostname                 | Selected Certificate | Match Type                             |
 | ------------------------ | -------------------- | -------------------------------------- |
-| `app.example.com`        | Main cert            | Exact match (`*.example.com`)          |
+| `app.example.com`        | Main cert            | Wildcard match (`*.example.com`)       |
 | `sub.example.com`        | Main cert            | Wildcard match (`*.example.com`)       |
 | `api.other.com`          | Extra cert 1         | Wildcard match (`*.other.com`)         |
 | `service.internal.local` | Extra cert 2         | Wildcard match (`*.internal.local`)    |

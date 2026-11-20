@@ -21,9 +21,9 @@ The Host header must be exactly `go` (e.g., via `/etc/hosts` or internal DNS).
 
 ### Environment Variable
 
-| Variable           | Default | Description                     |
-| ------------------ | ------- | ------------------------------- |
-| `SHORTLINK_PREFIX` | `go`    | Hostname prefix for short links |
+| Variable                  | Default | Description                     |
+| ------------------------- | ------- | ------------------------------- |
+| `GODOXY_SHORTLINK_PREFIX` | `go`    | Hostname prefix for short links |
 
 ## Examples
 
@@ -46,10 +46,5 @@ Wildcard aliases such as `*.example.com` are **not** registered as short links. 
 
 ## Requirements
 
-- **DNS**: The `go` hostname must resolve to GoDoxy.
-  - You need either custom DNS for your network (e.g. `AdguardHome`)
-  - **or** a local hosts file entry:
-    - On Linux/macOS: `/etc/hosts`
-    - On Windows: `C:\Windows\System32\drivers\etc\hosts`
-
-2. **Default domain**: At least one match domain or autocert must be configured for subdomain aliases
+- **DNS**: The `go` hostname must resolve to GoDoxy via either custom DNS for your network (e.g. AdGuard Home / Pi-hole) or a local hosts file entry (`/etc/hosts` on Linux/macOS, `C:\Windows\System32\drivers\etc\hosts` on Windows).
+- **Default domain**: At least one `match_domains` entry or `autocert` domain must be configured for short (subdomain) aliases.

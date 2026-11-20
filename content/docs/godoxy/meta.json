@@ -3,11 +3,13 @@
   "description": "The reverse proxy",
   "pages": [
     "Setup",
-    "migration",
-    "Benchmarks-and-Resource-Usage",
     "getting-started",
+    "Troubleshooting",
     "customization",
-    "advanced-topics"
+    "advanced-topics",
+    "Benchmarks-and-Resource-Usage",
+    "Gallery",
+    "migration"
   ],
   "root": true,
   "icon": "Waypoints",

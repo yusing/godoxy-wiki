@@ -1,41 +1,171 @@
 ---
 title: Examples
-description: Examples of how to configure GoDoxy
+description: Ready-to-use configuration examples for common GoDoxy setups
 ---
 
-<Callout type="warn">
-  <code>proxy.aliases</code> is the <code>container_name</code> by default
+<Callout type="info">
+  In Docker Compose labels, `proxy.aliases` defaults to `container_name`. Escape
+  GoDoxy runtime variables with `$$` inside Compose labels (for example
+  `$$remote_host`), and use a single `$` inside route files (`config/*.yml`).
 </Callout>
 
-## Multiple-port apps
+## Multi-Port Docker App
+
+Expose two ports from the same container under separate subdomains:
 
 ```yaml
 services:
   app:
-    ...
+    image: myorg/app:latest
     labels:
       proxy.aliases: app, app-backend
       proxy.#1.port: 8080
       proxy.#2.port: 8081
 ```
 
-## TCP Forwarding
+## Non-Docker Service (VM, Proxmox LXC, or Bare-Metal)
+
+Include a route file in `config/config.yml`:
+
+```yaml
+providers:
+  include:
+    - services.yml
+```
+
+Define your routes in `config/services.yml`:
+
+```yaml
+pve:
+  host: 10.0.0.1
+  port: 8006
+  scheme: https
+  no_tls_verify: true
+  homepage:
+    name: Proxmox VE
+    icon: "@selfhst/proxmox.svg"
+    category: Infrastructure
+
+nas:
+  host: 10.0.0.2
+  port: 5000
+```
+
+## Exclude a Container from Proxying
+
+Exclude a backend-only or internal container from proxying (or from both proxying and GoDoxy health probing):
+
+```yaml
+services:
+  internal-worker:
+    image: myorg/worker:latest
+    labels:
+      proxy.exclude: all # Use "proxy" or "true" to exclude only proxying
+```
+
+## Restrict WebUI to Local Network
+
+Protect the built-in WebUI route in `config/config.yml` without affecting other routes:
+
+```yaml
+webui:
+  display_name: Home Lab
+  aliases:
+    - godoxy
+  middlewares:
+    cidr_whitelist:
+      status_code: 403
+      message: IP not allowed
+      allow:
+        - 127.0.0.1
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+```
+
+## Protect a Route with OIDC or Forward Auth
+
+### OIDC (inheriting global `GODOXY_OIDC_*` env vars)
 
 ```yaml
 services:
   app:
-    ...
+    image: myorg/app:latest
     labels:
-      proxy.#1.scheme: tcp
-      proxy.#1.port: 2222:22 # forward container port 22 to host
+      proxy.aliases: app
+      proxy.#1.middlewares.oidc:
 ```
 
-## Idle-sleep
+### Forward Auth (e.g. TinyAuth)
 
 ```yaml
 services:
   app:
-    ...
+    image: myorg/app:latest
     labels:
-      proxy.idle_timeout: 1h30s
+      proxy.aliases: app
+      proxy.#1.middlewares.forward_auth: |
+        route: tinyauth
+        auth_endpoint: /api/auth/traefik
 ```
+
+## Entrypoint Real IP + Security Headers
+
+Configure global entrypoint middleware in `config/config.yml`:
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: CloudflareRealIP
+    - use: ModifyResponse
+      set_headers:
+        X-Content-Type-Options: nosniff
+        X-Frame-Options: SAMEORIGIN
+        Referrer-Policy: same-origin
+    - use: RedirectHTTP
+```
+
+## TCP Port Forwarding
+
+Forward a dedicated host port (`2222`) to a container's port (`22`):
+
+```yaml
+services:
+  git:
+    image: gitea/gitea:latest
+    labels:
+      proxy.aliases: git, git-ssh
+      proxy.#1.port: 3000
+      proxy.#2.scheme: tcp
+      proxy.#2.port: 2222:22
+      proxy.#2.homepage.show: false
+```
+
+## Idle Sleep with Dependencies
+
+Stop an infrequently used app and its database after 30 minutes of inactivity, then wake them automatically on the next request:
+
+```yaml
+services:
+  app:
+    image: myorg/app:latest
+    labels:
+      proxy.idle_timeout: 30m
+      proxy.wake_timeout: 60s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+```
+
+<Callout type="warn">
+  Do not set `proxy.idle_timeout` on dependency containers (`db` above). GoDoxy
+  manages their lifecycle automatically through `depends_on`.
+</Callout>

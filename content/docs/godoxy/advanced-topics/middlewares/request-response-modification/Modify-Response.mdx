@@ -1,6 +1,6 @@
 ---
 title: Modify Response
-description: Modify response headers and paths
+description: Modify response headers
 ---
 
 ## Name
@@ -92,7 +92,7 @@ myapp:
     modify_response:
       set_headers:
         X-Custom: value1, value2
-        X-Real-IP: $$remote_host
+        X-Real-IP: $remote_host
       add_headers:
         X-Custom: value1, value2
       hide_headers: X-Real-IP, X-Forwarded-For

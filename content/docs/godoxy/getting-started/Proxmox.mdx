@@ -81,9 +81,11 @@ my-lxc:
     category: Development
 ```
 
-:::info
-The `vmname` field is automatically populated by GoDoxy from the Proxmox API and should NOT be set manually in route configuration.
-:::
+<Callout type="info">
+  The `vmname` field is automatically populated by GoDoxy from the Proxmox API
+  and should **not** be set manually in route configuration. Note that
+  `/api2/json` is appended to `url` automatically if omitted.
+</Callout>
 
 ## Configuration Reference
 

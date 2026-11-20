@@ -13,10 +13,13 @@ Open the wiki on your WebUI instance to read docs of the version you're running.
 
 ## Prerequisites
 
-Configure Wildcard DNS Record(s) to point to machine running `GoDoxy`, e.g.
-
-- A Record: `*.domain.com` -> `10.0.10.1`
-- AAAA Record (if you use IPv6): `*.domain.com` -> `::ffff:a00:a01`
+1. **Linux host** (`amd64` or `arm64`) with Docker Engine and Docker Compose (or Podman).
+2. **Wildcard DNS record** pointing to the machine running GoDoxy (public DNS or local DNS such as AdGuard Home / Pi-hole):
+   - **A record**: `*.yourdomain.com` -> `10.0.10.1`
+   - **AAAA record** (if using IPv6): `*.yourdomain.com` -> `::ffff:a00:a01`
+3. **TLS certificates (optional for initial testing)**:
+   - For automatic wildcard HTTPS, prepare API credentials for a [supported DNS-01 provider](getting-started/DNS-01-Providers) (such as Cloudflare), or mount existing certificates with `provider: local`.
+   - For **HTTP-only mode**, leave `GODOXY_HTTPS_ADDR` empty and set `GODOXY_API_JWT_SECURE=false` (see [Environment Variables](getting-started/Environment-Variables)).
 
 ## Automatic
 

@@ -39,19 +39,17 @@ project/
 
 ### Docker Mount
 
-Mount your error pages directory to the GoDoxy container:
+Mount your `error_pages` directory to `/app/error_pages` in `compose.yml` (already included in `compose.example.yml`):
 
 ```yaml
 services:
-  godoxy:
-    image: godoxy:latest
-    container_name: godoxy
+  app:
+    image: ghcr.io/yusing/godoxy:latest
+    container_name: godoxy-proxy
+    network_mode: host # do not change this
     volumes:
-      - ./error_pages:/app/error_pages
-      - ./config.yaml:/app/config.yaml:ro
-    ports:
-      - "80:80"
-      - "443:443"
+      - ./config:/app/config
+      - ./error_pages:/app/error_pages:ro
 ```
 
 ### File Naming Convention

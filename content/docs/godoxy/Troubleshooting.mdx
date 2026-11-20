@@ -1,0 +1,175 @@
+---
+title: Troubleshooting & FAQ
+description: Solutions to common GoDoxy setup, routing, certificate, middleware, and authentication issues
+icon: CircleHelp
+---
+
+## Setup & Networking
+
+### Why does GoDoxy require `network_mode: host`?
+
+GoDoxy binds directly to the host's network interfaces so it can:
+
+- Listen on ports 80/443 (plus any custom TCP/UDP stream ports) without editing Docker Compose port mappings every time you add a stream route
+- Preserve real client IP addresses without Docker's NAT masquerading
+- Reach containers across different Docker networks as well as LAN/Proxmox hosts
+
+Do not change `network_mode: host` to a bridge network. To change the HTTP or HTTPS listening ports, set `GODOXY_HTTP_ADDR` and `GODOXY_HTTPS_ADDR` in `.env` (see [Environment Variables](getting-started/Environment-Variables)).
+
+### Do I need wildcard DNS?
+
+For normal subdomain routing (`app.example.com`, `godoxy.example.com`), point a wildcard DNS record to the machine running GoDoxy:
+
+- **A record**: `*.example.com` -> `<godoxy-host-ip>`
+- **AAAA record** (optional, IPv6): `*.example.com` -> `<godoxy-host-ipv6>`
+
+You can set this in your public DNS provider (for external access) or in a local DNS server such as AdGuard Home / Pi-hole (for LAN-only access). Without a wildcard record, you must create an individual A/AAAA record for each subdomain.
+
+### Can I run GoDoxy without HTTPS (HTTP-only)?
+
+Yes. By default, GoDoxy listens on `:443` and expects a certificate. To run HTTP-only:
+
+1. Set `GODOXY_HTTPS_ADDR=` (explicitly empty) in `.env`.
+2. If you log in to the WebUI directly over HTTP (without an external TLS-terminating proxy in front of GoDoxy), also set `GODOXY_API_JWT_SECURE=false`.
+3. Remove `RedirectHTTP` from `entrypoint.middlewares` if present (it is a no-op in HTTP-only mode).
+
+<Callout type="warn">
+  Running without HTTPS is intended for local testing or deployments behind an
+  external TLS-terminating proxy. Keep `GODOXY_API_JWT_SECURE=true` whenever
+  clients connect over HTTPS.
+</Callout>
+
+### Why did accessing GoDoxy by IP address stop working?
+
+GoDoxy routes requests by the HTTP `Host` header (virtual hosting). Open the WebUI using its configured hostname (for example `https://godoxy.example.com`) rather than `http://<server-ip>:8888`. If you configured `match_domains` or `autocert`, requests using a raw IP address will not match your domain routes.
+
+---
+
+## Container Discovery & Routing
+
+### My Docker container is not appearing in GoDoxy
+
+GoDoxy skips a container if **any** of the following applies:
+
+1. **No exposed port**: The image has no `EXPOSE` directive and Compose defines neither `expose` nor `ports`. Add `expose: ["8080"]` or set `proxy.#1.port: 8080`.
+2. **Excluded by label**: `proxy.exclude` is set to `true`, `proxy`, or `all`.
+3. **Explicit-only provider mode**: Your Docker provider name in `config.yml` ends with `!` (for example `local!: $DOCKER_HOST`). Add any `proxy.*` label (such as `proxy.aliases: myapp`) to opt the container in.
+4. **Ignored naming or image type**: Backend-only images (such as databases or headless browsers), container names starting with `buildx_`, or aliases starting with `x-` or ending with `-old` are skipped automatically.
+5. **Wrong Docker network**: If the container is attached to multiple networks, specify `proxy.network: <network-name>`.
+
+### How do I proxy non-Docker services (VMs, Proxmox LXCs, bare-metal)?
+
+Use a **route file** inside your `config/` directory and list it under `providers.include` in `config/config.yml`:
+
+```yaml
+# config/config.yml
+providers:
+  include:
+    - services.yml
+```
+
+```yaml
+# config/services.yml
+pve:
+  host: 10.0.0.1
+  port: 8006
+  scheme: https
+  no_tls_verify: true
+```
+
+See [Configuring Routes](getting-started/Configuring-Routes#route-file-configuration) for full options.
+
+### GoDoxy picked the wrong port on a multi-port container
+
+By default, GoDoxy picks the lowest exposed port. When a container exposes multiple ports (such as a web UI and a torrent/UDP port), explicitly set the port or define multiple aliases:
+
+```yaml
+labels:
+  proxy.aliases: qbt
+  proxy.#1.port: 8080
+```
+
+If you need multiple routes on the same container, see [Multiple-port apps](getting-started/Examples#multiple-port-apps).
+
+### Why do I get a configuration error when combining `proxy.ports` and `proxy.#1.port`?
+
+Shortcut labels (`proxy.ports`, `proxy.schemes`, `proxy.hosts`, etc.) cannot be mixed with the corresponding full label (`proxy.#1.port`, `proxy.<alias>.port`, or `proxy.*.port`) on the same container. Pick either the shortcut form or the indexed/named form.
+
+---
+
+## Certificates & TLS
+
+### Why does GoDoxy use DNS-01 instead of HTTP-01 for Let's Encrypt?
+
+HTTP-01 requires exposing port 80 publicly to the internet and cannot issue wildcard certificates (`*.example.com`). DNS-01 issues wildcard certificates automatically without opening any ports to the internet.
+
+If you already manage certificates externally (for example with Certbot, Caddy, or an internal CA), set `autocert.provider: local` and mount your `cert.crt` and `priv.key` into `/app/certs`. See [Certificates](advanced-topics/Certificates).
+
+### DNS-01 certificate issuance fails
+
+- Check that your provider ID is in the [Supported DNS-01 Providers](getting-started/DNS-01-Providers) list and that option keys use `snake_case` matching the provider's LEGO config (not environment variable names).
+- If your domain uses a CNAME record for `_acme-challenge`, set `LEGO_DISABLE_CNAME_SUPPORT=1` in `.env`.
+- If local DNS caches stale TXT records, set public resolvers under `autocert.resolvers` (for example `1.1.1.1:53`, `8.8.8.8:53`).
+
+### Multiple local certificates: why is `domains` ignored?
+
+When `provider: local`, SNI certificate selection reads the certificate's own Common Name (CN) and Subject Alternative Names (SANs) rather than the `domains` field. Put additional certificates under `autocert.extra` with unique `cert_path` and `key_path` values. See [Multiple Certificates with SNI](advanced-topics/Certificates#multiple-certificates-with-sni).
+
+---
+
+## Middlewares & Rules
+
+### Why is middleware syntax different in `config.yml`, route files, and Docker labels?
+
+Each configuration location uses its native structure:
+
+- **`config.yml` (`entrypoint.middlewares`) and `config/middlewares/*.yml`**: An **ordered list** using `- use: <name>`.
+- **Route files (`config/*.yml`)**: A **map** keyed by middleware name under `middlewares:`.
+- **Docker labels**: Flat `proxy.#1.middlewares.<name>.<option>` or YAML block `proxy.#1.middlewares.<name>: |`.
+
+See the side-by-side comparison in [Middlewares](advanced-topics/middlewares).
+
+### Variables like `$remote_host` or `$header(Origin)` are empty in Docker Compose labels
+
+Docker Compose interpolates `$VAR` before passing labels to Docker. Escape every `$` as `$$` inside `compose.yml` labels (for example `$$remote_host` or `$$header(Origin)`). Route files (`config/*.yml`) do **not** go through Docker Compose, so use a single `$` there.
+
+### How do I debug why a request was allowed, denied, or redirected?
+
+Use GoDoxy's dry-run access decision endpoint `GET /api/v1/route/explain` to inspect ACL evaluation, route matching, resolved `client_ip`, and middleware steps without hitting your upstream or triggering rate limits. See [Explain an Access Decision](advanced-topics/Access-Control#explain-an-access-decision).
+
+---
+
+## Authentication (OIDC)
+
+### OIDC fails with "invalid redirect URI" or callback errors
+
+Register the wildcard callback URL in your identity provider:
+
+```plaintext
+https://*.yourdomain.com/auth/callback
+```
+
+If your IdP uses regex matching instead of wildcards:
+
+```plaintext
+https:\/\/([^\.]+)\.yourdomain\.com\/auth\/callback
+```
+
+### Enabling OIDC on the entrypoint locks me out of my IdP or breaks mobile apps
+
+If you add `oidc` under `entrypoint.middlewares`, always bypass your identity provider route (to avoid a login redirect loop) and any API paths used by native mobile apps:
+
+```yaml
+entrypoint:
+  middlewares:
+    - use: oidc
+      bypass:
+        - route pocket-id
+        - route immich & path glob(/api/*)
+```
+
+Remember that the OIDC middleware only handles `GET` requests; non-`GET` requests and WebSocket connections without an existing session return `403 Forbidden`. You can also add per-route `bypass` overlays on individual routes without duplicating the middleware — see [Entrypoint Overlay Promotion](advanced-topics/middlewares#entrypoint-overlay-promotion).
+
+### `scope` is rejected in OIDC middleware config
+
+Starting in v0.30.3, the field name is **`scopes`** (plural), accepting a YAML list or comma-separated string. `scope` is rejected as an unknown field.

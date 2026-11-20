@@ -1,7 +1,16 @@
 ---
 title: Basics
-description: Basics of GoDoxy
+description: Core concepts, auto-discovery behavior, and security basics for GoDoxy
 ---
+
+## How GoDoxy Works
+
+GoDoxy discovers your services and builds reverse proxy routes automatically:
+
+1. **Docker & Podman containers**: GoDoxy watches your container runtime, reads each container's name, labels, and exposed ports, and creates routes live.
+2. **Non-Docker services (VMs, Proxmox LXCs, bare-metal)**: Define routes in YAML files under `config/` and list them under `providers.include` in `config/config.yml`.
+
+By default, a Docker container is reachable at **`<container_name>.yourdomain.com`**. Override the subdomain (or assign multiple subdomains / full FQDNs) with `proxy.aliases` — see [Configuring Routes](Configuring-Routes).
 
 ## Docker Image
 
@@ -102,8 +111,7 @@ See [OIDC Configuration](OIDC) for setup instructions.
 
 ### Explicitly Enable Container Proxying
 
-- **GoDoxy < v0.9** - set label `proxy.aliases`
-- **GoDoxy >= v0.9** - set any label starting with `proxy.`
+When a Docker provider is in explicit-only mode (`local!`), set **any** label starting with `proxy.` (for example `proxy.aliases: myapp`) to include the container.
 
 ### Health Monitoring
 

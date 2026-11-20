@@ -13,7 +13,11 @@ description: Configure middlewares for GoDoxy
 | **Route Files**        | Unordered\* | Per-route          | Route files                |
 
 <Callout type="info">
-  Set `priority` for unordered methods when order matters.
+  Set `priority` for unordered methods when order matters. Note the syntax
+  difference across locations: `entrypoint.middlewares` and middleware compose
+  files use an ordered YAML **list** (`- use: <name>`), whereas route files and
+  Docker labels use a **map** keyed by middleware name. In Docker Compose
+  labels, escape runtime variables like `$remote_host` as `$$remote_host`.
 </Callout>
 
 ### Basic Example

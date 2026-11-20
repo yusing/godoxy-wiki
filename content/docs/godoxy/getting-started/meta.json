@@ -3,14 +3,14 @@
   "icon": "Rocket",
   "pages": [
     "Basics",
-    "Environment-Variables",
-    "Examples",
     "Configuring-GoDoxy",
     "Configuring-Routes",
-    "Multi-Docker-Nodes",
     "DNS-01-Providers",
+    "Examples",
     "OIDC",
-    "Proxmox"
+    "Multi-Docker-Nodes",
+    "Proxmox",
+    "Environment-Variables"
   ],
   "defaultOpen": true
 }
