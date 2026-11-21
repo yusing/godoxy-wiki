@@ -9,21 +9,21 @@ Middlewares inspect or transform HTTP/HTTPS traffic globally on the entrypoint o
 
 | Category | Middleware | What It Does |
 | --- | --- | --- |
-| **Access Control** | [CIDR Whitelist](access-control/CIDR-Whitelist) (`cidr_whitelist`) | Allow only listed IPs, CIDRs, `host:<name>`, or `set:<name>` |
-| | [Rate Limiter](access-control/Rate-Limiter) (`rate_limit`) | Limit requests per client (`average`, `burst`, `periods`) |
-| **Auth & Security** | [OIDC](authentication-and-security/OIDC) (`oidc`) | Protect routes with OpenID Connect (global or per-app issuer) |
-| | [Forward Auth](authentication-and-security/Forward-Auth) (`forward_auth`) | Delegate auth to an external service (e.g. TinyAuth, Authelia) |
-| | [CrowdSec AppSec](authentication-and-security/Crowdsec-AppSec) (`crowdsec`) | Inspect requests against CrowdSec AppSec WAF |
-| | [hCaptcha](authentication-and-security/hCaptcha) (`hcaptcha`) | Gate routes behind a per-session hCaptcha challenge |
-| **IP Resolution** | [Cloudflare Real IP](ip-resolution/Cloudflare-Real-IP) (`cloudflare_real_ip`) | Resolve client IP from `CF-Connecting-IP` (recommended on entrypoint) |
-| | [Real IP](ip-resolution/Real-IP) (`real_ip`) | Resolve client IP from a custom header and trusted proxy list |
-| **Headers & Paths** | [Modify Request](request-response-modification/Modify-Request) (`modify_request` / `request`) | Set/add/hide request headers and add path prefixes |
-| | [Modify Response](request-response-modification/Modify-Response) (`modify_response` / `response`) | Set/add/hide response headers (e.g. security & CORS headers) |
-| | [X-Forwarded Headers](request-response-modification/X-Forwarded-Headers) (`hide_x_forwarded` / `set_x_forwarded`) | Strip or override `X-Forwarded-*` headers |
-| **Content** | [Modify HTML](content-modification/Modify-HTML) (`modify_html`) | Append or replace HTML elements by CSS selector |
-| | [Themed](content-modification/Themed) (`themed`) | Inject preset dark themes, Google Fonts, or Theme Park CSS |
-| **Traffic Control** | [Redirect HTTP](traffic-control/Redirect-HTTP) (`redirect_http`) | Redirect HTTP (`:80`) traffic to HTTPS (`:443`) |
-| | [Custom Error Pages](traffic-control/Custom-Error-Pages) (`custom_error_pages`) | Serve custom HTML error pages (enabled on entrypoint by default) |
+| **Access Control** | [CIDR Whitelist](/docs/godoxy/advanced-topics/middlewares/access-control/CIDR-Whitelist) (`cidr_whitelist`) | Allow only listed IPs, CIDRs, `host:<name>`, or `set:<name>` |
+| | [Rate Limiter](/docs/godoxy/advanced-topics/middlewares/access-control/Rate-Limiter) (`rate_limit`) | Limit requests per client (`average`, `burst`, `periods`) |
+| **Auth & Security** | [OIDC](/docs/godoxy/advanced-topics/middlewares/authentication-and-security/OIDC) (`oidc`) | Protect routes with OpenID Connect (global or per-app issuer) |
+| | [Forward Auth](/docs/godoxy/advanced-topics/middlewares/authentication-and-security/Forward-Auth) (`forward_auth`) | Delegate auth to an external service (e.g. TinyAuth, Authelia) |
+| | [CrowdSec AppSec](/docs/godoxy/advanced-topics/middlewares/authentication-and-security/Crowdsec-AppSec) (`crowdsec`) | Inspect requests against CrowdSec AppSec WAF |
+| | [hCaptcha](/docs/godoxy/advanced-topics/middlewares/authentication-and-security/hCaptcha) (`hcaptcha`) | Gate routes behind a per-session hCaptcha challenge |
+| **IP Resolution** | [Cloudflare Real IP](/docs/godoxy/advanced-topics/middlewares/ip-resolution/Cloudflare-Real-IP) (`cloudflare_real_ip`) | Resolve client IP from `CF-Connecting-IP` (recommended on entrypoint) |
+| | [Real IP](/docs/godoxy/advanced-topics/middlewares/ip-resolution/Real-IP) (`real_ip`) | Resolve client IP from a custom header and trusted proxy list |
+| **Headers & Paths** | [Modify Request](/docs/godoxy/advanced-topics/middlewares/request-response-modification/Modify-Request) (`modify_request` / `request`) | Set/add/hide request headers and add path prefixes |
+| | [Modify Response](/docs/godoxy/advanced-topics/middlewares/request-response-modification/Modify-Response) (`modify_response` / `response`) | Set/add/hide response headers (e.g. security & CORS headers) |
+| | [X-Forwarded Headers](/docs/godoxy/advanced-topics/middlewares/request-response-modification/X-Forwarded-Headers) (`hide_x_forwarded` / `set_x_forwarded`) | Strip or override `X-Forwarded-*` headers |
+| **Content** | [Modify HTML](/docs/godoxy/advanced-topics/middlewares/content-modification/Modify-HTML) (`modify_html`) | Append or replace HTML elements by CSS selector |
+| | [Themed](/docs/godoxy/advanced-topics/middlewares/content-modification/Themed) (`themed`) | Inject preset dark themes, Google Fonts, or Theme Park CSS |
+| **Traffic Control** | [Redirect HTTP](/docs/godoxy/advanced-topics/middlewares/traffic-control/Redirect-HTTP) (`redirect_http`) | Redirect HTTP (`:80`) traffic to HTTPS (`:443`) |
+| | [Custom Error Pages](/docs/godoxy/advanced-topics/middlewares/traffic-control/Custom-Error-Pages) (`custom_error_pages`) | Serve custom HTML error pages (enabled on entrypoint by default) |
 
 ## Where & How to Configure Middlewares
 
@@ -83,7 +83,7 @@ services:
 
 ## Bypass Rules
 
-Every middleware accepts a `bypass` list using [Rule Conditions](../rule-based-routing/Conditions) to skip that middleware for specific routes, paths, or client IPs:
+Every middleware accepts a `bypass` list using [Rule Conditions](/docs/godoxy/advanced-topics/rule-based-routing/Conditions) to skip that middleware for specific routes, paths, or client IPs:
 
 ```yaml
 # Entrypoint example
